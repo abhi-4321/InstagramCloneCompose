@@ -1,0 +1,440 @@
+package com.example.instagramclone.screen
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import coil.compose.rememberImagePainter
+import com.example.instagramclone.Line
+import com.example.instagramclone.R
+import com.example.instagramclone.RoundImage
+import com.example.instagramclone.model.HighlightItem
+import com.example.instagramclone.model.Profile
+import com.example.instagramclone.model.TabItem
+import com.example.instagramclone.ui.theme.TransGray
+import com.example.instagramclone.viewmodel.MainViewModel
+import kotlinx.serialization.Serializable
+
+@Composable
+fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainViewModel) {
+    val flow by viewModel.liveData.observeAsState()
+
+    if (flow == null) {
+        return
+    }
+
+    var selectedIndex by remember {
+        mutableIntStateOf(0)
+    }
+
+    Column(
+        modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        TopAppBar(flow!!.username)
+        UserInfo(flow!!)
+        Bio(flow!!.bio)
+        Options()
+        Spacer(modifier = modifier.height(20.dp))
+        Highlights(flow!!.highlights)
+        Spacer(modifier = modifier.height(10.dp))
+        Line()
+        TabView(
+            modifier = modifier,
+            tabsList = listOf(
+                TabItem("Posts", painterResource(id = R.drawable.round_grid)),
+                TabItem("Profile", painterResource(id = R.drawable.baseline_account_box_24))
+            )
+        ) {
+            selectedIndex = it
+        }
+        when (selectedIndex) {
+            0 -> PostSection(flow!!.posts, modifier = modifier.fillMaxWidth())
+            1 -> {}
+        }
+    }
+}
+
+@Composable
+fun Highlights(highlightsList: List<HighlightItem>, modifier: Modifier = Modifier) {
+    LazyRow(
+        modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        state = rememberLazyListState()
+    ) {
+        items(highlightsList.size) {
+            Spacer(modifier = modifier.width(15.dp))
+            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                RoundImage(
+                    image = highlightsList[it].imageUrl,
+                    modifier = modifier.size(70.dp)
+                )
+                Spacer(modifier = modifier.height(5.dp))
+                Text(
+                    text = highlightsList[it].content,
+                    fontSize = 13.sp,
+                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TabView(
+    modifier: Modifier,
+    tabsList: List<TabItem>,
+    onTabSelected: (selectedIndex: Int) -> Unit
+) {
+    var selectedIndex by remember {
+        mutableStateOf(0)
+    }
+    val inactiveColor = Color.LightGray
+
+
+    TabRow(
+        selectedTabIndex = selectedIndex,
+        containerColor = Color.Transparent,
+        contentColor = Color.Black,
+        modifier = modifier
+    ) {
+        tabsList.forEachIndexed { index, item ->
+            Tab(
+                selected = selectedIndex == index,
+                unselectedContentColor = inactiveColor,
+                selectedContentColor = Color.Black,
+                onClick = {
+                    selectedIndex = index
+                    onTabSelected(index)
+                }
+            ) {
+                Icon(
+                    painter = item.image,
+                    contentDescription = item.title,
+                    modifier = modifier
+                        .padding(10.dp)
+                        .size(25.dp),
+                    tint = if (selectedIndex == index) Color.Black else inactiveColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PostSection(
+    posts: List<String>,
+    modifier: Modifier
+) {
+    LazyVerticalGrid(columns = GridCells.Fixed(3), modifier.scale(1.01f)) {
+        items(posts.size) {
+            Image(
+                modifier = modifier
+                    .border(
+                        width = 1.dp,
+                        color = Color.White
+                    )
+                    .aspectRatio(1f),
+                painter = rememberImagePainter(data = posts[it]) { error(R.drawable.q2) },
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+        }
+    }
+}
+
+@Composable
+fun TopAppBar(username: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(10.dp), horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(id = R.drawable.outline_lock_24),
+                contentDescription = null,
+                modifier = modifier
+                    .scale(0.8f),
+                tint = Color.Black
+            )
+            Text(
+                text = username,
+//                text = "_d_evil_02",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_keyboard_arrow_down_24),
+                contentDescription = null,
+                modifier = modifier
+                    .scale(0.8f),
+                tint = Color.Black
+            )
+        }
+
+        Icon(
+            painter = painterResource(id = R.drawable.rounded_menu_24),
+            contentDescription = null,
+            modifier = modifier
+                .scale(0.8f),
+            tint = Color.Black
+        )
+    }
+}
+
+@Composable
+fun UserInfo(flow: Profile, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .wrapContentHeight()
+            .padding(horizontal = 15.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
+    ) {
+
+        RoundImage(
+//            image = painterResource(id = R.drawable.p),
+            image = flow.profileImageUrl,
+            modifier = Modifier
+                .weight(1f)
+                .aspectRatio(1.05f)
+        )
+
+        Row(
+            modifier
+                .weight(3f)
+                .wrapContentHeight()
+                .padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = flow.postsCount,
+//                    text = "1611",
+                    color = Color.Black,
+                    fontSize = 17.sp,
+                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Posts",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                )
+            }
+
+            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = flow.followersCount,
+//                    text = "924",
+                    color = Color.Black,
+                    fontSize = 17.sp,
+                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Followers",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = flow.followingCount,
+//                    text = "678",
+                    color = Color.Black,
+                    fontSize = 17.sp,
+                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Following",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun Bio(bio: String, modifier: Modifier = Modifier) {
+    val bios = bio.split("/n")
+
+    Column(
+        modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(10.dp)
+    ) {
+        Text(
+            text = bios[0],
+//            text = "Abhinav Mahalwal",
+            color = Color.Black,
+            fontSize = 16.sp,
+            letterSpacing = TextUnit(0.1f, TextUnitType.Sp),
+            fontWeight = FontWeight(500),
+        )
+        Text(
+//            text = "We forge the chains",
+            text = bios[1],
+            color = Color.Gray,
+            fontSize = 15.sp,
+            letterSpacing = TextUnit(-0.2f, TextUnitType.Sp)
+        )
+        Text(
+//            text = "we wear in life",
+            text = bios[2],
+            color = Color.Gray,
+            letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+            fontSize = 15.sp
+        )
+        Text(
+//            text = "Abhinav #androidDev",
+            text = bios[3],
+            color = Color.Gray,
+            fontSize = 15.sp,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+        )
+    }
+}
+
+@Composable
+fun Options(modifier: Modifier = Modifier) {
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = 10.dp)
+    ) {
+        // Create references for the three elements
+        val (editProfile, shareProfile, addPerson) = createRefs()
+
+        // Create a height reference that will be shared
+        val heightRef = createGuidelineFromTop(0.5f)
+
+        // Edit Profile Button
+        Row(
+            modifier = Modifier
+                .constrainAs(editProfile) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    height = Dimension.wrapContent  // This height will be used as reference
+                    width = Dimension.percent(0.4f)  // Using percent instead of weight
+                }
+                .border(1.dp, TransGray, RoundedCornerShape(4.dp)),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Edit Profile",
+                fontSize = 14.sp,
+                fontWeight = FontWeight(500),
+                letterSpacing = TextUnit(0.1f, TextUnitType.Sp),
+                modifier = Modifier
+                    .padding(vertical = 5.dp)
+            )
+        }
+
+        // Share Profile Button
+        Row(
+            modifier = Modifier
+                .constrainAs(shareProfile) {
+                    start.linkTo(editProfile.end, margin = 5.dp)
+                    top.linkTo(editProfile.top)
+                    bottom.linkTo(editProfile.bottom)
+                    height = Dimension.fillToConstraints  // Match edit profile height
+                    width = Dimension.percent(0.4f)
+                }
+                .border(1.dp, TransGray, RoundedCornerShape(4.dp)),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Share Profile",
+                fontSize = 14.sp,
+                fontWeight = FontWeight(500),
+                letterSpacing = TextUnit(0.1f, TextUnitType.Sp),
+                modifier = Modifier
+                    .padding(vertical = 5.dp)
+            )
+        }
+
+        // Add Person Icon
+        Row(
+            modifier = Modifier
+                .constrainAs(addPerson) {
+                    start.linkTo(shareProfile.end, margin = 5.dp)
+                    top.linkTo(editProfile.top)
+                    bottom.linkTo(editProfile.bottom)
+                    height = Dimension.fillToConstraints  // Match edit profile height
+                    width = Dimension.percent(0.15f)
+                }
+                .border(1.dp, TransGray, RoundedCornerShape(4.dp)),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.outline_person_add_24),
+                contentDescription = null,
+                modifier = Modifier.scale(0.7f),
+                tint = Color.Black
+            )
+        }
+    }
+}
+
+@Serializable
+object Profile
