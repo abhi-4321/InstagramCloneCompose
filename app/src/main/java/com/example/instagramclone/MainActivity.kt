@@ -12,16 +12,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.screen.Home
 import com.example.instagramclone.screen.Profile
+import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.MainViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val viewModel by viewModels<MainViewModel>()
-        window.statusBarColor = resources.getColor(R.color.white_var,theme) // Set background color
+        window.statusBarColor = resources.getColor(R.color.white,theme) // Set background color
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR // Dark icons
         setContent {
-            MaterialTheme {
+            InstagramCloneTheme {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = Home) {
                     composable<Home> {

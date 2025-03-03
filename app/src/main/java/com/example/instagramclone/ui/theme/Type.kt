@@ -5,6 +5,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.example.instagramclone.R
 
@@ -35,8 +37,29 @@ val Typography = Typography(
     */
 )
 
-val sfProFamily = FontFamily(
-    Font(R.font.sf_pro_display_regular, FontWeight.Normal),
-    Font(R.font.sf_pro_display_medium, FontWeight.Medium),
-    Font(R.font.sf_pro_display_bold, FontWeight.Bold)
+val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+val fontName = GoogleFont("Roboto",true)
+
+val fontFamily = FontFamily(
+    Font(googleFont = fontName, fontProvider = provider)
+)
+
+val MyTypography = Typography(
+    bodyMedium = TextStyle(
+        fontFamily = fontFamily, fontWeight = FontWeight.Normal, fontSize = 12.sp/*...*/
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 2.sp,
+        /*...*/
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = fontFamily, fontWeight = FontWeight.SemiBold/*...*/
+    )
 )
