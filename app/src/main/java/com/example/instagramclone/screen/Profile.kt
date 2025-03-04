@@ -40,12 +40,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.Line
 import com.example.instagramclone.R
@@ -58,7 +61,7 @@ import com.example.instagramclone.viewmodel.MainViewModel
 import kotlinx.serialization.Serializable
 
 @Composable
-fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainViewModel) {
+fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainViewModel, navController: NavController) {
     val flow by viewModel.liveData.observeAsState()
 
     if (flow == null) {

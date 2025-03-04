@@ -1,9 +1,10 @@
-package com.example.instagramclone.screen
+package com.example.instagramclone.screen.login
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,20 +37,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.instagramclone.R
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.ui.theme.MoreLightGray
+import kotlinx.serialization.Serializable
 
-@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
+//@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun Register(modifier: Modifier = Modifier.statusBarsPadding()) {
+fun Login(modifier: Modifier = Modifier, navController: NavController) {
     var textNameState by remember {
         mutableStateOf("")
     }
@@ -57,6 +59,7 @@ fun Register(modifier: Modifier = Modifier.statusBarsPadding()) {
     InstagramCloneTheme {
         Column(
             modifier = modifier
+                .statusBarsPadding()
                 .fillMaxSize()
                 .background(Color.White)
         ) {
@@ -174,7 +177,7 @@ fun Register(modifier: Modifier = Modifier.statusBarsPadding()) {
             }
             Spacer(modifier.height(10.dp))
             Button(
-                onClick = { },
+                onClick = { navController.navigate(EnterPassword) },
                 modifier = modifier
                     .padding(horizontal = 15.dp)
                     .fillMaxWidth()
@@ -192,7 +195,7 @@ fun Register(modifier: Modifier = Modifier.statusBarsPadding()) {
                 )
             }
             Spacer(modifier.height(20.dp))
-            Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Row(modifier = modifier.fillMaxWidth().clickable { navController.navigate(ForgotPassword) }, horizontalArrangement = Arrangement.Center) {
                 Text(
                     "Forgot Password?",
                     fontSize = 15.sp,
@@ -207,9 +210,9 @@ fun Register(modifier: Modifier = Modifier.statusBarsPadding()) {
                 .wrapContentHeight()
                 .fillMaxWidth()
                 , horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+            ) {
                 Button(
-                    onClick = { },
+                    onClick = { navController.navigate(Register) },
                     modifier = modifier
                         .padding(horizontal = 15.dp)
                         .fillMaxWidth()
@@ -250,3 +253,6 @@ fun Register(modifier: Modifier = Modifier.statusBarsPadding()) {
         }
     }
 }
+
+@Serializable
+object Login

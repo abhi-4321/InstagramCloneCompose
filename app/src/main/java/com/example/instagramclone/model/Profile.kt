@@ -1,5 +1,7 @@
 package com.example.instagramclone.model
 
+import androidx.navigation.NavHostController
+
 data class Profile(
     val id: String,
     val username: String,
