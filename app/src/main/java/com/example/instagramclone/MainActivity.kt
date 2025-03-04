@@ -5,13 +5,16 @@ import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.instagramclone.model.Profile
+import com.example.instagramclone.screen.Dashboard
+import com.example.instagramclone.screen.Profile
 import com.example.instagramclone.screen.login.Birthday
 import com.example.instagramclone.screen.login.Confirmation
-import com.example.instagramclone.screen.Dashboard
 import com.example.instagramclone.screen.login.EnterPassword
 import com.example.instagramclone.screen.login.Login
 import com.example.instagramclone.screen.login.Name
@@ -34,7 +37,25 @@ class MainActivity : ComponentActivity() {
         setContent {
             InstagramCloneTheme {
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = Login) {
+
+                val slideTime = 500
+                val slideLeftHorizontallyEnter =
+                    slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(slideTime))
+                val slideLeftHorizontallyExit =
+                    slideOutHorizontally(targetOffsetX = { -it } , animationSpec = tween(slideTime))
+                val slideRightHorizontallyPopEnter =
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(slideTime))
+                val slideRightHorizontallyPopExit =
+                    slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(slideTime))
+
+                NavHost(
+                    navController = navController,
+                    startDestination = Login,
+                    enterTransition = { slideLeftHorizontallyEnter },
+                    exitTransition = { slideLeftHorizontallyExit },
+                    popExitTransition = { slideRightHorizontallyPopEnter },
+                    popEnterTransition = { slideRightHorizontallyPopExit }
+                ) {
                     composable<Login> {
                         Login(navController = navController)
                     }
@@ -66,7 +87,7 @@ class MainActivity : ComponentActivity() {
                         ProfilePicture(navController = navController)
                     }
                     composable<Profile> {
-                        Profile()
+                        Profile(viewModel = viewModel, navController = navController)
                     }
                     composable<Dashboard> {
                         Dashboard()

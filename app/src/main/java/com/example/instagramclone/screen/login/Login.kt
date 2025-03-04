@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.login
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.instagramclone.R
+import com.example.instagramclone.screen.Dashboard
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
@@ -55,6 +58,12 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
     var textNameState by remember {
         mutableStateOf("")
     }
+
+    var textPasswordState by remember {
+        mutableStateOf("")
+    }
+
+    val context = LocalContext.current
 
     InstagramCloneTheme {
         Column(
@@ -118,7 +127,7 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
                         .wrapContentHeight(),
                     textStyle = TextStyle(
                         Color.Black, 16.sp,
-                        FontWeight.Bold,
+                        FontWeight.Normal,
                     ),
                     decorationBox = {
                         Box {
@@ -150,18 +159,19 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 18.dp),
             ) {
-                BasicTextField(value = textNameState,
-                    onValueChange = { textNameState = it },
+                BasicTextField(
+                    value = textPasswordState,
+                    onValueChange = { textPasswordState = it },
                     modifier
                         .fillMaxWidth()
                         .wrapContentHeight(),
                     textStyle = TextStyle(
                         Color.Black, 16.sp,
-                        FontWeight.Bold,
+                        FontWeight.Normal,
                     ),
                     decorationBox = {
                         Box {
-                            if (textNameState.isEmpty())
+                            if (textPasswordState.isEmpty())
                                 Text(
                                     "Password",
                                     fontSize = 16.sp,
@@ -177,7 +187,13 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
             }
             Spacer(modifier.height(10.dp))
             Button(
-                onClick = { navController.navigate(EnterPassword) },
+                onClick = {
+                    if (textPasswordState == "abhi@123") {
+                        navController.navigate(Dashboard)
+                    } else {
+                        Toast.makeText(context, "Incorrect Password", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 modifier = modifier
                     .padding(horizontal = 15.dp)
                     .fillMaxWidth()
@@ -195,7 +211,9 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
                 )
             }
             Spacer(modifier.height(20.dp))
-            Row(modifier = modifier.fillMaxWidth().clickable { navController.navigate(ForgotPassword) }, horizontalArrangement = Arrangement.Center) {
+            Row(modifier = modifier
+                .fillMaxWidth()
+                .clickable { navController.navigate(ForgotPassword) }, horizontalArrangement = Arrangement.Center) {
                 Text(
                     "Forgot Password?",
                     fontSize = 15.sp,

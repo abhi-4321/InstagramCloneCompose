@@ -30,9 +30,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -99,7 +101,7 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
                     .wrapContentHeight(),
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
-                    FontWeight.Bold,
+                    FontWeight.Normal,
                 ),
                 decorationBox = {
                     Box {
@@ -120,15 +122,8 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
         Spacer(modifier.height(15.dp))
         Button(
             onClick = {
-                when (navController.previousBackStackEntry?.destination?.route) {
-                    Login.toString() -> {
-                        navController.navigate(Dashboard)
-                    }
-                    Confirmation.toString() -> {
-                        navController.navigate(SaveInfo)
-                    }
-                    else -> {
-                    }
+                if (textName.isNotEmpty()) {
+                    navController.navigate(SaveInfo)
                 }
             },
             modifier = modifier
