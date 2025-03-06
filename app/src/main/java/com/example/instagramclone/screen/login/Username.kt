@@ -73,13 +73,15 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "Create a username",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Add a username or use our suggestion. You can change this at any time.",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         Row(
@@ -102,6 +104,7 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
                     FontWeight.Bold,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 ),
                 decorationBox = {
                     Box {

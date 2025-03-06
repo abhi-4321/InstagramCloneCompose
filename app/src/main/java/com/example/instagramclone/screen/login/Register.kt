@@ -74,13 +74,15 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "What's your email?",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Enter the email id where you can be contacted. No one will see this on your profile.",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         Row(
@@ -103,6 +105,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
                     FontWeight.Bold,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 ),
                 decorationBox = {
                     Box {

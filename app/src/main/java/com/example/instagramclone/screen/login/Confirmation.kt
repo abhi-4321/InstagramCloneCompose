@@ -76,13 +76,15 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
         Text(
             "Enter the confirmation code",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "To confirm your account, enter the 6-digit code we sent to your email",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         Row(
@@ -105,6 +107,7 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
                     FontWeight.Bold,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 ),
                 decorationBox = {
                     Box {

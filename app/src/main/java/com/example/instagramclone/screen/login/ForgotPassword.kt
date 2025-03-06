@@ -78,20 +78,23 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
         Text(
             "Find your account",
             fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Enter your email or username.",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(3.dp))
         Text(
             "Can't reset your password?",
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            style = TextStyle(color = Blue)
+            style = TextStyle(color = Blue),
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         Row(
@@ -114,6 +117,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
                     FontWeight.Bold,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 ),
                 decorationBox = {
                     Box {
@@ -172,7 +176,8 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             )
             Text(
                 text = "OR",
-                modifier = Modifier.padding(horizontal = 10.dp) // Add spacing around OR
+                modifier = Modifier.padding(horizontal = 10.dp),
+                letterSpacing = TextUnit(0f, TextUnitType.Sp)// Add spacing around OR
             )
             HorizontalDivider(
                 modifier = Modifier
@@ -193,14 +198,15 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
                 painter = painterResource(id = R.drawable.facebook),
                 contentDescription = "facebook",
                 tint = Color.Black,
-                modifier = modifier.size(17.dp)
+                modifier = modifier.size(17.dp),
             )
             Text(
                 modifier = Modifier.padding(start = 8.dp).wrapContentSize().padding(vertical = 10.dp),
                 text = "Log in with Facebook",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black
+                color = Color.Black,
+                letterSpacing = TextUnit(0f, TextUnitType.Sp)
             )
         }
         Spacer(modifier.weight(1f, true))

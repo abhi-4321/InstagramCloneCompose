@@ -1,4 +1,4 @@
-package com.example.instagramclone.network
+package com.example.instagramclone.network.main
 
 import com.example.instagramclone.model.Profile
 import retrofit2.Response
@@ -9,16 +9,10 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
-interface RetrofitInterface {
+interface RetrofitInterfaceMain {
 
-    @GET("/profile")
-    suspend fun getUserList() : Response<List<Profile>>
-
-    @GET("/profile/{id}")
-    suspend fun getUser(@Path("id") id: String) : Response<Profile>
-
-    @POST("/profile")
-    suspend fun addUser(@Body user: Profile) : Response<Boolean>
+    @GET("/user")
+    suspend fun getUser() : Response<Profile>
 
     @PUT("/profile/{id}")
     suspend fun updateBio(@Path("id") id: String, @Body bio: String) : Response<Boolean>

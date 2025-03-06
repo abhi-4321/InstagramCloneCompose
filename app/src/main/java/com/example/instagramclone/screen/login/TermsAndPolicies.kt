@@ -54,25 +54,29 @@ fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostContro
         Text(
             "Agree to Instagram's terms and policies",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "People who use our services may have uploaded your contact information to Instagram. Learn More",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(15.dp))
         Text(
             "By tapping I agree, you have to create an account and to Instagram's Terms, Privacy Policy and Cookies Policy.",
             fontSize = 14.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(15.dp))
         Text(
             "The Privacy Policy describes the ways we can use the infromation we collect when you create an account. For information we collect when you create an account. For example, we use this information to provide, personalize and improve our products, including ads.",
             fontSize = 14.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(15.dp))
         Button(

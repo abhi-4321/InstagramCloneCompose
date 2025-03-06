@@ -27,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.DisableContentCapture
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -45,16 +47,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.instagramclone.R
+import com.example.instagramclone.model.LoginRequest
 import com.example.instagramclone.screen.Dashboard
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.ui.theme.MoreLightGray
+import com.example.instagramclone.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun Login(modifier: Modifier = Modifier, navController: NavController) {
+fun Login(modifier: Modifier = Modifier, navController: NavController, viewModel: MainViewModel) {
     var textNameState by remember {
         mutableStateOf("")
     }
@@ -128,6 +136,7 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
                     textStyle = TextStyle(
                         Color.Black, 16.sp,
                         FontWeight.Normal,
+                        letterSpacing = TextUnit(0f, TextUnitType.Sp)
                     ),
                     decorationBox = {
                         Box {
@@ -168,6 +177,7 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
                     textStyle = TextStyle(
                         Color.Black, 16.sp,
                         FontWeight.Normal,
+                        letterSpacing = TextUnit(0f, TextUnitType.Sp)
                     ),
                     decorationBox = {
                         Box {
@@ -188,10 +198,19 @@ fun Login(modifier: Modifier = Modifier, navController: NavController) {
             Spacer(modifier.height(10.dp))
             Button(
                 onClick = {
-                    if (textPasswordState == "abhi@123") {
-                        navController.navigate(Dashboard)
+                    if (textNameState.isEmpty() || textPasswordState.isEmpty()) {
+                        Toast.makeText(context, "Please fill all the details", Toast.LENGTH_SHORT).show()
                     } else {
-                        Toast.makeText(context, "Incorrect Password", Toast.LENGTH_SHORT).show()
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val response = viewModel.login(LoginRequest(textNameState, textPasswordState), context)
+                            withContext(Dispatchers.Main) {
+                                if (response) {
+                                    navController.navigate(Dashboard)
+                                } else {
+                                    Toast.makeText(context, "Incorrect username or password", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     }
                 },
                 modifier = modifier

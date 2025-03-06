@@ -57,13 +57,15 @@ fun SaveInfo(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "Save your login info?",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "We'll save the login info for your new account, so you won't need to enter it next time you log in.",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(15.dp))
         Button(

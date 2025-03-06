@@ -73,13 +73,15 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
         Text(
             "Create a password",
             fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Create a password with at least 6 letters or numbers. It should be something others can't guess.",
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         Row(
@@ -102,6 +104,7 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
                     FontWeight.Normal,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 ),
                 decorationBox = {
                     Box {

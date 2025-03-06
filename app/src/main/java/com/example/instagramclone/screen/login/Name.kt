@@ -71,7 +71,8 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "What's your name?",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         Row(
@@ -94,6 +95,7 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
                     FontWeight.Bold,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 ),
                 decorationBox = {
                     Box {

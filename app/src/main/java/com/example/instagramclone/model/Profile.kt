@@ -1,9 +1,7 @@
 package com.example.instagramclone.model
 
-import androidx.navigation.NavHostController
-
 data class Profile(
-    val id: String,
+    val id: Int,
     val username: String,
     val profileImageUrl: String,
     val postsCount: String,
@@ -12,7 +10,8 @@ data class Profile(
     val fullName: String,
     val bio: String,
     val highlights: List<HighlightItem>,
-    val posts: List<String>
+    val posts: List<Post>,
+    val private: Boolean
 ) {
-    constructor() : this("","","","","","","","", emptyList(), emptyList())
+    constructor() : this(1,"","","","","","","", emptyList(), emptyList(),false)
 }

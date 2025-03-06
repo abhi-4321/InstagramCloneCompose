@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
@@ -35,13 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -50,10 +51,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.instagramclone.Line
 import com.example.instagramclone.R
-import com.example.instagramclone.RoundImage
 import com.example.instagramclone.model.HighlightItem
+import com.example.instagramclone.model.Post
 import com.example.instagramclone.model.Profile
 import com.example.instagramclone.model.TabItem
 import com.example.instagramclone.ui.theme.TransGray
@@ -113,12 +113,12 @@ fun Highlights(highlightsList: List<HighlightItem>, modifier: Modifier = Modifie
             Spacer(modifier = modifier.width(15.dp))
             Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 RoundImage(
-                    image = highlightsList[it].imageUrl,
+                    image = highlightsList[it].highlightUrl,
                     modifier = modifier.size(70.dp)
                 )
                 Spacer(modifier = modifier.height(5.dp))
                 Text(
-                    text = highlightsList[it].content,
+                    text = highlightsList[it].title,
                     fontSize = 13.sp,
                     letterSpacing = TextUnit(-0.2f, TextUnitType.Sp)
                 )
@@ -170,7 +170,7 @@ fun TabView(
 
 @Composable
 fun PostSection(
-    posts: List<String>,
+    posts: List<Post>,
     modifier: Modifier
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(3), modifier.scale(1.01f)) {
@@ -182,7 +182,7 @@ fun PostSection(
                         color = Color.White
                     )
                     .aspectRatio(1f),
-                painter = rememberImagePainter(data = posts[it]) { error(R.drawable.q2) },
+                painter = rememberImagePainter(data = posts[it].postUrl) { error(R.drawable.q2) },
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )
@@ -438,6 +438,36 @@ fun Options(modifier: Modifier = Modifier) {
         }
     }
 }
+
+@Composable
+fun Line() {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .border(1.dp, TransGray, CutCornerShape(1.dp))
+    ) {}
+}
+
+@Composable
+fun RoundImage(image: String, modifier: Modifier) {
+    Image(
+        painter = rememberImagePainter(data = image) { error(R.drawable.p) },
+        contentDescription = "menu",
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .aspectRatio(1f, matchHeightConstraintsFirst = true)
+            .border(
+                width = 1.dp,
+                color = Color.LightGray,
+                shape = CircleShape
+            )
+            .padding(3.dp)
+            .clip(CircleShape)
+
+    )
+}
+
 
 @Serializable
 object Profile

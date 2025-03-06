@@ -70,13 +70,15 @@ fun Birthday(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "What's your birthday?",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Use your own birthday, even if this account is for a business, a pet or something else. No one will see this unless you choose to share it. Why do I need to provide my birthday?",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
+            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         Row(
@@ -99,6 +101,7 @@ fun Birthday(modifier: Modifier = Modifier, navController: NavHostController) {
                 textStyle = TextStyle(
                     Color.Black, 16.sp,
                     FontWeight.Bold,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 ),
                 decorationBox = {
                     Box {
