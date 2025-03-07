@@ -1,13 +1,17 @@
 package com.example.instagramclone
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -27,20 +31,31 @@ import com.example.instagramclone.screen.login.TermsAndPolicies
 import com.example.instagramclone.screen.login.Username
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.MainViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashscreen = installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
-        window.statusBarColor = resources.getColor(R.color.white,theme) // Set background color
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR // Dark icons
+        var keepSplashScreen = true
+        splashscreen.setKeepOnScreenCondition {
+            keepSplashScreen
+        }
+
+        lifecycleScope.launch {
+            delay(2000)
+            keepSplashScreen = false
+        }
 
         val sessionManager = SessionManager(this)
         val savedToken = sessionManager.fetchAuthToken()
         val startDestination = if (savedToken != null) Dashboard else Login
 
-        val retrofitInstanceMain = RetrofitInstanceMain().getApiService(this)
-        val viewModel = ViewModelProvider(this,MainViewModel.MainViewModelFactory(retrofitInstanceMain, sessionManager))[MainViewModel::class]
+        val retrofitInstanceMain = RetrofitInstanceMain.getApiService(this)
+        val viewModel = ViewModelProvider(this,MainViewModel.MainViewModelFactory(retrofitInstanceMain))[MainViewModel::class]
 
         setContent {
             InstagramCloneTheme {
@@ -65,7 +80,9 @@ class MainActivity : ComponentActivity() {
                     popEnterTransition = { slideRightHorizontallyPopExit }
                 ) {
                     composable<Login> {
-                        Login(navController = navController, viewModel = viewModel)
+                        Login(navController = navController, viewModel = viewModel) {
+                            restartActivity()
+                        }
                     }
                     composable<Register> {
                         Register(navController = navController)
@@ -95,14 +112,20 @@ class MainActivity : ComponentActivity() {
                         ProfilePicture(navController = navController)
                     }
                     composable<Profile> {
-                        viewModel.fetchUser()
                         Profile(viewModel = viewModel, navController = navController)
                     }
                     composable<Dashboard> {
-                        Dashboard(navController = navController)
+                        Dashboard(navController = navController) {
+                            restartActivity()
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun restartActivity() {
+        finish()
+        startActivity(Intent(this,MainActivity::class.java))
     }
 }

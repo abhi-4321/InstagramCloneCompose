@@ -22,7 +22,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,12 +38,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Green
@@ -66,7 +72,9 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
             contentDescription = null,
             modifier = modifier
                 .size(18.dp)
-                .offset(x = (-2).dp),
+                .offset(x = (-2).dp)
+                .clickable { navController.navigateUp() }
+            ,
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -84,50 +92,53 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
             letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = modifier
-                .border(
-                    border = BorderStroke(1.dp, MoreLightGray),
-                    shape = RoundedCornerShape(15.dp)
-                )
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 18.dp),
-        ) {
-            BasicTextField(value = textName,
-                onValueChange = { textName = it },
-                modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight(),
-                textStyle = TextStyle(
-                    Color.Black, 16.sp,
-                    FontWeight.Bold,
+        TextField(
+            value = textName,
+            onValueChange = { textName = it },
+            textStyle = LocalTextStyle.current.copy(
+                textAlign = TextAlign.Start,
+                fontSize = 16.sp,
+                letterSpacing = TextUnit(0f, TextUnitType.Sp),
+                fontWeight = FontWeight.Normal
+            ),
+            label = {
+                Text(
+                    "Username",
+                    fontSize = if (textName.isEmpty()) 16.sp else 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Gray,
                     letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                )
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .border(
+                    BorderStroke(1.dp, MoreLightGray),
+                    RoundedCornerShape(15.dp)
                 ),
-                decorationBox = {
-                    Box {
-                        if (textName.isEmpty())
-                            Text(
-                                "Username",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = Color.Gray,
-                                letterSpacing = TextUnit(0f, TextUnitType.Sp)
-                            )
-                        it()
-                    }
-                })
-            Icon(
-                painter = painterResource(id = R.drawable.round_check_circle_outline_24),
-                contentDescription = "check",
-                modifier.size(20.dp).scale(1.2f),
-                tint = Green
-            )
-        }
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,  // Make background transparent
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                cursorColor = Color.Black, // Set cursor color
+                focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
+                unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
+                disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
+            ),
+            trailingIcon = {
+                if (textName.isNotEmpty()) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.round_check_circle_outline_24),
+                        contentDescription = "check",
+                        modifier
+                            .size(20.dp)
+                            .scale(1.2f),
+                        tint = Green
+                    )
+                }
+            }
+        )
         Spacer(modifier.height(15.dp))
         Button(
             onClick = { navController.navigate(TermsAndPolicies) },
@@ -147,9 +158,12 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
             )
         }
         Spacer(modifier.weight(1f, true))
-        Row(modifier.fillMaxWidth().padding(vertical = 20.dp).clickable {
-            navController.popBackStack(Login, false)
-        }, horizontalArrangement = Arrangement.Center) {
+        Row(modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp)
+            .clickable {
+                navController.popBackStack(Login, false)
+            }, horizontalArrangement = Arrangement.Center) {
             Text(
                 text = "I already have an account",
                 fontSize = 15.sp,

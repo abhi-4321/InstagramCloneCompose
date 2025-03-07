@@ -25,9 +25,11 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,11 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.DisableContentCapture
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -48,7 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.instagramclone.R
 import com.example.instagramclone.model.LoginRequest
-import com.example.instagramclone.screen.Dashboard
+import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
@@ -56,13 +58,14 @@ import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun Login(modifier: Modifier = Modifier, navController: NavController, viewModel: MainViewModel) {
+fun Login(modifier: Modifier = Modifier, navController: NavController, viewModel: MainViewModel, onClick: () -> Unit) {
     var textNameState by remember {
         mutableStateOf("")
     }
@@ -72,6 +75,8 @@ fun Login(modifier: Modifier = Modifier, navController: NavController, viewModel
     }
 
     val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+
 
     InstagramCloneTheme {
         Column(
@@ -115,86 +120,69 @@ fun Login(modifier: Modifier = Modifier, navController: NavController, viewModel
                 )
             }
             Spacer(modifier.height(110.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
-                modifier = modifier
-                    .padding(horizontal = 15.dp)
-                    .border(
-                        border = BorderStroke(1.dp, MoreLightGray),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
-            ) {
-                BasicTextField(value = textNameState,
-                    onValueChange = { textNameState = it },
-                    modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    textStyle = TextStyle(
-                        Color.Black, 16.sp,
-                        FontWeight.Normal,
+            TextField(
+                value = textNameState,
+                onValueChange = { textNameState = it },
+                textStyle = LocalTextStyle.current.copy(
+                    textAlign = TextAlign.Start,
+                    fontSize = 16.sp,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Normal
+                ),
+                label = {
+                    Text(
+                        "Username, email or mobile number",
+                        fontSize = if (textNameState.isEmpty()) 16.sp else 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Gray,
                         letterSpacing = TextUnit(0f, TextUnitType.Sp)
-                    ),
-                    decorationBox = {
-                        Box {
-                            if (textNameState.isEmpty())
-                                Text(
-                                    "Username, email or mobile number",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = Color.Gray,
-                                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
-                                )
-                            it()
-                        }
-                    })
-            }
+                    )
+                },
+                modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
+                    RoundedCornerShape(15.dp)
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,  // Make background transparent
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    cursorColor = Color.Black, // Set cursor color
+                    focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
+                    unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
+                    disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
+                )
+            )
             Spacer(modifier.height(10.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
-                modifier = modifier
-                    .padding(horizontal = 15.dp)
-                    .border(
-                        border = BorderStroke(1.dp, MoreLightGray),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 18.dp),
-            ) {
-                BasicTextField(
-                    value = textPasswordState,
-                    onValueChange = { textPasswordState = it },
-                    modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    textStyle = TextStyle(
-                        Color.Black, 16.sp,
-                        FontWeight.Normal,
+            TextField(
+                value = textPasswordState,
+                onValueChange = { textPasswordState = it },
+                textStyle = LocalTextStyle.current.copy(
+                    textAlign = TextAlign.Start,
+                    fontSize = 16.sp,
+                    letterSpacing = TextUnit(0f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Normal
+                ),
+                label = {
+                    Text(
+                        "Password",
+                        fontSize = if (textPasswordState.isEmpty()) 16.sp else 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Gray,
                         letterSpacing = TextUnit(0f, TextUnitType.Sp)
-                    ),
-                    decorationBox = {
-                        Box {
-                            if (textPasswordState.isEmpty())
-                                Text(
-                                    "Password",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = Color.Gray,
-                                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
-                                )
-                            it()
-                        }
-                    })
-            }
+                    )
+                },
+                modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
+                    RoundedCornerShape(15.dp)
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,  // Make background transparent
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    cursorColor = Color.Black, // Set cursor color
+                    focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
+                    unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
+                    disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
+                )
+            )
             Spacer(modifier.height(10.dp))
             Button(
                 onClick = {
@@ -202,12 +190,14 @@ fun Login(modifier: Modifier = Modifier, navController: NavController, viewModel
                         Toast.makeText(context, "Please fill all the details", Toast.LENGTH_SHORT).show()
                     } else {
                         CoroutineScope(Dispatchers.IO).launch {
-                            val response = viewModel.login(LoginRequest(textNameState, textPasswordState), context)
+                            val response = viewModel.login(LoginRequest(textNameState, textPasswordState))
                             withContext(Dispatchers.Main) {
-                                if (response) {
-                                    navController.navigate(Dashboard)
-                                } else {
+                                if (response.isNullOrEmpty()) {
                                     Toast.makeText(context, "Incorrect username or password", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    sessionManager.saveAuthToken(response)
+                                    delay(1000)
+                                    onClick()
                                 }
                             }
                         }

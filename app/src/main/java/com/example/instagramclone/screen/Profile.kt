@@ -62,6 +62,9 @@ import kotlinx.serialization.Serializable
 
 @Composable
 fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainViewModel, navController: NavController) {
+
+    viewModel.fetchUser()
+
     val flow by viewModel.liveData.observeAsState()
 
     if (flow == null) {

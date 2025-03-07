@@ -47,6 +47,7 @@ fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostContro
             contentDescription = null,
             modifier = modifier
                 .size(18.dp)
+                .clickable { navController.navigateUp() }
                 .offset(x = (-2).dp),
             tint = Color.Black,
         )
