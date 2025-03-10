@@ -43,9 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.instagramclone.R
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
-import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalMaterial3Api::class)
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
@@ -125,7 +125,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
                 if (textMobState.isEmpty()) {
                     
                 }
-                navController.navigate(EnterPassword)
+                navController.navigate(Screen.EnterPassword)
                       },
             modifier = modifier
                 .fillMaxWidth()
@@ -167,7 +167,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
             .fillMaxWidth()
             .padding(vertical = 20.dp)
             .clickable {
-                navController.popBackStack(Login, false)
+                navController.popBackStack(Screen.Login, false)
             }, horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -180,6 +180,3 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
         }
     }
 }
-
-@Serializable
-object Register

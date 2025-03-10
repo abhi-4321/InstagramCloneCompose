@@ -1,10 +1,11 @@
-package com.example.instagramclone.screen
+package com.example.instagramclone.screen.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -43,29 +44,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.model.HighlightItem
 import com.example.instagramclone.model.Post
-import com.example.instagramclone.model.Profile
+import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.TabItem
 import com.example.instagramclone.ui.theme.TransGray
 import com.example.instagramclone.viewmodel.MainViewModel
-import kotlinx.serialization.Serializable
 
 @Composable
-fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainViewModel, navController: NavController) {
+//@Preview(showSystemUi = true)
+fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel = MainViewModel()) {
 
     viewModel.fetchUser()
 
     val flow by viewModel.liveData.observeAsState()
+
+//    val flow = ProfileItem(0,"_d_evil_02","","10","233","192","Abhinav Mahalwal","We forge the chains\nWe wear in life",
+//       listOf(HighlightItem(1,1,"","Italy"),HighlightItem(2,1,"","Paris")),
+//        listOf(
+//            Post(1,1,"","","20", emptyList(),"10", emptyList()),
+//            Post(2,1,"","","20", emptyList(),"10", emptyList()),
+//            Post(3,1,"","","20", emptyList(),"10", emptyList())
+//        ),
+//        false)
 
     if (flow == null) {
         return
@@ -78,6 +88,7 @@ fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainVi
     Column(
         modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .background(Color.White)
     ) {
         TopAppBar(flow!!.username)
@@ -90,6 +101,7 @@ fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainVi
         Line()
         TabView(
             modifier = modifier,
+            selectedIndex = selectedIndex,
             tabsList = listOf(
                 TabItem("Posts", painterResource(id = R.drawable.round_grid)),
                 TabItem("Profile", painterResource(id = R.drawable.baseline_account_box_24))
@@ -99,7 +111,7 @@ fun Profile(modifier: Modifier = Modifier.statusBarsPadding(), viewModel: MainVi
         }
         when (selectedIndex) {
             0 -> PostSection(flow!!.posts, modifier = modifier.fillMaxWidth())
-            1 -> {}
+            1 -> PostSection(flow!!.posts, modifier = modifier.fillMaxWidth())
         }
     }
 }
@@ -134,13 +146,10 @@ fun Highlights(highlightsList: List<HighlightItem>, modifier: Modifier = Modifie
 fun TabView(
     modifier: Modifier,
     tabsList: List<TabItem>,
+    selectedIndex: Int,
     onTabSelected: (selectedIndex: Int) -> Unit
 ) {
-    var selectedIndex by remember {
-        mutableStateOf(0)
-    }
     val inactiveColor = Color.LightGray
-
 
     TabRow(
         selectedTabIndex = selectedIndex,
@@ -154,7 +163,6 @@ fun TabView(
                 unselectedContentColor = inactiveColor,
                 selectedContentColor = Color.Black,
                 onClick = {
-                    selectedIndex = index
                     onTabSelected(index)
                 }
             ) {
@@ -176,16 +184,13 @@ fun PostSection(
     posts: List<Post>,
     modifier: Modifier
 ) {
-    LazyVerticalGrid(columns = GridCells.Fixed(3), modifier.scale(1.01f)) {
+    LazyVerticalGrid(columns = GridCells.Fixed(3),Modifier.scale(1.01f)) {
         items(posts.size) {
             Image(
-                modifier = modifier
-                    .border(
-                        width = 1.dp,
-                        color = Color.White
-                    )
+                modifier = modifier.padding((0.75).dp)
                     .aspectRatio(1f),
-                painter = rememberImagePainter(data = posts[it].postUrl) { error(R.drawable.q2) },
+//                painter = painterResource(id = R.drawable.p),
+                painter = rememberImagePainter(data = posts[it].postUrl) { error(R.drawable.instagram) },
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )
@@ -211,7 +216,6 @@ fun TopAppBar(username: String, modifier: Modifier = Modifier) {
             )
             Text(
                 text = username,
-//                text = "_d_evil_02",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
@@ -236,7 +240,7 @@ fun TopAppBar(username: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun UserInfo(flow: Profile, modifier: Modifier = Modifier) {
+fun UserInfo(flow: ProfileItem, modifier: Modifier = Modifier) {
     Row(
         modifier
             .wrapContentHeight()
@@ -246,7 +250,6 @@ fun UserInfo(flow: Profile, modifier: Modifier = Modifier) {
     ) {
 
         RoundImage(
-//            image = painterResource(id = R.drawable.p),
             image = flow.profileImageUrl,
             modifier = Modifier
                 .weight(1f)
@@ -262,7 +265,6 @@ fun UserInfo(flow: Profile, modifier: Modifier = Modifier) {
             Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = flow.postsCount,
-//                    text = "1611",
                     color = Color.Black,
                     fontSize = 17.sp,
                     letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
@@ -280,7 +282,6 @@ fun UserInfo(flow: Profile, modifier: Modifier = Modifier) {
             Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = flow.followersCount,
-//                    text = "924",
                     color = Color.Black,
                     fontSize = 17.sp,
                     letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
@@ -298,7 +299,6 @@ fun UserInfo(flow: Profile, modifier: Modifier = Modifier) {
             Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = flow.followingCount,
-//                    text = "678",
                     color = Color.Black,
                     fontSize = 17.sp,
                     letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
@@ -318,8 +318,6 @@ fun UserInfo(flow: Profile, modifier: Modifier = Modifier) {
 
 @Composable
 fun Bio(bio: String, modifier: Modifier = Modifier) {
-    val bios = bio.split("/n")
-
     Column(
         modifier
             .fillMaxWidth()
@@ -327,33 +325,11 @@ fun Bio(bio: String, modifier: Modifier = Modifier) {
             .padding(10.dp)
     ) {
         Text(
-            text = bios[0],
-//            text = "Abhinav Mahalwal",
+            text = bio,
             color = Color.Black,
             fontSize = 16.sp,
             letterSpacing = TextUnit(0.1f, TextUnitType.Sp),
             fontWeight = FontWeight(500),
-        )
-        Text(
-//            text = "We forge the chains",
-            text = bios[1],
-            color = Color.Gray,
-            fontSize = 15.sp,
-            letterSpacing = TextUnit(-0.2f, TextUnitType.Sp)
-        )
-        Text(
-//            text = "we wear in life",
-            text = bios[2],
-            color = Color.Gray,
-            letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
-            fontSize = 15.sp
-        )
-        Text(
-//            text = "Abhinav #androidDev",
-            text = bios[3],
-            color = Color.Gray,
-            fontSize = 15.sp,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
     }
 }
@@ -455,6 +431,7 @@ fun Line() {
 @Composable
 fun RoundImage(image: String, modifier: Modifier) {
     Image(
+//        painter = painterResource(id = R.drawable.p),
         painter = rememberImagePainter(data = image) { error(R.drawable.p) },
         contentDescription = "menu",
         contentScale = ContentScale.Crop,
@@ -470,7 +447,3 @@ fun RoundImage(image: String, modifier: Modifier) {
 
     )
 }
-
-
-@Serializable
-object Profile

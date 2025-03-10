@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.instagramclone.R
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
-import kotlinx.serialization.Serializable
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
@@ -81,7 +81,7 @@ fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostContro
         )
         Spacer(modifier.height(15.dp))
         Button(
-            onClick = { navController.navigate(ProfilePicture) },
+            onClick = { navController.navigate(Screen.ProfilePicture) },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
@@ -102,7 +102,7 @@ fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostContro
             modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp).clickable {
-                    navController.popBackStack(Login, false)
+                    navController.popBackStack(Screen.Login, false)
                 },
             horizontalArrangement = Arrangement.Center
         ) {
@@ -116,6 +116,3 @@ fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostContro
         }
     }
 }
-
-@Serializable
-object TermsAndPolicies

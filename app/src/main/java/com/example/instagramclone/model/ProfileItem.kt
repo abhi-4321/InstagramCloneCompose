@@ -1,6 +1,6 @@
 package com.example.instagramclone.model
 
-data class Profile(
+data class ProfileItem(
     val id: Int,
     val username: String,
     val profileImageUrl: String,

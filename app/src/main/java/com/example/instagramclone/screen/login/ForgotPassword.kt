@@ -45,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.instagramclone.R
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
-import kotlinx.serialization.Serializable
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
@@ -131,7 +131,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
         )
         Spacer(modifier.height(15.dp))
         Button(
-            onClick = { navController.navigate(Confirmation) },
+            onClick = { navController.navigate(Screen.Confirmation) },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
@@ -208,7 +208,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp).clickable {
-                    navController.popBackStack(Login, false)
+                    navController.popBackStack(Screen.Login, false)
                 },
             horizontalArrangement = Arrangement.Center
         ) {
@@ -222,7 +222,3 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
         }
     }
 }
-
-@Serializable
-object ForgotPassword
-

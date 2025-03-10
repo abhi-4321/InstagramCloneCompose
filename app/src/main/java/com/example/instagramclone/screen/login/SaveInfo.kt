@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.instagramclone.R
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
-import kotlinx.serialization.Serializable
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
@@ -72,7 +72,7 @@ fun SaveInfo(modifier: Modifier = Modifier, navController: NavHostController) {
         Button(
             onClick = {
                 saveInfo()
-                navController.navigate(Birthday)
+                navController.navigate(Screen.Birthday)
             },
             modifier = modifier
                 .fillMaxWidth()
@@ -91,7 +91,7 @@ fun SaveInfo(modifier: Modifier = Modifier, navController: NavHostController) {
         }
         Spacer(modifier.height(10.dp))
         Button(
-            onClick = { navController.navigate(Birthday) },
+            onClick = { navController.navigate(Screen.Birthday) },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -114,7 +114,7 @@ fun SaveInfo(modifier: Modifier = Modifier, navController: NavHostController) {
             modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp).clickable {
-                    navController.popBackStack(Login, false)
+                    navController.popBackStack(Screen.Login, false)
                 },
             horizontalArrangement = Arrangement.Center
         ) {
@@ -131,6 +131,3 @@ fun SaveInfo(modifier: Modifier = Modifier, navController: NavHostController) {
 
 fun saveInfo() {
 }
-
-@Serializable
-object SaveInfo

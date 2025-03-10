@@ -34,10 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.instagramclone.R
-import com.example.instagramclone.screen.Dashboard
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
-import kotlinx.serialization.Serializable
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
@@ -85,7 +84,7 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
         Button(
             onClick = {
                 uploadImage()
-                navController.navigate(Dashboard)
+                navController.navigate(Screen.Home)
             },
             modifier = modifier
                 .fillMaxWidth()
@@ -104,7 +103,7 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
         }
         Spacer(modifier.height(10.dp))
         Button(
-            onClick = { navController.navigate(Dashboard) },
+            onClick = { navController.navigate(Screen.Home) },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -128,6 +127,3 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
 
 fun uploadImage() {
 }
-
-@Serializable
-object ProfilePicture
