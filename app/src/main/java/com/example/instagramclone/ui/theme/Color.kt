@@ -15,6 +15,7 @@ val MoreLightGray = Color(0xFFD7D7D7)
 val TransGray = Color(0xBFD6D6D6)
 
 val Gray = Color(0xFF777777)
+val LightBlack = Color(0xFF575757)
 
 val WhiteVar = Color(0xFFF7F7F7)
 val Blue = Color(0xFF0C85D5)

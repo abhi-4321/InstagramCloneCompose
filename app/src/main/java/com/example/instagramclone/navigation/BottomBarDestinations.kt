@@ -25,7 +25,7 @@ enum class BottomBarDestinations(
         screen = Screen.Search
     ),
     CREATE(
-        label = "Notifications",
+        label = "Create",
         icon = Icons.TwoTone.AddCircle,
         screen = Screen.Create
     ),

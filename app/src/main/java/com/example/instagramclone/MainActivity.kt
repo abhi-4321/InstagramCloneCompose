@@ -70,21 +70,19 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 val slideTime = 300
-                val slideLeftHorizontallyEnter =
+                val slideLeftHorizontallyEnter = // New screen coming left from right after new screen enter
                     slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(slideTime))
-                val slideLeftHorizontallyExit =
+                val slideLeftHorizontallyExit = // Current screen going left from right after new screen enter
                     slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(slideTime))
-                val slideRightHorizontallyPopEnter =
+                val slideRightHorizontallyPopEnter = // Previous screen coming right from left after back press
                     slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(slideTime))
-                val slideRightHorizontallyPopExit =
+                val slideRightHorizontallyPopExit = // Current screen going right from left after back press
                     slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(slideTime))
 
                 val items = BottomBarDestinations.entries
                 val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
                 val showBottomBar = items.any { currentDestination?.hasRoute(it.screen::class) == true }
-
-                Log.d("BottomBar", "Boolean 1: $showBottomBar")
 
                 Scaffold(
                     bottomBar = {
@@ -105,7 +103,10 @@ class MainActivity : ComponentActivity() {
                         popEnterTransition = { slideRightHorizontallyPopExit },
                         modifier = Modifier.padding(paddingValues)
                     ) {
-                        composable<Screen.Login> {
+                        composable<Screen.Login>(
+                            enterTransition = { null },
+                            popExitTransition = { null }
+                        ) {
                             Login(navController = navController, viewModel = viewModel)
                         }
                         composable<Screen.Register> {
@@ -135,19 +136,44 @@ class MainActivity : ComponentActivity() {
                         composable<Screen.ProfilePicture> {
                             ProfilePicture(navController = navController)
                         }
-                        composable<Screen.Profile> {
+                        composable<Screen.Profile>(
+                            enterTransition = { null },
+                            popExitTransition = { null },
+                            exitTransition = { null },
+                            popEnterTransition = { null }
+                        ) {
                             Profile(viewModel = viewModel)
                         }
-                        composable<Screen.Home> {
+                        composable<Screen.Home>(
+                            enterTransition = { null },
+                            popExitTransition = { null },
+                            exitTransition = { null },
+                            popEnterTransition = { null }
+                        ) {
                             Home(navController = navController, viewModel = viewModel)
                         }
-                        composable<Screen.Search> {
+                        composable<Screen.Search>(
+                            enterTransition = { null },
+                            popExitTransition = { null },
+                            exitTransition = { null },
+                            popEnterTransition = { null }
+                        ) {
                             Search(navController = navController)
                         }
-                        composable<Screen.Reels> {
+                        composable<Screen.Reels>(
+                            enterTransition = { null },
+                            popExitTransition = { null },
+                            exitTransition = { null },
+                            popEnterTransition = { null }
+                        ) {
                             Reels(navController = navController)
                         }
-                        composable<Screen.Create> {
+                        composable<Screen.Create>(
+                            enterTransition = { null },
+                            popExitTransition = { null },
+                            exitTransition = { null },
+                            popEnterTransition = { null }
+                        ) {
                             Create(navController = navController)
                         }
                     }
