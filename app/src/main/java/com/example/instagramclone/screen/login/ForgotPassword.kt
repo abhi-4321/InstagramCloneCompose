@@ -1,9 +1,14 @@
 package com.example.instagramclone.screen.login
 
 import android.widget.Toast
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +60,19 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
     var textName by remember {
         mutableStateOf("")
     }
+
+    // Create an interaction source to track focus state
+    val interactionSourceUsername = remember { MutableInteractionSource() }
+    // Detect if field is focused
+    val isFocusedUsername by interactionSourceUsername.collectIsFocusedAsState()
+
+    val labelFontSizeName by animateFloatAsState(
+        targetValue = if (isFocusedUsername || textName.isNotEmpty()) 12f else 16f,
+        animationSpec = tween(
+            durationMillis = 150,
+            easing = LinearEasing
+        )
+    )
 
     val context = LocalContext.current
 
@@ -110,7 +128,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             label = {
                 Text(
                     "Username",
-                    fontSize = if (textName.isEmpty()) 16.sp else 12.sp,
+                    fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.Gray,
                     letterSpacing = TextUnit(0f, TextUnitType.Sp)
@@ -127,7 +145,8 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
                 focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
                 unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
                 disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
-            )
+            ),
+            interactionSource = interactionSourceUsername
         )
         Spacer(modifier.height(15.dp))
         Button(

@@ -28,8 +28,6 @@ import com.example.instagramclone.viewmodel.MainViewModel
 
 @Composable
 fun Home(modifier: Modifier = Modifier, navController: NavController, viewModel: MainViewModel) {
-    val sessionManager = SessionManager(LocalContext.current)
-
     val context = LocalContext.current
 
     Box(modifier = modifier.fillMaxSize(),

@@ -1,8 +1,14 @@
 package com.example.instagramclone.screen.login
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,11 +39,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
@@ -49,6 +57,19 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
     var textName by remember {
         mutableStateOf("")
     }
+
+    // Create an interaction source to track focus state
+    val interactionSource = remember { MutableInteractionSource() }
+    // Detect if field is focused
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val labelFontSizeName by animateFloatAsState(
+        targetValue = if (isFocused || textName.isNotEmpty()) 12f else 16f,
+        animationSpec = tween(
+            durationMillis = 150,
+            easing = LinearEasing
+        )
+    )
 
     Column(
         modifier
@@ -87,7 +108,7 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
             label = {
                 Text(
                     "Full name",
-                    fontSize = if (textName.isEmpty()) 16.sp else 12.sp,
+                    fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.Gray,
                     letterSpacing = TextUnit(0f, TextUnitType.Sp)
@@ -104,7 +125,8 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
                 focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
                 unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
                 disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
-            )
+            ),
+            interactionSource = interactionSource
         )
         Spacer(modifier.height(15.dp))
         Button(

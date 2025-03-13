@@ -1,9 +1,14 @@
 package com.example.instagramclone.screen.login
 
 import android.widget.Toast
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +60,19 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
         mutableStateOf("")
     }
 
+    // Create an interaction source to track focus state
+    val interactionSourceUsername = remember { MutableInteractionSource() }
+    // Detect if field is focused
+    val isFocusedUsername by interactionSourceUsername.collectIsFocusedAsState()
+
+    val labelFontSizeName by animateFloatAsState(
+        targetValue = if (isFocusedUsername || textMobState.isNotEmpty()) 12f else 16f,
+        animationSpec = tween(
+            durationMillis = 150,
+            easing = LinearEasing
+        )
+    )
+
     val context = LocalContext.current
 
     Column(
@@ -100,7 +118,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
             label = {
                 Text(
                     "Username",
-                    fontSize = if (textMobState.isEmpty()) 16.sp else 12.sp,
+                    fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -117,7 +135,8 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
                 unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
                 disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
                 cursorColor = Color.Black // Set cursor color
-            )
+            ),
+            interactionSource = interactionSourceUsername
         )
         Spacer(modifier.height(15.dp))
         Button(

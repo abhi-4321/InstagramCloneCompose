@@ -9,10 +9,13 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -60,123 +63,131 @@ class MainActivity : ComponentActivity() {
 
         val sessionManager = SessionManager(this)
         val savedToken = sessionManager.fetchAuthToken()
-        val startDestination = if (savedToken != null) Screen.Home else Screen.Home
+        val startDestination = if (savedToken != null) Screen.Home else Screen.Login
 
         val viewModel = ViewModelProvider(this)[MainViewModel::class]
         viewModel.initOrUpdateRetrofit(applicationContext)
 
         setContent {
             InstagramCloneTheme {
-                val navController = rememberNavController()
+                Main(startDestination,viewModel)
+            }
+        }
+    }
 
-                val slideTime = 300
-                val slideLeftHorizontallyEnter = // New screen coming left from right after new screen enter
-                    slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(slideTime))
-                val slideLeftHorizontallyExit = // Current screen going left from right after new screen enter
-                    slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(slideTime))
-                val slideRightHorizontallyPopEnter = // Previous screen coming right from left after back press
-                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(slideTime))
-                val slideRightHorizontallyPopExit = // Current screen going right from left after back press
-                    slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(slideTime))
+//    @Preview(showSystemUi = true)
+    @Composable
+    fun Main(startDestination: Screen, viewModel: MainViewModel) {
+        val navController = rememberNavController()
 
-                val items = BottomBarDestinations.entries
-                val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+        val slideTime = 300
+        val slideLeftHorizontallyEnter = // New screen coming left from right after new screen enter
+            slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(slideTime))
+        val slideLeftHorizontallyExit =
+            // Current screen going left from right after new screen enter
+            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(slideTime))
+        val slideRightHorizontallyPopEnter =
+            // Previous screen coming right from left after back press
+            slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(slideTime))
+        val slideRightHorizontallyPopExit = // Current screen going right from left after back press
+            slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(slideTime))
 
-                val showBottomBar = items.any { currentDestination?.hasRoute(it.screen::class) == true }
+        val items = BottomBarDestinations.entries
+        val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
-                Scaffold(
-                    bottomBar = {
-                        if (showBottomBar) {
-                            BottomNavigationBar(
-                                navController = navController,
-                                currentDestination = currentDestination
-                            )
-                        }
-                    }
-                ) { paddingValues ->
-                    NavHost(
+        val showBottomBar = items.any { currentDestination?.hasRoute(it.screen::class) == true }
+
+        Scaffold(
+            bottomBar = {
+                if (showBottomBar) {
+                    BottomNavigationBar(
                         navController = navController,
-                        startDestination = startDestination,
-                        enterTransition = { slideLeftHorizontallyEnter },
-                        exitTransition = { slideLeftHorizontallyExit },
-                        popExitTransition = { slideRightHorizontallyPopEnter },
-                        popEnterTransition = { slideRightHorizontallyPopExit },
-                        modifier = Modifier.padding(paddingValues)
-                    ) {
-                        composable<Screen.Login>(
-                            enterTransition = { null },
-                            popExitTransition = { null }
-                        ) {
-                            Login(navController = navController, viewModel = viewModel)
-                        }
-                        composable<Screen.Register> {
-                            Register(navController = navController)
-                        }
-                        composable<Screen.Confirmation> {
-                            Confirmation(navController = navController)
-                        }
-                        composable<Screen.EnterPassword> {
-                            EnterPassword(navController = navController)
-                        }
-                        composable<Screen.SaveInfo> {
-                            SaveInfo(navController = navController)
-                        }
-                        composable<Screen.Birthday> {
-                            Birthday(navController = navController)
-                        }
-                        composable<Screen.Name> {
-                            Name(navController = navController)
-                        }
-                        composable<Screen.Username> {
-                            Username(navController = navController)
-                        }
-                        composable<Screen.TermsAndPolicies> {
-                            TermsAndPolicies(navController = navController)
-                        }
-                        composable<Screen.ProfilePicture> {
-                            ProfilePicture(navController = navController)
-                        }
-                        composable<Screen.Profile>(
-                            enterTransition = { null },
-                            popExitTransition = { null },
-                            exitTransition = { null },
-                            popEnterTransition = { null }
-                        ) {
-                            Profile(viewModel = viewModel)
-                        }
-                        composable<Screen.Home>(
-                            enterTransition = { null },
-                            popExitTransition = { null },
-                            exitTransition = { null },
-                            popEnterTransition = { null }
-                        ) {
-                            Home(navController = navController, viewModel = viewModel)
-                        }
-                        composable<Screen.Search>(
-                            enterTransition = { null },
-                            popExitTransition = { null },
-                            exitTransition = { null },
-                            popEnterTransition = { null }
-                        ) {
-                            Search(navController = navController)
-                        }
-                        composable<Screen.Reels>(
-                            enterTransition = { null },
-                            popExitTransition = { null },
-                            exitTransition = { null },
-                            popEnterTransition = { null }
-                        ) {
-                            Reels(navController = navController)
-                        }
-                        composable<Screen.Create>(
-                            enterTransition = { null },
-                            popExitTransition = { null },
-                            exitTransition = { null },
-                            popEnterTransition = { null }
-                        ) {
-                            Create(navController = navController)
-                        }
-                    }
+                        currentDestination = currentDestination
+                    )
+                }
+            }
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                enterTransition = { slideLeftHorizontallyEnter },
+                exitTransition = { slideLeftHorizontallyExit },
+                popExitTransition = { slideRightHorizontallyPopEnter },
+                popEnterTransition = { slideRightHorizontallyPopExit },
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                composable<Screen.Login>(
+                    enterTransition = { null },
+                    popExitTransition = { null }
+                ) {
+                    Login(navController = navController, viewModel = viewModel)
+                }
+                composable<Screen.Register> {
+                    Register(navController = navController)
+                }
+                composable<Screen.Confirmation> {
+                    Confirmation(navController = navController)
+                }
+                composable<Screen.EnterPassword> {
+                    EnterPassword(navController = navController)
+                }
+                composable<Screen.SaveInfo> {
+                    SaveInfo(navController = navController)
+                }
+                composable<Screen.Birthday> {
+                    Birthday(navController = navController)
+                }
+                composable<Screen.Name> {
+                    Name(navController = navController)
+                }
+                composable<Screen.Username> {
+                    Username(navController = navController)
+                }
+                composable<Screen.TermsAndPolicies> {
+                    TermsAndPolicies(navController = navController)
+                }
+                composable<Screen.ProfilePicture> {
+                    ProfilePicture(navController = navController)
+                }
+                composable<Screen.Profile>(
+                    enterTransition = { null },
+                    popExitTransition = { null },
+                    exitTransition = { null },
+                    popEnterTransition = { null }
+                ) {
+                    Profile(viewModel = viewModel)
+                }
+                composable<Screen.Home>(
+                    enterTransition = { null },
+                    popExitTransition = { null },
+                    exitTransition = { null },
+                    popEnterTransition = { null }
+                ) {
+                    Home(navController = navController, viewModel = viewModel)
+                }
+                composable<Screen.Search>(
+                    enterTransition = { null },
+                    popExitTransition = { null },
+                    exitTransition = { null },
+                    popEnterTransition = { null }
+                ) {
+                    Search(navController = navController)
+                }
+                composable<Screen.Reels>(
+                    enterTransition = { null },
+                    popExitTransition = { null },
+                    exitTransition = { null },
+                    popEnterTransition = { null }
+                ) {
+                    Reels(navController = navController)
+                }
+                composable<Screen.Create>(
+                    enterTransition = { null },
+                    popExitTransition = { null },
+                    exitTransition = { null },
+                    popEnterTransition = { null }
+                ) {
+                    Create(navController = navController)
                 }
             }
         }
