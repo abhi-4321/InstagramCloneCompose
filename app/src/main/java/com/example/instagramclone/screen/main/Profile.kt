@@ -431,8 +431,8 @@ fun Line() {
 @Composable
 fun RoundImage(image: String, modifier: Modifier) {
     Image(
-//        painter = painterResource(id = R.drawable.p),
-        painter = rememberImagePainter(data = image) { error(R.drawable.p) },
+        painter = painterResource(id = R.drawable.p),
+//        painter = rememberImagePainter(data = image) { error(R.drawable.p) },
         contentDescription = "menu",
         contentScale = ContentScale.Crop,
         modifier = modifier

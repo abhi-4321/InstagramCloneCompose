@@ -113,8 +113,7 @@ class MainActivity : ComponentActivity() {
                 enterTransition = { slideLeftHorizontallyEnter },
                 exitTransition = { slideLeftHorizontallyExit },
                 popExitTransition = { slideRightHorizontallyPopEnter },
-                popEnterTransition = { slideRightHorizontallyPopExit },
-                modifier = Modifier.padding(paddingValues)
+                popEnterTransition = { slideRightHorizontallyPopExit }
             ) {
                 composable<Screen.Login>(
                     enterTransition = { null },
@@ -163,7 +162,10 @@ class MainActivity : ComponentActivity() {
                     exitTransition = { null },
                     popEnterTransition = { null }
                 ) {
-                    Home(navController = navController, viewModel = viewModel)
+                    Home(
+//                        navController = navController,
+//                        viewModel = viewModel
+                    )
                 }
                 composable<Screen.Search>(
                     enterTransition = { null },
