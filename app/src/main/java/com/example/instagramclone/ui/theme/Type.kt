@@ -7,6 +7,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.sp
 import com.example.instagramclone.R
 
@@ -17,7 +19,6 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
     )
     /* Other default text styles to override
     titleLarge = TextStyle(
@@ -51,15 +52,13 @@ val fontFamily = FontFamily(
 
 val MyTypography = Typography(
     bodyMedium = TextStyle(
-        fontFamily = fontFamily, fontWeight = FontWeight.Normal, fontSize = 12.sp/*...*/
+        fontFamily = fontFamily, fontWeight = FontWeight.Normal, fontSize = 12.sp,
     ),
     bodyLarge = TextStyle(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Bold,
-        letterSpacing = 2.sp,
-        /*...*/
     ),
     headlineMedium = TextStyle(
-        fontFamily = fontFamily, fontWeight = FontWeight.SemiBold/*...*/
+        fontFamily = fontFamily, fontWeight = FontWeight.SemiBold
     )
 )

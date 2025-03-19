@@ -1,5 +1,6 @@
 package com.example.instagramclone
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -44,6 +45,7 @@ import com.example.instagramclone.navigation.BottomNavigationBar
 import com.example.instagramclone.screen.main.Create
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
+import com.example.instagramclone.screen.util.Settings
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,6 +78,7 @@ class MainActivity : ComponentActivity() {
     }
 
 //    @Preview(showSystemUi = true)
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
     fun Main(startDestination: Screen, viewModel: MainViewModel) {
         val navController = rememberNavController()
@@ -154,7 +157,7 @@ class MainActivity : ComponentActivity() {
                     exitTransition = { null },
                     popEnterTransition = { null }
                 ) {
-                    Profile(viewModel = viewModel)
+                    Profile(viewModel = viewModel, navController = navController)
                 }
                 composable<Screen.Home>(
                     enterTransition = { null },
@@ -163,8 +166,8 @@ class MainActivity : ComponentActivity() {
                     popEnterTransition = { null }
                 ) {
                     Home(
-//                        navController = navController,
-//                        viewModel = viewModel
+                        navController = navController,
+                        viewModel = viewModel
                     )
                 }
                 composable<Screen.Search>(
@@ -190,6 +193,9 @@ class MainActivity : ComponentActivity() {
                     popEnterTransition = { null }
                 ) {
                     Create(navController = navController)
+                }
+                composable<Screen.Settings> {
+                    Settings(navController = navController)
                 }
             }
         }

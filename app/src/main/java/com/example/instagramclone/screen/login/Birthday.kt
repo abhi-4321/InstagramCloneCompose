@@ -89,15 +89,13 @@ fun Birthday(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "What's your birthday?",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Medium
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Use your own birthday, even if this account is for a business, a pet or something else. No one will see this unless you choose to share it. Why do I need to provide my birthday?",
             fontSize = 13.sp,
-            fontWeight = FontWeight.Normal,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Normal
         )
         Spacer(modifier.height(20.dp))
         TextField(
@@ -106,7 +104,6 @@ fun Birthday(modifier: Modifier = Modifier, navController: NavHostController) {
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -114,8 +111,7 @@ fun Birthday(modifier: Modifier = Modifier, navController: NavHostController) {
                     "Birthday",
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Color.Gray
                 )
             },
             modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
@@ -158,8 +154,7 @@ fun Birthday(modifier: Modifier = Modifier, navController: NavHostController) {
                 text = "I already have an account",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Blue,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                color = Blue
             )
         }
     }

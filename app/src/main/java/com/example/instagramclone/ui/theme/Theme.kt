@@ -50,6 +50,6 @@ fun InstagramCloneTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = MyTypography,
-        content = content
+        content = content,
     )
 }

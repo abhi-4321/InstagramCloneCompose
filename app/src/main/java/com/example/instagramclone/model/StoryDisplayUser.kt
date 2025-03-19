@@ -4,4 +4,6 @@ data class StoryDisplayUser(
     val userId: Int,
     val username: String,
     val profileImageUrl: String
-)
+) {
+    constructor() : this(0,"","")
+}

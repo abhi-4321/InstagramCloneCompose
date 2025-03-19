@@ -95,14 +95,12 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
             "Create a username",
             fontSize = 22.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Add a username or use our suggestion. You can change this at any time.",
             fontSize = 13.sp,
             fontWeight = FontWeight.Normal,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
         )
         Spacer(modifier.height(20.dp))
         TextField(
@@ -111,7 +109,6 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -120,7 +117,6 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 )
             },
             modifier = modifier
@@ -183,7 +179,6 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = Blue,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
             )
         }
     }

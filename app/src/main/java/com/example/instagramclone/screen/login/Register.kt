@@ -96,15 +96,13 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "What's your email?",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Medium
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Enter the email id where you can be contacted. No one will see this on your profile.",
             fontSize = 13.sp,
-            fontWeight = FontWeight.Normal,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Normal
         )
         Spacer(modifier.height(20.dp))
         TextField(
@@ -112,8 +110,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
             onValueChange = { textMobState = it },
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
-                fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                fontSize = 16.sp
             ),
             label = {
                 Text(
@@ -122,8 +119,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Color.Gray
                 )
             },
             modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
@@ -193,8 +189,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
                 text = "I already have an account",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Blue,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                color = Blue
             )
         }
     }

@@ -97,23 +97,20 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
         Text(
             "Find your account",
             fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.SemiBold
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Enter your email or username.",
             fontSize = 13.sp,
-            fontWeight = FontWeight.Normal,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Normal
         )
         Spacer(modifier.height(3.dp))
         Text(
             "Can't reset your password?",
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            style = TextStyle(color = Blue),
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            style = TextStyle(color = Blue)
         )
         Spacer(modifier.height(20.dp))
         TextField(
@@ -122,7 +119,6 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -131,7 +127,6 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
                 )
             },
             modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
@@ -189,8 +184,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             )
             Text(
                 text = "OR",
-                modifier = Modifier.padding(horizontal = 10.dp),
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)// Add spacing around OR
+                modifier = Modifier.padding(horizontal = 10.dp)
             )
             HorizontalDivider(
                 modifier = Modifier
@@ -218,8 +212,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
                 text = "Log in with Facebook",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                color = Color.Black
             )
         }
         Spacer(modifier.weight(1f, true))
@@ -235,8 +228,7 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
                 text = "I already have an account",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Blue,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                color = Blue
             )
         }
     }

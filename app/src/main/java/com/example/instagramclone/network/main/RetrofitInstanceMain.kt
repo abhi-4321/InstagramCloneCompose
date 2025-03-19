@@ -13,7 +13,7 @@ object RetrofitInstanceMain {
     fun getApiService(context: Context): RetrofitInterfaceMain {
         if (!::apiService.isInitialized) {
             val retrofit = Retrofit.Builder()
-                .baseUrl("http://192.168.1.35:3000")
+                .baseUrl("https://instagram-clone-3rjr.onrender.com")
                 .client(okhttpClient(context))
                 .addConverterFactory(GsonConverterFactory.create())// Add our Okhttp client
                 .build()

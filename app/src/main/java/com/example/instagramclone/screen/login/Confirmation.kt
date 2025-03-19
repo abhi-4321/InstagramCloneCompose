@@ -108,7 +108,6 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -116,8 +115,7 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
                     "Confirmation code",
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Color.Gray
                 )
             },
             modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),

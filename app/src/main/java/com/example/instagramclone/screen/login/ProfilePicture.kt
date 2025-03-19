@@ -51,15 +51,13 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
         Text(
             "Add a profile picture",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Medium
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Add a profile picture so your friends know it's you.\nEveryone will be able to see your picture.",
             fontSize = 13.sp,
-            fontWeight = FontWeight.Normal,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Normal
         )
         Spacer(modifier.height(20.dp))
         Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {

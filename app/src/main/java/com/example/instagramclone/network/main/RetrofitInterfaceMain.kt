@@ -1,6 +1,8 @@
 package com.example.instagramclone.network.main
 
+import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
+import com.example.instagramclone.model.StoryDisplayUser
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -19,4 +21,9 @@ interface RetrofitInterfaceMain {
     @DELETE("/profile/{id}")
     suspend fun deleteUser(@Path("id") id: String) : Response<Boolean>
 
+    @GET("/post")
+    suspend fun fetchFeed() : Response<List<PostDisplay>>
+
+    @GET("/story")
+    suspend fun fetchDisplayUsers() : Response<List<StoryDisplayUser>>
 }

@@ -92,8 +92,7 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
         Text(
             "What's your name?",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Medium
         )
         Spacer(modifier.height(20.dp))
         TextField(
@@ -102,7 +101,6 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -110,8 +108,7 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
                     "Full name",
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Color.Gray
                 )
             },
             modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
@@ -154,8 +151,7 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
                 text = "I already have an account",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Blue,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                color = Blue
             )
         }
     }

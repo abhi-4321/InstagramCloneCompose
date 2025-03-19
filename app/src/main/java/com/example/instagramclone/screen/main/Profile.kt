@@ -1,11 +1,13 @@
 package com.example.instagramclone.screen.main
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -30,10 +32,11 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,76 +45,88 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.model.HighlightItem
 import com.example.instagramclone.model.Post
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.TabItem
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.TransGray
 import com.example.instagramclone.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.flow
 
 @Composable
-//@Preview(showSystemUi = true)
-fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel = MainViewModel()) {
+//@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp")
+fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController) {
 
-    viewModel.fetchUser()
+    val context = LocalContext.current
 
-    val flow by viewModel.liveData.observeAsState()
-
-//    val flow = ProfileItem(0,"_d_evil_02","","10","233","192","Abhinav Mahalwal","We forge the chains\nWe wear in life",
-//       listOf(HighlightItem(1,1,"","Italy"),HighlightItem(2,1,"","Paris")),
-//        listOf(
-//            Post(1,1,"","","20", emptyList(),"10", emptyList()),
-//            Post(2,1,"","","20", emptyList(),"10", emptyList()),
-//            Post(3,1,"","","20", emptyList(),"10", emptyList())
-//        ),
-//        false)
-
-    if (flow == null) {
-        return
+    LaunchedEffect(true) {
+        viewModel.fetchUser()
     }
+
+    val flowState by viewModel.liveData.collectAsState()
 
     var selectedIndex by remember {
         mutableIntStateOf(0)
     }
 
-    Column(
-        modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .background(Color.White)
-    ) {
-        TopAppBar(flow!!.username)
-        UserInfo(flow!!)
-        Bio(flow!!.bio)
-        Options()
-        Spacer(modifier = modifier.height(20.dp))
-        Highlights(flow!!.highlights)
-        Spacer(modifier = modifier.height(10.dp))
-        Line()
-        TabView(
-            modifier = modifier,
-            selectedIndex = selectedIndex,
-            tabsList = listOf(
-                TabItem("Posts", painterResource(id = R.drawable.round_grid)),
-                TabItem("Profile", painterResource(id = R.drawable.baseline_account_box_24))
-            )
-        ) {
-            selectedIndex = it
+    when(flowState) {
+        is MainViewModel.ApiResponse.Failure -> {
+            Toast.makeText(context,"Failed to fetch the feed : ${(flowState as MainViewModel.ApiResponse.Failure).error}",Toast.LENGTH_SHORT).show()
+            return
         }
-        when (selectedIndex) {
-            0 -> PostSection(flow!!.posts, modifier = modifier.fillMaxWidth())
-            1 -> PostSection(flow!!.posts, modifier = modifier.fillMaxWidth())
+        MainViewModel.ApiResponse.Idle -> {
+            return
+        }
+        MainViewModel.ApiResponse.Loading -> {
+            return
+        }
+        is MainViewModel.ApiResponse.Success<*> -> {
+            val flow = (flowState as MainViewModel.ApiResponse.Success).data!!
+
+            Log.d("ApiResponse", "Response Success with data :  $flow")
+
+            Column(
+                modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .background(Color.White)
+            ) {
+                TopAppBar(flow.username, navController = navController)
+                UserInfo(flow)
+                Bio(flow.bio)
+                Options()
+                Spacer(modifier = modifier.height(20.dp))
+                Highlights(flow.highlights)
+                Spacer(modifier = modifier.height(10.dp))
+                Line()
+                TabView(
+                    modifier = modifier,
+                    selectedIndex = selectedIndex,
+                    tabsList = listOf(
+                        TabItem("Posts", painterResource(id = R.drawable.round_grid)),
+                        TabItem("Profile", painterResource(id = R.drawable.baseline_account_box_24))
+                    )
+                ) {
+                    selectedIndex = it
+                }
+                when (selectedIndex) {
+                    0 -> PostSection(flow.posts, modifier = modifier.fillMaxWidth())
+                    1 -> PostSection(flow.posts, modifier = modifier.fillMaxWidth())
+                }
+            }
         }
     }
 }
@@ -134,8 +149,7 @@ fun Highlights(highlightsList: List<HighlightItem>, modifier: Modifier = Modifie
                 Spacer(modifier = modifier.height(5.dp))
                 Text(
                     text = highlightsList[it].title,
-                    fontSize = 13.sp,
-                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp)
+                    fontSize = 13.sp
                 )
             }
         }
@@ -187,7 +201,8 @@ fun PostSection(
     LazyVerticalGrid(columns = GridCells.Fixed(3),Modifier.scale(1.01f)) {
         items(posts.size) {
             Image(
-                modifier = modifier.padding((0.75).dp)
+                modifier = modifier
+                    .padding((0.75).dp)
                     .aspectRatio(1f),
 //                painter = painterResource(id = R.drawable.p),
                 painter = rememberImagePainter(data = posts[it].postUrl) { error(R.drawable.instagram) },
@@ -199,7 +214,7 @@ fun PostSection(
 }
 
 @Composable
-fun TopAppBar(username: String, modifier: Modifier = Modifier) {
+fun TopAppBar(username: String, modifier: Modifier = Modifier, navController: NavController) {
     Row(
         modifier
             .fillMaxWidth()
@@ -217,8 +232,7 @@ fun TopAppBar(username: String, modifier: Modifier = Modifier) {
             Text(
                 text = username,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                fontWeight = FontWeight.Bold
             )
             Icon(
                 painter = painterResource(id = R.drawable.baseline_keyboard_arrow_down_24),
@@ -233,7 +247,11 @@ fun TopAppBar(username: String, modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.rounded_menu_24),
             contentDescription = null,
             modifier = modifier
-                .scale(0.8f),
+                .scale(0.8f)
+                .clickable {
+                    navController.navigate(Screen.Settings)
+                }
+            ,
             tint = Color.Black
         )
     }
@@ -267,15 +285,13 @@ fun UserInfo(flow: ProfileItem, modifier: Modifier = Modifier) {
                     text = flow.postsCount,
                     color = Color.Black,
                     fontSize = 17.sp,
-                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Posts",
                     color = Color.Gray,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -284,14 +300,12 @@ fun UserInfo(flow: ProfileItem, modifier: Modifier = Modifier) {
                     text = flow.followersCount,
                     color = Color.Black,
                     fontSize = 17.sp,
-                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Followers",
                     color = Color.Gray,
                     fontSize = 14.sp,
-                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -301,14 +315,12 @@ fun UserInfo(flow: ProfileItem, modifier: Modifier = Modifier) {
                     text = flow.followingCount,
                     color = Color.Black,
                     fontSize = 17.sp,
-                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Following",
                     color = Color.Gray,
                     fontSize = 14.sp,
-                    letterSpacing = TextUnit(-0.2f, TextUnitType.Sp),
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -328,7 +340,6 @@ fun Bio(bio: String, modifier: Modifier = Modifier) {
             text = bio,
             color = Color.Black,
             fontSize = 16.sp,
-            letterSpacing = TextUnit(0.1f, TextUnitType.Sp),
             fontWeight = FontWeight(500),
         )
     }
@@ -365,7 +376,6 @@ fun Options(modifier: Modifier = Modifier) {
                 text = "Edit Profile",
                 fontSize = 14.sp,
                 fontWeight = FontWeight(500),
-                letterSpacing = TextUnit(0.1f, TextUnitType.Sp),
                 modifier = Modifier
                     .padding(vertical = 5.dp)
             )
@@ -388,7 +398,6 @@ fun Options(modifier: Modifier = Modifier) {
                 text = "Share Profile",
                 fontSize = 14.sp,
                 fontWeight = FontWeight(500),
-                letterSpacing = TextUnit(0.1f, TextUnitType.Sp),
                 modifier = Modifier
                     .padding(vertical = 5.dp)
             )
@@ -431,8 +440,8 @@ fun Line() {
 @Composable
 fun RoundImage(image: String, modifier: Modifier) {
     Image(
-        painter = painterResource(id = R.drawable.p),
-//        painter = rememberImagePainter(data = image) { error(R.drawable.p) },
+//        painter = painterResource(id = R.drawable.p),
+        painter = rememberImagePainter(data = image) { error(R.drawable.p) },
         contentDescription = "menu",
         contentScale = ContentScale.Crop,
         modifier = modifier

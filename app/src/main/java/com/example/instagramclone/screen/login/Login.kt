@@ -120,7 +120,11 @@ fun Login(
             sessionManager.saveAuthToken(token = (loginState as MainViewModel.LoginState.Success).token)
             viewModel.initOrUpdateRetrofit(context.applicationContext)
             LaunchedEffect(Unit) {
-                navController.navigate(Screen.Home)
+                navController.navigate(Screen.Home) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                }
             }
         }
 
@@ -145,7 +149,6 @@ fun Login(
                 "English (US)",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 style = TextStyle(color = Gray)
             )
             Icon(
@@ -174,7 +177,6 @@ fun Login(
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -182,8 +184,7 @@ fun Login(
                     "Username, email or mobile number",
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Color.Gray
                 )
             },
             modifier = modifier
@@ -212,7 +213,6 @@ fun Login(
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -220,8 +220,7 @@ fun Login(
                     "Password",
                     fontSize = labelFontSizePass.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Color.Gray
                 )
             },
             modifier = modifier
@@ -284,8 +283,7 @@ fun Login(
                 "Forgot Password?",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Gray,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                color = Color.Gray
             )
         }
         Spacer(modifier.weight(1f, true))
@@ -329,8 +327,7 @@ fun Login(
                     "Meta",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Gray
                 )
             }
         }

@@ -89,15 +89,13 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
         Text(
             "Create a password",
             fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.SemiBold
         )
         Spacer(modifier.height(8.dp))
         Text(
             "Create a password with at least 6 letters or numbers. It should be something others can't guess.",
             fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = TextUnit(0f, TextUnitType.Sp)
+            fontWeight = FontWeight.Medium
         )
         Spacer(modifier.height(20.dp))
         TextField(
@@ -106,7 +104,6 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
             textStyle = LocalTextStyle.current.copy(
                 textAlign = TextAlign.Start,
                 fontSize = 16.sp,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp),
                 fontWeight = FontWeight.Normal
             ),
             label = {
@@ -114,8 +111,7 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
                     "Password",
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.Gray,
-                    letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                    color = Color.Gray
                 )
             },
             modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
@@ -162,8 +158,7 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController) {
                 text = "I already have an account",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = Blue,
-                letterSpacing = TextUnit(0f, TextUnitType.Sp)
+                color = Blue
             )
         }
     }
