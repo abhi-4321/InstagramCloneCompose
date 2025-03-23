@@ -8,24 +8,19 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 object RetrofitInstanceMain {
-    private lateinit var apiService: RetrofitInterfaceMain
+    fun getApiService(token: String): RetrofitInterfaceMain {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://instagram-clone-3rjr.onrender.com")
+            .client(okhttpClient(token))
+            .addConverterFactory(GsonConverterFactory.create())// Add our Okhttp client
+            .build()
 
-    fun getApiService(context: Context): RetrofitInterfaceMain {
-        if (!::apiService.isInitialized) {
-            val retrofit = Retrofit.Builder()
-                .baseUrl("https://instagram-clone-3rjr.onrender.com")
-                .client(okhttpClient(context))
-                .addConverterFactory(GsonConverterFactory.create())// Add our Okhttp client
-                .build()
-
-            apiService = retrofit.create(RetrofitInterfaceMain::class.java)
-        }
-        return apiService
+        return retrofit.create(RetrofitInterfaceMain::class.java)
     }
 
-    private fun okhttpClient(context: Context): OkHttpClient {
+    private fun okhttpClient(token: String): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(CustomAuthInterceptor(context))
+            .addInterceptor(CustomAuthInterceptor(token))
             .build()
     }
 }

@@ -1,9 +1,7 @@
 package com.example.instagramclone.screen.login
 
 import android.widget.Toast
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -11,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -58,19 +57,20 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.instagramclone.R
 import com.example.instagramclone.model.LoginRequest
-import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.MoreLightGray
-import com.example.instagramclone.viewmodel.MainViewModel
+import com.example.instagramclone.viewmodel.LoginViewModel
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
 fun Login(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: MainViewModel
+    viewModel: LoginViewModel,
+    launchActivity: (token: String) -> Unit
 ) {
     var textNameState by remember {
         mutableStateOf("")
@@ -107,27 +107,26 @@ fun Login(
     )
 
     val context = LocalContext.current
-    val sessionManager = SessionManager(context)
-
     val loginState by viewModel.uiState.collectAsState()
 
+
     when (loginState) {
-        is MainViewModel.LoginState.Error -> {
+        is LoginViewModel.LoginState.Error -> {
             Toast.makeText(context, "Incorrect username or password", Toast.LENGTH_SHORT).show()
         }
 
-        is MainViewModel.LoginState.Success -> {
-            sessionManager.saveAuthToken(token = (loginState as MainViewModel.LoginState.Success).token)
-            viewModel.initOrUpdateRetrofit(context.applicationContext)
-            LaunchedEffect(Unit) {
-                navController.navigate(Screen.Home) {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
+        is LoginViewModel.LoginState.Success -> {
+            LaunchedEffect(true) {
+//                viewModel.saveToken(token = (loginState as LoginViewModel.LoginState.Success).token)
+                val token = (loginState as LoginViewModel.LoginState.Success).token
+                val saved = SessionManager.saveToken(context.applicationContext, token = token)
+                if (saved) {
+                    launchActivity(token)
+                } else {
+                    Toast.makeText(context,"Error saving token", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-
         else -> {}
     }
 
@@ -179,6 +178,10 @@ fun Login(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal
             ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done // Prevents multiline actions
+            ),
+            singleLine = true, // Ensures it's a single-line field
             label = {
                 Text(
                     "Username, email or mobile number",
@@ -223,6 +226,10 @@ fun Login(
                     color = Color.Gray
                 )
             },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done // Prevents multiline actions
+            ),
+            singleLine = true, // Ensures it's a single-line field
             modifier = modifier
                 .padding(horizontal = 15.dp)
                 .fillMaxWidth()
@@ -246,7 +253,8 @@ fun Login(
         Button(
             onClick = {
                 if (textNameState.isEmpty() || textPasswordState.isEmpty()) {
-                    Toast.makeText(context, "Please fill all the details", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Please fill all the details", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     viewModel.login(LoginRequest(textNameState, textPasswordState))
                 }
@@ -258,7 +266,7 @@ fun Login(
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             shape = RoundedCornerShape(28.dp)
         ) {
-            if (loginState is MainViewModel.LoginState.Loading) {
+            if (loginState is LoginViewModel.LoginState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = Color.White,
@@ -276,9 +284,12 @@ fun Login(
             }
         }
         Spacer(modifier.height(20.dp))
-        Row(modifier = modifier
-            .fillMaxWidth()
-            .clickable { navController.navigate(Screen.ForgotPassword) }, horizontalArrangement = Arrangement.Center) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .clickable { navController.navigate(Screen.ForgotPassword) },
+            horizontalArrangement = Arrangement.Center
+        ) {
             Text(
                 "Forgot Password?",
                 fontSize = 15.sp,
@@ -287,23 +298,22 @@ fun Login(
             )
         }
         Spacer(modifier.weight(1f, true))
-        Column(modifier
-            .padding(bottom = 25.dp)
-            .wrapContentHeight()
-            .fillMaxWidth()
-            , horizontalAlignment = Alignment.CenterHorizontally
+        Column(
+            modifier
+                .padding(bottom = 25.dp)
+                .wrapContentHeight()
+                .fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
                 onClick = { navController.navigate(Screen.Register) },
                 modifier = modifier
                     .padding(horizontal = 15.dp)
                     .fillMaxWidth()
-                    .wrapContentHeight()
+                    .height(45.dp)
                     .border(
                         BorderStroke(1.dp, color = Blue),
                         shape = RoundedCornerShape(28.dp)
-                    )
-                ,
+                    ),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
             ) {
                 Text(

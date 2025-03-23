@@ -1,27 +1,20 @@
 package com.example.instagramclone.network.util
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.instagramclone.R
 
-class SessionManager (context: Context) {
-    private var prefs: SharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)
+@SuppressLint("ApplySharedPref", "UseKtx")
+object SessionManager {
+    private const val AUTH_TOKEN = "auth_token"
 
-    companion object {
-        const val USER_TOKEN = "user_token"
+    fun saveToken(context: Context, token: String?): Boolean {
+        val prefs = context.getSharedPreferences(AUTH_TOKEN,Context.MODE_PRIVATE)
+        return prefs.edit().putString(AUTH_TOKEN,token).commit()
     }
 
-    fun saveAuthToken(token: String) {
-        val editor = prefs.edit()
-        editor.putString(USER_TOKEN, token)
-        editor.apply()
-    }
-
-    fun fetchAuthToken(): String? {
-        return prefs.getString(USER_TOKEN, null)
-    }
-
-    fun clear() {
-        prefs.edit().clear().apply()
+    fun fetchToken(context: Context) : String? {
+        val prefs = context.getSharedPreferences(AUTH_TOKEN,Context.MODE_PRIVATE)
+        return prefs.getString(AUTH_TOKEN,null)
     }
 }

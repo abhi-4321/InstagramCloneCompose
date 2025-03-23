@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -49,11 +53,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
@@ -62,20 +69,16 @@ import com.example.instagramclone.model.Post
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.TabItem
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.TransGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.flow
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp")
-fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController) {
+fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController, launchActivity: () -> Unit) {
 
     val context = LocalContext.current
-
-    LaunchedEffect(true) {
-        viewModel.fetchUser()
-    }
-
     val flowState by viewModel.liveData.collectAsState()
 
     var selectedIndex by remember {
@@ -85,13 +88,59 @@ fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel, navControll
     when(flowState) {
         is MainViewModel.ApiResponse.Failure -> {
             Toast.makeText(context,"Failed to fetch the feed : ${(flowState as MainViewModel.ApiResponse.Failure).error}",Toast.LENGTH_SHORT).show()
-            return
+            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(modifier.wrapContentSize(), verticalArrangement = Arrangement.Center) {
+
+                    Button(
+                        onClick = {
+                            viewModel.fetchUser()
+                        },
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Blue),
+                        shape = RoundedCornerShape(28.dp)
+                    ) {
+                        Text(
+                            modifier = modifier.padding(vertical = 4.dp),
+                            text = "Retry",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.White,
+                            letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
+                        )
+                    }
+
+                    Spacer(modifier.height(20.dp))
+
+                    Button(
+                        onClick = {
+                            launchActivity()
+                        },
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Blue),
+                        shape = RoundedCornerShape(28.dp)
+                    ) {
+                        Text(
+                            modifier = modifier.padding(vertical = 4.dp),
+                            text = "Log out",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.White,
+                            letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
+                        )
+                    }
+                }
+            }
         }
-        MainViewModel.ApiResponse.Idle -> {
-            return
-        }
+
+        MainViewModel.ApiResponse.Idle -> {}
         MainViewModel.ApiResponse.Loading -> {
-            return
+            Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(modifier.size(40.dp))
+            }
         }
         is MainViewModel.ApiResponse.Success<*> -> {
             val flow = (flowState as MainViewModel.ApiResponse.Success).data!!
@@ -249,6 +298,7 @@ fun TopAppBar(username: String, modifier: Modifier = Modifier, navController: Na
             modifier = modifier
                 .scale(0.8f)
                 .clickable {
+                    Log.d("TAG", "TopAppBar: navigated")
                     navController.navigate(Screen.Settings)
                 }
             ,
@@ -441,7 +491,7 @@ fun Line() {
 fun RoundImage(image: String, modifier: Modifier) {
     Image(
 //        painter = painterResource(id = R.drawable.p),
-        painter = rememberImagePainter(data = image) { error(R.drawable.p) },
+        painter = if (image.isEmpty()) painterResource(id = R.drawable.user) else rememberImagePainter(data = image) { error(R.drawable.user) },
         contentDescription = "menu",
         contentScale = ContentScale.Crop,
         modifier = modifier

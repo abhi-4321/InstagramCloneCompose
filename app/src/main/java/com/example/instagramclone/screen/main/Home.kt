@@ -35,6 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,12 +67,27 @@ fun Home(
 ) {
     val context = LocalContext.current
 
-    LaunchedEffect(true) {
-        viewModel.fetchFeed()
-    }
+//    viewModel.resetLoginState()
 
     val displayListState by viewModel.liveDataStory.collectAsState()
     val postsListState by viewModel.liveDataFeed.collectAsState()
+
+    val userDetailsState by viewModel.liveData.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (postsListState !is MainViewModel.ApiResponse.Success<*>) {
+            viewModel.fetchFeed()
+        }
+    }
+
+    var imageUrl by remember { mutableStateOf("") }
+
+    // When userDetailsState updates, update imageUrl
+    LaunchedEffect(userDetailsState) {
+        if (userDetailsState is MainViewModel.ApiResponse.Success) {
+            imageUrl = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.profileImageUrl
+        }
+    }
 
     LazyColumn(
         modifier = modifier
@@ -144,10 +162,21 @@ fun Home(
                                 modifier.wrapContentSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                RoundImage(
-                                    image = "",
-                                    modifier = modifier.size(70.dp)
-                                )
+                                Box(modifier.wrapContentSize(), contentAlignment = Alignment.BottomEnd) {
+                                    Image(
+                                        painter = rememberImagePainter(data = imageUrl),
+                                        contentDescription = "menu",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = modifier
+                                            .size(70.dp)
+                                            .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                                            .padding(3.dp)
+                                            .clip(CircleShape)
+                                    )
+                                    Image(modifier = modifier.border(
+                                        BorderStroke(2.dp,Color.White), shape = CircleShape
+                                    ), painter = painterResource(R.drawable.add_circle), contentDescription = null)
+                                }
                                 Spacer(modifier = modifier.height(5.dp))
                                 Text(
                                     text = "Your Story",
@@ -166,10 +195,21 @@ fun Home(
                                 modifier.wrapContentSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                RoundImage(
-                                    image = list[0].profileImageUrl,
-                                    modifier = modifier.size(70.dp)
-                                )
+                                Box(modifier.wrapContentSize(), contentAlignment = Alignment.BottomEnd) {
+                                    Image(
+                                        painter = rememberImagePainter(data = imageUrl),
+                                        contentDescription = "menu",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = modifier
+                                            .size(70.dp)
+                                            .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                                            .padding(3.dp)
+                                            .clip(CircleShape)
+                                    )
+                                    Image(modifier = modifier.border(
+                                        BorderStroke(2.dp,Color.White), shape = CircleShape
+                                    ), painter = painterResource(R.drawable.add_circle), contentDescription = null)
+                                }
                                 Spacer(modifier = modifier.height(5.dp))
                                 Text(
                                     text = "Your Story",
@@ -274,7 +314,7 @@ fun Home(
 
                     Image(
 //                painter = painterResource(id = R.drawable.p),
-                        painter = rememberImagePainter(data = postsList[it].postUrl) { error(R.drawable.p) },
+                        painter = rememberImagePainter(data = postsList[it].postUrl),
                         contentDescription = "menu",
                         contentScale = ContentScale.Crop,
                         modifier = modifier

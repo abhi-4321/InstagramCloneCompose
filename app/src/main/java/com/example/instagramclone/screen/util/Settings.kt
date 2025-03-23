@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.util
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,28 +21,33 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
+import com.example.instagramclone.viewmodel.MainViewModel
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", )
-fun Settings(modifier: Modifier = Modifier, navController: NavController) {
+fun Settings(modifier: Modifier = Modifier, navController: NavController, viewModel: MainViewModel, launchActivity: () -> Unit) {
 
     val context = LocalContext.current
-    val sessionManager = SessionManager(context)
 
-    Box(contentAlignment = Alignment.BottomCenter, modifier = modifier.fillMaxSize().padding(20.dp)) {
+    Box(contentAlignment = Alignment.BottomCenter, modifier = modifier
+        .fillMaxSize()
+        .padding(20.dp)) {
         Button(
             onClick = {
-                navController.navigate(Screen.Login) {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
+//                viewModel.saveToken(null)
+                val saved = SessionManager.saveToken(context.applicationContext,null)
+                if (saved) {
+                    launchActivity()
+                } else {
+                    Toast.makeText(context, "Error logging out", Toast.LENGTH_SHORT).show()
                 }
-                sessionManager.clear()
             },
             modifier = modifier
                 .fillMaxWidth()
