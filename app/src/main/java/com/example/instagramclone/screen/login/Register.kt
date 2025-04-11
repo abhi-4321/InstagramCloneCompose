@@ -44,20 +44,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
+import com.example.instagramclone.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
+fun Register(modifier: Modifier = Modifier, navController: NavHostController, viewModel: LoginViewModel) {
     var textMobState by remember {
         mutableStateOf("")
     }
@@ -116,7 +119,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
             ),
             label = {
                 Text(
-                    "Username",
+                    "Email",
                     fontSize = labelFontSizeName.sp,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -143,10 +146,12 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
         Spacer(modifier.height(15.dp))
         Button(
             onClick = {
-                if (textMobState.isEmpty()) {
-                    
+                if (textMobState.isEmpty() || textMobState.contains("@gmail.com").not()) {
+                    Toast.makeText(context, "Enter a valid email", Toast.LENGTH_SHORT).show()
+                    return@Button
                 }
-                navController.navigate(Screen.EnterPassword)
+                viewModel.registrationDetails.email = textMobState
+                navController.navigate(Screen.Confirmation)
                       },
             modifier = modifier
                 .fillMaxWidth()
@@ -176,6 +181,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController) {
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         ) {
             Text(
+                modifier = modifier.padding(vertical = 4.dp),
                 text = "Sign up with mobile number",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,

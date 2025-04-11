@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.login
 
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -48,6 +49,7 @@ import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
+import com.example.instagramclone.viewmodel.LoginViewModel
 
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
@@ -85,8 +87,7 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() }
-            ,
+                .clickable { navController.navigateUp() },
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -120,9 +121,13 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
                     color = Color.Gray
                 )
             },
-            modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
-                RoundedCornerShape(15.dp)
-            ),
+            modifier = modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .border(
+                    BorderStroke(1.dp, MoreLightGray),
+                    RoundedCornerShape(15.dp)
+                ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done // Prevents multiline actions
             ),
@@ -140,7 +145,13 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
         )
         Spacer(modifier.height(15.dp))
         Button(
-            onClick = { navController.navigate(Screen.EnterPassword) },
+            onClick = {
+                if (textMobState.isEmpty()) {
+                    Toast.makeText(context, "Enter a valid otp", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                navController.navigate(Screen.EnterPassword)
+            },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
@@ -158,7 +169,7 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
         }
         Spacer(modifier.height(10.dp))
         Button(
-            onClick = {  },
+            onClick = { },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight()

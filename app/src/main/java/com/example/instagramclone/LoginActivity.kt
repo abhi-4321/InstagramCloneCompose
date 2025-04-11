@@ -30,6 +30,7 @@ import com.example.instagramclone.screen.login.Username
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.LoginViewModel
 import com.example.instagramclone.viewmodel.LoginViewModelFactory
+import kotlin.math.log
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,28 +106,28 @@ class LoginActivity : ComponentActivity() {
                         }
                     }
                     composable<Screen.Register> {
-                        Register(navController = navController)
+                        Register(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.Confirmation> {
                         Confirmation(navController = navController)
                     }
                     composable<Screen.EnterPassword> {
-                        EnterPassword(navController = navController)
+                        EnterPassword(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.SaveInfo> {
                         SaveInfo(navController = navController)
                     }
                     composable<Screen.Birthday> {
-                        Birthday(navController = navController)
+                        Birthday(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.Name> {
-                        Name(navController = navController)
+                        Name(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.Username> {
-                        Username(navController = navController)
+                        Username(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.TermsAndPolicies> {
-                        TermsAndPolicies(navController = navController)
+                        TermsAndPolicies(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.ProfilePicture> {
                         ProfilePicture(navController = navController)

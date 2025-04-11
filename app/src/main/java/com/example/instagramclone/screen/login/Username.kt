@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.login
 
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -38,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -54,13 +56,20 @@ import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Green
 import com.example.instagramclone.ui.theme.MoreLightGray
+import com.example.instagramclone.viewmodel.LoginViewModel
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
-fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
+fun Username(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: LoginViewModel
+) {
     var textName by remember {
         mutableStateOf("")
     }
+
+    val context = LocalContext.current
 
     // Create an interaction source to track focus state
     val interactionSourceUsername = remember { MutableInteractionSource() }
@@ -88,8 +97,7 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() }
-            ,
+                .clickable { navController.navigateUp() },
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -157,7 +165,14 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
         )
         Spacer(modifier.height(15.dp))
         Button(
-            onClick = { navController.navigate(Screen.TermsAndPolicies) },
+            onClick = {
+                if (textName.isEmpty()) {
+                    Toast.makeText(context, "Username can not be empty", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                viewModel.registrationDetails.username = textName
+                navController.navigate(Screen.TermsAndPolicies)
+            },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
@@ -174,12 +189,14 @@ fun Username(modifier: Modifier = Modifier, navController: NavHostController) {
             )
         }
         Spacer(modifier.weight(1f, true))
-        Row(modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp)
-            .clickable {
-                navController.popBackStack(Screen.Login, false)
-            }, horizontalArrangement = Arrangement.Center) {
+        Row(
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp)
+                .clickable {
+                    navController.popBackStack(Screen.Login, false)
+                }, horizontalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = "I already have an account",
                 fontSize = 15.sp,

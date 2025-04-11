@@ -67,6 +67,7 @@ import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.ui.theme.Pink40
 import com.example.instagramclone.ui.theme.Purple80
 import com.example.instagramclone.ui.theme.PurpleGrey80
+import com.example.instagramclone.viewmodel.LoginViewModel
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -78,7 +79,8 @@ import java.util.Date
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 fun Birthday(
     modifier: Modifier = Modifier,
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: LoginViewModel
 ) {
     val context = LocalContext.current
 
@@ -120,7 +122,8 @@ fun Birthday(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
-                                textBirthday = SimpleDateFormat("yyyy/MM/dd").format(selectedDate.time)
+                                textBirthday =
+                                    SimpleDateFormat("yyyy/MM/dd").format(selectedDate.time)
                                 showDatePicker = false
                             }
                         }
@@ -192,7 +195,7 @@ fun Birthday(
                     BorderStroke(1.dp, MoreLightGray),
                     RoundedCornerShape(15.dp)
                 )
-                .clickable(interactionSource = interactionSource,indication = null) {
+                .clickable(interactionSource = interactionSource, indication = null) {
                     showDatePicker = true
                 }
                 .padding(horizontal = 16.dp), // Ensuring padding inside Box
@@ -215,7 +218,14 @@ fun Birthday(
         }
         Spacer(modifier.height(15.dp))
         Button(
-            onClick = { navController.navigate(Screen.Name) },
+            onClick = {
+                if (textBirthday.isEmpty()) {
+                    Toast.makeText(context, "Please enter a valid date", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                viewModel.registrationDetails.birthday = textBirthday
+                navController.navigate(Screen.Name)
+            },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),

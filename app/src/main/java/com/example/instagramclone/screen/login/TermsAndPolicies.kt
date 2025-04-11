@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.login
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,8 +20,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
@@ -30,11 +35,38 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
+import com.example.instagramclone.viewmodel.LoginViewModel
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostController) {
+fun TermsAndPolicies(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: LoginViewModel
+) {
+    val context = LocalContext.current
+    val uiState by viewModel.uiStateReg.collectAsState()
+
+    when(uiState) {
+        is LoginViewModel.LoginState.Error -> {
+            Toast.makeText(context, "Unknown error occurred", Toast.LENGTH_SHORT).show()
+        }
+        is LoginViewModel.LoginState.Success -> {
+            LaunchedEffect(true) {
+                val token = (uiState as LoginViewModel.LoginState.Success).token
+                val saved = SessionManager.saveToken(context.applicationContext, token = token)
+                if (saved) {
+                    navController.navigate(Screen.ProfilePicture)
+                } else {
+                    Toast.makeText(context,"Error saving token", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        else -> {}
+    }
+
     Column(
         modifier
             .fillMaxSize()
@@ -77,7 +109,9 @@ fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostContro
         )
         Spacer(modifier.height(15.dp))
         Button(
-            onClick = { navController.navigate(Screen.ProfilePicture) },
+            onClick = {
+                viewModel.register()
+            },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
@@ -97,7 +131,8 @@ fun TermsAndPolicies(modifier: Modifier = Modifier, navController: NavHostContro
         Row(
             modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp).clickable {
+                .padding(vertical = 20.dp)
+                .clickable {
                     navController.popBackStack(Screen.Login, false)
                 },
             horizontalArrangement = Arrangement.Center

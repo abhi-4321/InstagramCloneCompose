@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.login
 
+import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -37,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -52,13 +54,21 @@ import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
+import com.example.instagramclone.viewmodel.LoginViewModel
+import kotlin.coroutines.coroutineContext
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
-fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
+fun Name(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: LoginViewModel
+) {
     var textName by remember {
         mutableStateOf("")
     }
+
+    val context = LocalContext.current
 
     // Create an interaction source to track focus state
     val interactionSource = remember { MutableInteractionSource() }
@@ -86,8 +96,7 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() }
-            ,
+                .clickable { navController.navigateUp() },
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -117,9 +126,13 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
                 imeAction = ImeAction.Done // Prevents multiline actions
             ),
             singleLine = true, // Ensures it's a single-line field
-            modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
-                RoundedCornerShape(15.dp)
-            ),
+            modifier = modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .border(
+                    BorderStroke(1.dp, MoreLightGray),
+                    RoundedCornerShape(15.dp)
+                ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,  // Make background transparent
                 unfocusedContainerColor = Color.Transparent,
@@ -133,7 +146,14 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
         )
         Spacer(modifier.height(15.dp))
         Button(
-            onClick = { navController.navigate(Screen.Username) },
+            onClick = {
+                if (textName.isEmpty()) {
+                    Toast.makeText(context, "Name can not be empty", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                viewModel.registrationDetails.fullName = textName
+                navController.navigate(Screen.Username)
+            },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
@@ -150,9 +170,12 @@ fun Name(modifier: Modifier = Modifier, navController: NavHostController) {
             )
         }
         Spacer(modifier.weight(1f, true))
-        Row(modifier.fillMaxWidth().padding(vertical = 20.dp).clickable {
-            navController.popBackStack(Screen.Login, false)
-        }, horizontalArrangement = Arrangement.Center) {
+        Row(modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp)
+            .clickable {
+                navController.popBackStack(Screen.Login, false)
+            }, horizontalArrangement = Arrangement.Center) {
             Text(
                 text = "I already have an account",
                 fontSize = 15.sp,

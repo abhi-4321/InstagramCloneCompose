@@ -256,7 +256,11 @@ fun Login(
                     Toast.makeText(context, "Please fill all the details", Toast.LENGTH_SHORT)
                         .show()
                 } else {
-                    viewModel.login(LoginRequest(textNameState, textPasswordState))
+                    if (textNameState.contains("@gmail.com")) {
+                        viewModel.login(LoginRequest(textNameState,null, textPasswordState))
+                    } else {
+                        viewModel.login(LoginRequest(null, textNameState, textPasswordState))
+                    }
                 }
             },
             modifier = modifier

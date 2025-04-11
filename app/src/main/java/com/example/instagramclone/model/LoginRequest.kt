@@ -1,6 +1,7 @@
 package com.example.instagramclone.model
 
 data class LoginRequest(
-    val username: String,
+    val email: String? = null,
+    val username: String? = null,
     val password: String
 )
