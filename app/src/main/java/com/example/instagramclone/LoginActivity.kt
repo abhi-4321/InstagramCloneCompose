@@ -14,12 +14,14 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.screen.login.Birthday
 import com.example.instagramclone.screen.login.Confirmation
 import com.example.instagramclone.screen.login.EnterPassword
+import com.example.instagramclone.screen.login.ForgotPassword
 import com.example.instagramclone.screen.login.Login
 import com.example.instagramclone.screen.login.Name
 import com.example.instagramclone.screen.login.ProfilePicture
@@ -129,8 +131,21 @@ class LoginActivity : ComponentActivity() {
                     composable<Screen.TermsAndPolicies> {
                         TermsAndPolicies(navController = navController, viewModel = loginViewModel)
                     }
-                    composable<Screen.ProfilePicture> {
-                        ProfilePicture(navController = navController)
+                    composable<Screen.ProfilePicture> { backStackEntry ->
+                        val args = backStackEntry.toRoute<Screen.ProfilePicture>()
+                        ProfilePicture(navController = navController) {
+                            startActivity(
+                                Intent(
+                                    this@LoginActivity,
+                                    MainActivity::class.java
+                                ).apply {
+                                    putExtra("token", args.token)
+                                })
+                            finish()
+                        }
+                    }
+                    composable<Screen.ForgotPassword> {
+                        ForgotPassword(navController = navController)
                     }
                 }
             }

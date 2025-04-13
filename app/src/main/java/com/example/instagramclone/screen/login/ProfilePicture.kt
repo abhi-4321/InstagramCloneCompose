@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.instagramclone.LoginActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
@@ -40,7 +41,10 @@ import com.example.instagramclone.ui.theme.MoreLightGray
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostController) {
+fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostController, finishActivity: () -> Unit) {
+
+    val token =
+
     Column(
         modifier
             .fillMaxSize()
@@ -82,7 +86,7 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
         Button(
             onClick = {
                 uploadImage()
-                navController.navigate(Screen.Home)
+                finishActivity()
             },
             modifier = modifier
                 .fillMaxWidth()
@@ -101,7 +105,7 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
         }
         Spacer(modifier.height(10.dp))
         Button(
-            onClick = { navController.navigate(Screen.Home) },
+            onClick = { finishActivity() },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
@@ -124,4 +128,5 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
 }
 
 fun uploadImage() {
+
 }

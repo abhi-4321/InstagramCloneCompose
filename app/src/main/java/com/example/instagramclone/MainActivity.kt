@@ -60,7 +60,6 @@ class MainActivity : ComponentActivity() {
                 Main(viewModel)
             }
         }
-
     }
 
     //@Preview(showSystemUi = true)

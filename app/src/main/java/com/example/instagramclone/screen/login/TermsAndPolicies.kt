@@ -58,7 +58,7 @@ fun TermsAndPolicies(
                 val token = (uiState as LoginViewModel.LoginState.Success).token
                 val saved = SessionManager.saveToken(context.applicationContext, token = token)
                 if (saved) {
-                    navController.navigate(Screen.ProfilePicture)
+                    navController.navigate(Screen.ProfilePicture(token))
                 } else {
                     Toast.makeText(context,"Error saving token", Toast.LENGTH_SHORT).show()
                 }

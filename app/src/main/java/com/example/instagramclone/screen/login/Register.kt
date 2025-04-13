@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
+import com.example.instagramclone.model.OtpRequest
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
@@ -60,7 +61,11 @@ import com.example.instagramclone.viewmodel.LoginViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun Register(modifier: Modifier = Modifier, navController: NavHostController, viewModel: LoginViewModel) {
+fun Register(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: LoginViewModel
+) {
     var textMobState by remember {
         mutableStateOf("")
     }
@@ -93,8 +98,7 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController, vi
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() }
-            ,
+                .clickable { navController.navigateUp() },
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -131,9 +135,13 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController, vi
                 imeAction = ImeAction.Done // Prevents multiline actions
             ),
             singleLine = true, // Ensures it's a single-line field
-            modifier = modifier.fillMaxWidth().height(52.dp).border(BorderStroke(1.dp, MoreLightGray),
-                RoundedCornerShape(15.dp)
-            ),
+            modifier = modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .border(
+                    BorderStroke(1.dp, MoreLightGray),
+                    RoundedCornerShape(15.dp)
+                ),
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = Color.Transparent,  // Make background transparent
                 focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
@@ -151,8 +159,9 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController, vi
                     return@Button
                 }
                 viewModel.registrationDetails.email = textMobState
+                viewModel.sendOtp(email = textMobState)
                 navController.navigate(Screen.Confirmation)
-                      },
+            },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
@@ -190,12 +199,13 @@ fun Register(modifier: Modifier = Modifier, navController: NavHostController, vi
             )
         }
         Spacer(modifier.weight(1f, true))
-        Row(modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp)
-            .clickable {
-                navController.popBackStack(Screen.Login, false)
-            }, horizontalArrangement = Arrangement.Center
+        Row(
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp)
+                .clickable {
+                    navController.popBackStack(Screen.Login, false)
+                }, horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "I already have an account",

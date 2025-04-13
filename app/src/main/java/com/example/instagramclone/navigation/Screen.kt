@@ -22,7 +22,7 @@ sealed interface Screen {
     data object Name : Screen
 
     @Serializable
-    data object ProfilePicture : Screen
+    data class ProfilePicture(val token: String) : Screen
 
     @Serializable
     data object Register : Screen

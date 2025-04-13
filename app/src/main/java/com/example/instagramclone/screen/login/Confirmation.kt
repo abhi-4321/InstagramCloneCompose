@@ -23,12 +23,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.instagramclone.R
+import com.example.instagramclone.model.OtpRequest
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
@@ -54,9 +58,57 @@ import com.example.instagramclone.viewmodel.LoginViewModel
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController) {
+fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController, viewModel: LoginViewModel) {
     var textMobState by remember {
         mutableStateOf("")
+    }
+
+    var isLoadingState by remember {
+        mutableStateOf(false)
+    }
+
+    val context = LocalContext.current
+
+    val otpRequestState by viewModel.otpState.collectAsState()
+
+    when (otpRequestState) {
+        LoginViewModel.OtpRequestState.Error -> {
+            Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT).show()
+        }
+        LoginViewModel.OtpRequestState.Idle -> {}
+        LoginViewModel.OtpRequestState.Loading -> {}
+        LoginViewModel.OtpRequestState.Sent -> {
+            Toast.makeText(context, "Otp sent to email successfully", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val otpVerifyState by viewModel.otpVerifyState.collectAsState()
+
+    when (otpVerifyState) {
+        LoginViewModel.OtpVerifyState.Correct -> {
+            LaunchedEffect(true) {
+                navController.navigate(Screen.EnterPassword)
+            }
+            isLoadingState = false
+        }
+        LoginViewModel.OtpVerifyState.EmailExists -> {
+            Toast.makeText(context, "Email already exists", Toast.LENGTH_SHORT).show()
+            isLoadingState = false
+        }
+        LoginViewModel.OtpVerifyState.Error -> {
+            Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT).show()
+            isLoadingState = false
+        }
+        LoginViewModel.OtpVerifyState.Idle -> {
+            isLoadingState = false
+        }
+        LoginViewModel.OtpVerifyState.Incorrect -> {
+            Toast.makeText(context, "Otp is invalid or expired", Toast.LENGTH_SHORT).show()
+            isLoadingState = false
+        }
+        LoginViewModel.OtpVerifyState.Loading -> {
+            isLoadingState = true
+        }
     }
 
     // Create an interaction source to track focus state
@@ -71,8 +123,6 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
             easing = LinearEasing
         )
     )
-
-    val context = LocalContext.current
 
     Column(
         modifier
@@ -150,7 +200,7 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
                     Toast.makeText(context, "Enter a valid otp", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
-                navController.navigate(Screen.EnterPassword)
+                viewModel.verifyOtp(otp = textMobState)
             },
             modifier = modifier
                 .fillMaxWidth()
@@ -158,18 +208,29 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             shape = RoundedCornerShape(28.dp)
         ) {
-            Text(
-                modifier = modifier.padding(vertical = 4.dp),
-                text = "Next",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.White,
-                letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
-            )
+            if (isLoadingState) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    modifier = modifier.padding(vertical = 4.dp),
+                    text = "Next",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.White,
+                    letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
+                )
+            }
+
         }
         Spacer(modifier.height(10.dp))
         Button(
-            onClick = { },
+            onClick = {
+                viewModel.sendOtp()
+            },
             modifier = modifier
                 .fillMaxWidth()
                 .wrapContentHeight()

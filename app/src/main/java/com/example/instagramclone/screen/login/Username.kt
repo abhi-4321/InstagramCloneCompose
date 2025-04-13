@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.login
 
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -32,6 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +60,7 @@ import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Green
 import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.viewmodel.LoginViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
@@ -66,7 +70,11 @@ fun Username(
     viewModel: LoginViewModel
 ) {
     var textName by remember {
-        mutableStateOf("")
+        mutableStateOf("abbi")
+    }
+
+    var isValidUsername by remember {
+        mutableStateOf(false)
     }
 
     val context = LocalContext.current
@@ -151,14 +159,66 @@ fun Username(
             ),
             trailingIcon = {
                 if (textName.isNotEmpty()) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.round_check_circle_outline_24),
-                        contentDescription = "check",
-                        modifier
-                            .size(20.dp)
-                            .scale(1.2f),
-                        tint = Green
-                    )
+                    LaunchedEffect(true) {
+                        delay(1000)
+                        viewModel.validateUsername(textName)
+                    }
+
+                    val usernameState by viewModel.usernameState.collectAsState()
+
+                    when(usernameState) {
+                        LoginViewModel.UsernameState.Empty -> {
+                            isValidUsername = false
+                        }
+                        LoginViewModel.UsernameState.Error -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.round_error_outline_24),
+                                contentDescription = "check",
+                                modifier
+                                    .size(20.dp)
+                                    .scale(1.2f),
+                                tint = Green
+                            )
+                            isValidUsername = false
+                            Toast.makeText(context, "Unknown error occurred", Toast.LENGTH_SHORT).show()
+                        }
+                        LoginViewModel.UsernameState.Invalid -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.round_error_outline_24),
+                                contentDescription = "check",
+                                modifier
+                                    .size(20.dp)
+                                    .scale(1.2f),
+                                tint = Green
+                            )
+                            isValidUsername = false
+                        }
+                        LoginViewModel.UsernameState.Valid -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.round_check_circle_outline_24),
+                                contentDescription = "check",
+                                modifier
+                                    .size(20.dp)
+                                    .scale(1.2f),
+                                tint = Green
+                            )
+                            isValidUsername = true
+                        }
+                        LoginViewModel.UsernameState.Validating -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_sync_24),
+                                contentDescription = "check",
+                                modifier
+                                    .size(20.dp)
+                                    .scale(1.2f),
+                                tint = Green
+                            )
+                            isValidUsername = false
+                        }
+                    }
+                } else {
+                    isValidUsername = false
+                    Icon(painter = painterResource(0), contentDescription = null)
                 }
             },
             interactionSource = interactionSourceUsername
@@ -170,6 +230,12 @@ fun Username(
                     Toast.makeText(context, "Username can not be empty", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
+
+                if (isValidUsername.not()) {
+                    Toast.makeText(context, "Username already exists", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+
                 viewModel.registrationDetails.username = textName
                 navController.navigate(Screen.TermsAndPolicies)
             },
