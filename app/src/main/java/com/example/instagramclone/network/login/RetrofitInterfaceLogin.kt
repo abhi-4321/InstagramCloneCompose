@@ -25,6 +25,6 @@ interface RetrofitInterfaceLogin {
     @POST("auth/verifyOtp")
     suspend fun verifyOtp(@Body otpRequest: OtpRequest) : Response<OtpResponse>
 
-    @GET
+    @GET("auth/validate/{username}")
     suspend fun validateUsername(@Path("username") username: String) : Response<Void>
 }

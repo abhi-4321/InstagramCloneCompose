@@ -7,6 +7,7 @@ import com.example.instagramclone.model.OtpRequest
 import com.example.instagramclone.model.OtpResponse
 import com.example.instagramclone.model.RegistrationRequest
 import com.example.instagramclone.network.login.RetrofitInterfaceLogin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -92,6 +93,7 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
         data object Idle : OtpRequestState()
         data object Loading : OtpRequestState()
         data object Sent : OtpRequestState()
+        data object Exists : OtpRequestState()
         data object Error : OtpRequestState()
     }
 
@@ -105,6 +107,10 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
                 val response = retrofitInterfaceLogin.sendOtp(OtpRequest(email,""))
                 if (response.isSuccessful && response.body() != null && response.body()!!.success) {
                     _otpState.value = OtpRequestState.Sent
+                    delay(100)
+                    _otpState.value = OtpRequestState.Idle
+                } else if (response.code() == 401) {
+                    _otpState.value = OtpRequestState.Exists
                 } else {
                     _otpState.value = OtpRequestState.Error
                 }
@@ -117,7 +123,6 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
     sealed class OtpVerifyState {
         data object Idle : OtpVerifyState()
         data object Loading : OtpVerifyState()
-        data object EmailExists : OtpVerifyState()
         data object Correct : OtpVerifyState()
         data object Incorrect : OtpVerifyState()
         data object Error : OtpVerifyState()
@@ -133,8 +138,6 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
                 val response = retrofitInterfaceLogin.verifyOtp(OtpRequest(email = registrationDetails.email!!, otp = otp))
                 if (response.isSuccessful && response.body() != null && response.body()!!.success) {
                     _otpVerifyState.value = OtpVerifyState.Correct
-                } else if (response.code() == 409) {
-                    _otpVerifyState.value = OtpVerifyState.EmailExists
                 } else if (response.code() == 400) {
                     _otpVerifyState.value = OtpVerifyState.Incorrect
                 } else {

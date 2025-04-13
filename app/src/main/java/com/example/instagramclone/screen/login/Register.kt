@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.login
 
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -25,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
@@ -32,10 +34,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.traceEventEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -70,6 +75,29 @@ fun Register(
         mutableStateOf("")
     }
 
+    val otpRequestState by viewModel.otpState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(otpRequestState) {
+        when (otpRequestState) {
+            LoginViewModel.OtpRequestState.Error -> {
+                Toast.makeText(context, "Unknown error occurred. Please retry!", Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+            LoginViewModel.OtpRequestState.Sent -> {
+                Toast.makeText(context, "Otp sent to email successfully", Toast.LENGTH_SHORT).show()
+                navController.navigate(Screen.Confirmation)
+            }
+
+            LoginViewModel.OtpRequestState.Exists -> {
+                Toast.makeText(context, "Email already registered", Toast.LENGTH_SHORT).show()
+            }
+
+            else -> {}
+        }
+    }
+
     // Create an interaction source to track focus state
     val interactionSourceUsername = remember { MutableInteractionSource() }
     // Detect if field is focused
@@ -82,8 +110,6 @@ fun Register(
             easing = LinearEasing
         )
     )
-
-    val context = LocalContext.current
 
     Column(
         modifier
@@ -154,13 +180,12 @@ fun Register(
         Spacer(modifier.height(15.dp))
         Button(
             onClick = {
-                if (textMobState.isEmpty() || textMobState.contains("@gmail.com").not()) {
+                if (textMobState.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(textMobState).matches().not()) {
                     Toast.makeText(context, "Enter a valid email", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
                 viewModel.registrationDetails.email = textMobState
                 viewModel.sendOtp(email = textMobState)
-                navController.navigate(Screen.Confirmation)
             },
             modifier = modifier
                 .fillMaxWidth()
@@ -168,14 +193,22 @@ fun Register(
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             shape = RoundedCornerShape(28.dp)
         ) {
-            Text(
-                modifier = modifier.padding(vertical = 4.dp),
-                text = "Next",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color.White,
-                letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
-            )
+            if (otpRequestState is LoginViewModel.OtpRequestState.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = Color.White,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    modifier = modifier.padding(vertical = 4.dp),
+                    text = "Next",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.White,
+                    letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
+                )
+            }
         }
         Spacer(modifier.height(10.dp))
         Button(

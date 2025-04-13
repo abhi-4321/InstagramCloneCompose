@@ -111,7 +111,7 @@ class LoginActivity : ComponentActivity() {
                         Register(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.Confirmation> {
-                        Confirmation(navController = navController)
+                        Confirmation(navController = navController, viewModel = loginViewModel)
                     }
                     composable<Screen.EnterPassword> {
                         EnterPassword(navController = navController, viewModel = loginViewModel)

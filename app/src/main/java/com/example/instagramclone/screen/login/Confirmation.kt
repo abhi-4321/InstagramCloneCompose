@@ -63,10 +63,6 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
         mutableStateOf("")
     }
 
-    var isLoadingState by remember {
-        mutableStateOf(false)
-    }
-
     val context = LocalContext.current
 
     val otpRequestState by viewModel.otpState.collectAsState()
@@ -75,11 +71,10 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
         LoginViewModel.OtpRequestState.Error -> {
             Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT).show()
         }
-        LoginViewModel.OtpRequestState.Idle -> {}
-        LoginViewModel.OtpRequestState.Loading -> {}
         LoginViewModel.OtpRequestState.Sent -> {
             Toast.makeText(context, "Otp sent to email successfully", Toast.LENGTH_SHORT).show()
         }
+        else -> {}
     }
 
     val otpVerifyState by viewModel.otpVerifyState.collectAsState()
@@ -89,26 +84,14 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
             LaunchedEffect(true) {
                 navController.navigate(Screen.EnterPassword)
             }
-            isLoadingState = false
-        }
-        LoginViewModel.OtpVerifyState.EmailExists -> {
-            Toast.makeText(context, "Email already exists", Toast.LENGTH_SHORT).show()
-            isLoadingState = false
         }
         LoginViewModel.OtpVerifyState.Error -> {
             Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT).show()
-            isLoadingState = false
-        }
-        LoginViewModel.OtpVerifyState.Idle -> {
-            isLoadingState = false
         }
         LoginViewModel.OtpVerifyState.Incorrect -> {
             Toast.makeText(context, "Otp is invalid or expired", Toast.LENGTH_SHORT).show()
-            isLoadingState = false
         }
-        LoginViewModel.OtpVerifyState.Loading -> {
-            isLoadingState = true
-        }
+        else -> {}
     }
 
     // Create an interaction source to track focus state
@@ -208,7 +191,7 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             shape = RoundedCornerShape(28.dp)
         ) {
-            if (isLoadingState) {
+            if (otpVerifyState is LoginViewModel.OtpVerifyState.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = Color.White,
@@ -224,7 +207,6 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
                     letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
                 )
             }
-
         }
         Spacer(modifier.height(10.dp))
         Button(
