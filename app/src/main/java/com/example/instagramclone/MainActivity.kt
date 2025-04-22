@@ -24,6 +24,7 @@ import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.screen.main.Create
 import com.example.instagramclone.screen.main.Home
+import com.example.instagramclone.screen.main.Messages
 import com.example.instagramclone.screen.main.Profile
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
@@ -154,6 +155,9 @@ class MainActivity : ComponentActivity() {
                         startActivity(Intent(this@MainActivity,LoginActivity::class.java))
                         finish()
                     }
+                }
+                composable<Screen.Messages> {
+                    Messages()
                 }
             }
         }
