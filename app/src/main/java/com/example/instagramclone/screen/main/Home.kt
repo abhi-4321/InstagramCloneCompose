@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.StoryDisplayUser
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Pink
 import com.example.instagramclone.viewmodel.MainViewModel
 
@@ -66,8 +68,6 @@ fun Home(
     viewModel: MainViewModel
 ) {
     val context = LocalContext.current
-
-//    viewModel.resetLoginState()
 
     val displayListState by viewModel.liveDataStory.collectAsState()
     val postsListState by viewModel.liveDataFeed.collectAsState()
@@ -119,7 +119,11 @@ fun Home(
                     Icon(
                         modifier = modifier
                             .size(21.dp)
-                            .padding(top = 3.dp),
+                            .padding(top = 3.dp)
+                            .clickable {
+                                navController.navigate(Screen.Messages)
+                            }
+                        ,
                         painter = painterResource(id = R.drawable.share),
                         contentDescription = null
                     )
@@ -364,7 +368,8 @@ fun Home(
                                 modifier = modifier
                                     .fillMaxHeight()
                                     .scale(0.9f)
-                                    .offset(y = 1.dp),
+                                    .offset(y = 1.dp)
+                                ,
                                 painter = painterResource(id = R.drawable.share),
                                 tint = Color.Unspecified,
                                 contentDescription = null,

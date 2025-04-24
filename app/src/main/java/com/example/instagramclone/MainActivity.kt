@@ -18,18 +18,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.instagramclone.navigation.BottomBarDestinations
 import com.example.instagramclone.navigation.BottomNavigationBar
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
+import com.example.instagramclone.screen.chat.Chat
 import com.example.instagramclone.screen.main.Create
 import com.example.instagramclone.screen.main.Home
-import com.example.instagramclone.screen.main.Messages
+import com.example.instagramclone.screen.chat.Messages
+import com.example.instagramclone.screen.chat.NewMessage
 import com.example.instagramclone.screen.main.Profile
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
 import com.example.instagramclone.screen.util.Settings
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
+import com.example.instagramclone.viewmodel.ChatViewModel
+import com.example.instagramclone.viewmodel.ChatViewModelFactory
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.MainViewModelFactory
 
@@ -157,7 +162,17 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 composable<Screen.Messages> {
-                    Messages()
+                    Messages(navController = navController, viewModel = viewModel)
+                }
+                composable<Screen.Chat> {
+                    val args = it.toRoute<Screen.Chat>()
+                    val chatViewModel by viewModels<ChatViewModel> {
+                        ChatViewModelFactory(args.receiverId)
+                    }
+                    Chat(viewModel = chatViewModel, mainViewModel = viewModel, args.receiverId)
+                }
+                composable<Screen.NewMessage> {
+                    NewMessage()
                 }
             }
         }

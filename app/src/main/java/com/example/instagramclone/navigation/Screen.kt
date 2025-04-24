@@ -56,4 +56,10 @@ sealed interface Screen {
 
     @Serializable
     data object Messages : Screen
+
+    @Serializable
+    data object NewMessage : Screen
+
+    @Serializable
+    data class Chat(val receiverId: Int) : Screen
 }
