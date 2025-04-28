@@ -61,5 +61,5 @@ sealed interface Screen {
     data object NewMessage : Screen
 
     @Serializable
-    data class Chat(val receiverId: Int) : Screen
+    data class Chat(val receiverId: Int, val senderId: Int) : Screen
 }

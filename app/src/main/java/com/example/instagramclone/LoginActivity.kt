@@ -10,6 +10,7 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.runtime.Composable
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,6 +19,7 @@ import androidx.navigation.toRoute
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.network.util.SessionManager
+import com.example.instagramclone.screen.chat.Chat
 import com.example.instagramclone.screen.login.Birthday
 import com.example.instagramclone.screen.login.Confirmation
 import com.example.instagramclone.screen.login.EnterPassword
@@ -68,86 +70,91 @@ class LoginActivity : ComponentActivity() {
 
         setContent {
             InstagramCloneTheme {
-                val navController = rememberNavController()
+                Login(loginViewModel)
+            }
+        }
+    }
 
-                val slideTime = 300
-                val slideLeftHorizontallyEnter =
-                    // New screen coming left from right after new screen enter
-                    slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(slideTime))
-                val slideLeftHorizontallyExit =
-                    // Current screen going left from right after new screen enter
-                    slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(slideTime))
-                val slideRightHorizontallyPopEnter =
-                    // Previous screen coming right from left after back press
-                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(slideTime))
-                val slideRightHorizontallyPopExit =
-                    // Current screen going right from left after back press
-                    slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(slideTime))
+    @Composable
+    fun Login(loginViewModel: LoginViewModel) {
+        val navController = rememberNavController()
 
-                NavHost(
-                    navController = navController,
-                    startDestination = Screen.Login,
-                    enterTransition = { slideLeftHorizontallyEnter },
-                    exitTransition = { slideLeftHorizontallyExit },
-                    popExitTransition = { slideRightHorizontallyPopEnter },
-                    popEnterTransition = { slideRightHorizontallyPopExit }
-                ) {
-                    composable<Screen.Login>(
-                        enterTransition = { null },
-                        popExitTransition = { null }
-                    ) {
-                        Login(navController = navController, viewModel = loginViewModel) {
-                            startActivity(
-                                Intent(
-                                    this@LoginActivity,
-                                    MainActivity::class.java
-                                ).apply {
-                                    putExtra("token", it)
-                                })
-                            finish()
-                        }
-                    }
-                    composable<Screen.Register> {
-                        Register(navController = navController, viewModel = loginViewModel)
-                    }
-                    composable<Screen.Confirmation> {
-                        Confirmation(navController = navController, viewModel = loginViewModel)
-                    }
-                    composable<Screen.EnterPassword> {
-                        EnterPassword(navController = navController, viewModel = loginViewModel)
-                    }
-                    composable<Screen.SaveInfo> {
-                        SaveInfo(navController = navController)
-                    }
-                    composable<Screen.Birthday> {
-                        Birthday(navController = navController, viewModel = loginViewModel)
-                    }
-                    composable<Screen.Name> {
-                        Name(navController = navController, viewModel = loginViewModel)
-                    }
-                    composable<Screen.Username> {
-                        Username(navController = navController, viewModel = loginViewModel)
-                    }
-                    composable<Screen.TermsAndPolicies> {
-                        TermsAndPolicies(navController = navController, viewModel = loginViewModel)
-                    }
-                    composable<Screen.ProfilePicture> { backStackEntry ->
-                        val args = backStackEntry.toRoute<Screen.ProfilePicture>()
-                        ProfilePicture(navController = navController) {
-                            startActivity(
-                                Intent(
-                                    this@LoginActivity,
-                                    MainActivity::class.java
-                                ).apply {
-                                    putExtra("token", args.token)
-                                })
-                            finish()
-                        }
-                    }
-                    composable<Screen.ForgotPassword> {
-                        ForgotPassword(navController = navController)
-                    }
+        val slideTime = 300
+        val slideLeftHorizontallyEnter =
+            // New screen coming left from right after new screen enter
+            slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(slideTime))
+        val slideLeftHorizontallyExit =
+            // Current screen going left from right after new screen enter
+            slideOutHorizontally(targetOffsetX = { -it }, animationSpec = tween(slideTime))
+        val slideRightHorizontallyPopEnter =
+            // Previous screen coming right from left after back press
+            slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(slideTime))
+        val slideRightHorizontallyPopExit =
+            // Current screen going right from left after back press
+            slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(slideTime))
+
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Login,
+            enterTransition = { slideLeftHorizontallyEnter },
+            exitTransition = { slideLeftHorizontallyExit },
+            popExitTransition = { slideRightHorizontallyPopEnter },
+            popEnterTransition = { slideRightHorizontallyPopExit }
+        ) {
+            composable<Screen.Login>(
+                enterTransition = { null },
+                popExitTransition = { null }
+            ) {
+                Login(navController = navController, viewModel = loginViewModel) {
+                    startActivity(
+                        Intent(
+                            this@LoginActivity,
+                            MainActivity::class.java
+                        ).apply {
+                            putExtra("token", it)
+                        })
+                    finish()
                 }
+            }
+            composable<Screen.Register> {
+                Register(navController = navController, viewModel = loginViewModel)
+            }
+            composable<Screen.Confirmation> {
+                Confirmation(navController = navController, viewModel = loginViewModel)
+            }
+            composable<Screen.EnterPassword> {
+                EnterPassword(navController = navController, viewModel = loginViewModel)
+            }
+            composable<Screen.SaveInfo> {
+                SaveInfo(navController = navController)
+            }
+            composable<Screen.Birthday> {
+                Birthday(navController = navController, viewModel = loginViewModel)
+            }
+            composable<Screen.Name> {
+                Name(navController = navController, viewModel = loginViewModel)
+            }
+            composable<Screen.Username> {
+                Username(navController = navController, viewModel = loginViewModel)
+            }
+            composable<Screen.TermsAndPolicies> {
+                TermsAndPolicies(navController = navController, viewModel = loginViewModel)
+            }
+            composable<Screen.ProfilePicture> { backStackEntry ->
+                val args = backStackEntry.toRoute<Screen.ProfilePicture>()
+                ProfilePicture(navController = navController) {
+                    startActivity(
+                        Intent(
+                            this@LoginActivity,
+                            MainActivity::class.java
+                        ).apply {
+                            putExtra("token", args.token)
+                        })
+                    finish()
+                }
+            }
+            composable<Screen.ForgotPassword> {
+                ForgotPassword(navController = navController)
             }
         }
     }

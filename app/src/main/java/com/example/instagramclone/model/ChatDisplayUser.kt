@@ -4,5 +4,6 @@ data class ChatDisplayUser(
     val receiverId: Int,
     val fullName: String,
     val profileImageUrl : String,
-    val lastChat: Chat
+    val username: String,
+    val lastChat: Chat = Chat()
 )

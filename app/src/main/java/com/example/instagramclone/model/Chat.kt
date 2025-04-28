@@ -8,4 +8,6 @@ data class Chat(
     val attachment: String = "",
     val timestamp: String,
     val participants: List<Int>,
-)
+) {
+    constructor() : this("",0,0,"","","",emptyList())
+}

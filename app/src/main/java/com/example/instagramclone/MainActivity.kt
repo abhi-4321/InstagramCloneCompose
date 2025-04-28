@@ -23,18 +23,17 @@ import com.example.instagramclone.navigation.BottomBarDestinations
 import com.example.instagramclone.navigation.BottomNavigationBar
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
+import com.example.instagramclone.network.main.RetrofitInterfaceMain
 import com.example.instagramclone.screen.chat.Chat
-import com.example.instagramclone.screen.main.Create
-import com.example.instagramclone.screen.main.Home
 import com.example.instagramclone.screen.chat.Messages
 import com.example.instagramclone.screen.chat.NewMessage
+import com.example.instagramclone.screen.main.Create
+import com.example.instagramclone.screen.main.Home
 import com.example.instagramclone.screen.main.Profile
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
 import com.example.instagramclone.screen.util.Settings
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
-import com.example.instagramclone.viewmodel.ChatViewModel
-import com.example.instagramclone.viewmodel.ChatViewModelFactory
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.MainViewModelFactory
 
@@ -63,7 +62,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             InstagramCloneTheme {
-                Main(viewModel)
+                Main(viewModel, retrofitInterfaceMain)
             }
         }
     }
@@ -71,7 +70,7 @@ class MainActivity : ComponentActivity() {
     //@Preview(showSystemUi = true)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
-    fun Main(viewModel: MainViewModel) {
+    fun Main(viewModel: MainViewModel, retrofitInterfaceMain: RetrofitInterfaceMain) {
         val navController = rememberNavController()
 
         val slideTime = 300
@@ -166,13 +165,10 @@ class MainActivity : ComponentActivity() {
                 }
                 composable<Screen.Chat> {
                     val args = it.toRoute<Screen.Chat>()
-                    val chatViewModel by viewModels<ChatViewModel> {
-                        ChatViewModelFactory(args.receiverId)
-                    }
-                    Chat(viewModel = chatViewModel, mainViewModel = viewModel, args.receiverId)
+                    Chat(receiverId = args.receiverId, senderId = args.senderId, retrofitInterfaceMain = retrofitInterfaceMain)
                 }
                 composable<Screen.NewMessage> {
-                    NewMessage()
+                    NewMessage(viewModel = viewModel, navController = navController)
                 }
             }
         }

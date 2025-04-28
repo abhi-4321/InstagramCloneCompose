@@ -179,7 +179,8 @@ fun Home(
                                     )
                                     Image(modifier = modifier.border(
                                         BorderStroke(2.dp,Color.White), shape = CircleShape
-                                    ), painter = painterResource(R.drawable.add_circle), contentDescription = null)
+                                    ).size(20.dp)
+                                        , painter = painterResource(R.drawable.round_add_circle_24), contentDescription = null)
                                 }
                                 Spacer(modifier = modifier.height(5.dp))
                                 Text(
@@ -212,7 +213,7 @@ fun Home(
                                     )
                                     Image(modifier = modifier.border(
                                         BorderStroke(2.dp,Color.White), shape = CircleShape
-                                    ), painter = painterResource(R.drawable.add_circle), contentDescription = null)
+                                    ).size(20.dp), painter = painterResource(R.drawable.round_add_circle_24), contentDescription = null)
                                 }
                                 Spacer(modifier = modifier.height(5.dp))
                                 Text(
@@ -262,6 +263,7 @@ fun Home(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(90.dp)
                             .height(90.dp),
                         contentAlignment = Alignment.Center
                     ) {

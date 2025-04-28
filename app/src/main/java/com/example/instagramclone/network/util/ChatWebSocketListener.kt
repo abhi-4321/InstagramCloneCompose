@@ -17,10 +17,11 @@ class ChatWebSocketListener(private val onMessage: (chat: Chat) -> Unit) : WebSo
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
+        Log.d(TAG, "Received message: $text")
         val gson = Gson()
         val msg = gson.fromJson(text,Chat::class.java)
-        onMessage(msg)
         Log.d(TAG, "Received message: $msg")
+        onMessage(msg)
     }
 
     override fun onMessage(webSocket: WebSocket, bytes: ByteString) {

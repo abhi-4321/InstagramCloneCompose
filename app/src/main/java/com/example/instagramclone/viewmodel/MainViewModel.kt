@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.util.recursiveFetchLongSparseArray
-import com.example.instagramclone.model.AllChatUsers
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.model.ChatDisplayUser
 import com.example.instagramclone.model.PostDisplay
@@ -89,8 +88,8 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
         }
     }
 
-    private val _allChatUsersFlow = MutableStateFlow<ApiResponse<List<AllChatUsers>>>(ApiResponse.Idle)
-    val allChatUsersFlow: StateFlow<ApiResponse<List<AllChatUsers>>> get() = _allChatUsersFlow
+    private val _allChatUsersFlow = MutableStateFlow<ApiResponse<List<ChatDisplayUser>>>(ApiResponse.Idle)
+    val allChatUsersFlow: StateFlow<ApiResponse<List<ChatDisplayUser>>> get() = _allChatUsersFlow
 
     fun fetchAllChatUsers() {
         viewModelScope.launch {
@@ -106,27 +105,26 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
         }
     }
 
+    fun updateLastMessage(userId: Int, newMessage: String, timestamp: String) {
+        val currentUsers = (_chatUsersFlow.value as? ApiResponse.Success)?.data ?: return
+
+        // Create a new list with the updated last message for the specific user
+        val updatedUsers = currentUsers.map { user ->
+            if (user.receiverId == userId) {
+                user.copy(lastChat = user.lastChat.copy(chat = newMessage, timestamp = timestamp))
+            } else {
+                user
+            }
+        }
+
+        // Update the state flow with the new list
+        _chatUsersFlow.value = ApiResponse.Success(updatedUsers)
+    }
+
     sealed class ApiResponse<out T> {
         data class Success<T>(val data: T?) : ApiResponse<T>()
         data class Failure(val error: String?): ApiResponse<Nothing>()
         data object Loading: ApiResponse<Nothing>()
         data object Idle: ApiResponse<Nothing>()
-    }
-
-    private val _previousChats = MutableStateFlow<ApiResponse<List<Chat>>>(ApiResponse.Idle)
-    val previousChats: StateFlow<ApiResponse<List<Chat>>> get() = _previousChats
-
-    fun fetchPreviousChats() {
-        viewModelScope.launch {
-            _previousChats.value = ApiResponse.Loading
-
-            val response = retrofitInterfaceMain.fetchPreviousChats()
-
-            if (response.isSuccessful && response.body() != null) {
-                _previousChats.value = ApiResponse.Success(response.body()!!)
-            } else {
-                _previousChats.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
-            }
-        }
     }
 }

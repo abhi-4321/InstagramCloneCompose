@@ -1,6 +1,5 @@
 package com.example.instagramclone.screen.chat
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -50,9 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
-import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.navigation.Screen
-import com.example.instagramclone.screen.main.RoundImage
 import com.example.instagramclone.ui.theme.WhiteVar
 import com.example.instagramclone.viewmodel.MainViewModel
 import java.time.Duration
@@ -230,6 +227,7 @@ fun Messages(
                 is MainViewModel.ApiResponse.Idle -> {}
                 is MainViewModel.ApiResponse.Success -> {
                     val list = (chatDisplayUsers as MainViewModel.ApiResponse.Success).data!!
+                    val senderId = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.id
                     items(list.size) {
                         Row(
                             modifier
@@ -237,7 +235,7 @@ fun Messages(
                                 .wrapContentHeight()
                                 .fillMaxWidth()
                                 .clickable {
-                                    navController.navigate(Screen.Chat(list[it].receiverId))
+                                    navController.navigate(Screen.Chat(list[it].receiverId,senderId))
                                 },
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically

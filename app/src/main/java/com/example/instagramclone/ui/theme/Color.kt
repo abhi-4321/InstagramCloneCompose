@@ -20,6 +20,7 @@ val Gray = Color(0xFF777777)
 val LightBlack = Color(0xFF575757)
 
 val WhiteVar = Color(0xFFF7F7F7)
+val WhiteVar2 = Color(0xFFECECEC)
 val Blue = Color(0xFF0C85D5)
 
 val Pink = Color(0xF5F55C5C)

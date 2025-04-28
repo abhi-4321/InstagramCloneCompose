@@ -26,6 +26,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.InstagramClone">
         </activity>
     </application>

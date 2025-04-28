@@ -1,6 +1,5 @@
 package com.example.instagramclone.network.main
 
-import com.example.instagramclone.model.AllChatUsers
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.model.ChatDisplayUser
 import com.example.instagramclone.model.PostDisplay
@@ -34,8 +33,8 @@ interface RetrofitInterfaceMain {
     suspend fun fetchChatUsers() : Response<List<ChatDisplayUser>>
 
     @GET("/chat/all")
-    suspend fun fetchAllChatUsers() : Response<List<AllChatUsers>>
+    suspend fun fetchAllChatUsers() : Response<List<ChatDisplayUser>>
 
     @GET("/chat/{receiverId}")
-    suspend fun fetchPreviousChats() : Response<List<Chat>>
+    suspend fun fetchPreviousChats(@Path("receiverId") receiverId: Int) : Response<List<Chat>>
 }
