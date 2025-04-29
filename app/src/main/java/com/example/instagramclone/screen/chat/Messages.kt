@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
+import com.example.instagramclone.model.ReceiverInfo
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.WhiteVar
 import com.example.instagramclone.viewmodel.MainViewModel
@@ -57,7 +58,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-//@Preview(showSystemUi = true)
 @Composable
 fun Messages(
     modifier: Modifier = Modifier,
@@ -178,8 +178,8 @@ fun Messages(
                 ) {
                     Box(modifier.wrapContentSize(), contentAlignment = Alignment.BottomEnd) {
                         Image(
-                            painter = painterResource(id = R.drawable.p),
-//                            painter = rememberImagePainter(data = ),
+//                            painter = painterResource(id = R.drawable.p) ,
+                            painter = rememberImagePainter(data = imageUrl) { R.drawable.user },
                             contentDescription = "menu",
                             contentScale = ContentScale.Crop,
                             modifier = modifier
@@ -235,7 +235,7 @@ fun Messages(
                                 .wrapContentHeight()
                                 .fillMaxWidth()
                                 .clickable {
-                                    navController.navigate(Screen.Chat(list[it].receiverId,senderId))
+                                    navController.navigate(Screen.Chat(list[it].receiverId,list[it].profileImageUrl,list[it].username,list[it].fullName,senderId))
                                 },
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
@@ -246,7 +246,7 @@ fun Messages(
                             ) {
                                 Image(
 //                                    painter = painterResource(id = R.drawable.p),
-                                    painter = rememberImagePainter(data = list[it].profileImageUrl),
+                                    painter = rememberImagePainter(data = list[it].profileImageUrl) { R.drawable.user },
                                     contentDescription = "menu",
                                     contentScale = ContentScale.Crop,
                                     modifier = modifier

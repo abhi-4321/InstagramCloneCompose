@@ -1,5 +1,6 @@
 package com.example.instagramclone.navigation
 
+import com.example.instagramclone.model.ReceiverInfo
 import kotlinx.serialization.Serializable
 
 sealed interface Screen {
@@ -61,5 +62,5 @@ sealed interface Screen {
     data object NewMessage : Screen
 
     @Serializable
-    data class Chat(val receiverId: Int, val senderId: Int) : Screen
+    data class Chat(val receiverId: Int, val profileImageUrl: String, val username: String, val fullName: String, val senderId: Int) : Screen
 }

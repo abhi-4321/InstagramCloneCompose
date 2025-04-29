@@ -94,6 +94,7 @@ fun Home(
             .fillMaxSize()
             .background(color = Color.White)
             .statusBarsPadding()
+            .padding(bottom = 60.dp),
     ) {
 
         item {

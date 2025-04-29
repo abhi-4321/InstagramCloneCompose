@@ -20,7 +20,7 @@ import okhttp3.WebSocketListener
 import okhttp3.internal.notify
 import okio.ByteString
 
-class ChatViewModel(userId: Int, private val retrofitInterfaceMain: RetrofitInterfaceMain) :
+class ChatViewModel(userId: Int, private val retrofitInterfaceMain: RetrofitInterfaceMain, mainViewModel: MainViewModel) :
     ViewModel() {
 
     val client = OkHttpClient()
@@ -48,6 +48,7 @@ class ChatViewModel(userId: Int, private val retrofitInterfaceMain: RetrofitInte
                 }
 
                 updateLastMessage(msg)
+                mainViewModel.fetchChatUsers()
             } catch (e: Exception) {
                 Log.e(TAG, "Error parsing message: ${e.message}", e)
                 e.printStackTrace()

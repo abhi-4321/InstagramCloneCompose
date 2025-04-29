@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
+import com.example.instagramclone.model.ReceiverInfo
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.viewmodel.MainViewModel
@@ -180,7 +181,7 @@ fun NewMessage(
                                 .clickable {
                                     navController.navigate(
                                         Screen.Chat(
-                                            list[it].receiverId,
+                                            list[it].receiverId,list[it].profileImageUrl,list[it].username,list[it].fullName,
                                             senderId
                                         )
                                     )
@@ -194,7 +195,7 @@ fun NewMessage(
                             ) {
                                 Image(
 //                                    painter = painterResource(id = R.drawable.p),
-                                    painter = rememberImagePainter(data = list[it].profileImageUrl),
+                                    painter = rememberImagePainter(data = list[it].profileImageUrl) { R.drawable.user },
                                     contentDescription = "menu",
                                     contentScale = ContentScale.Crop,
                                     modifier = modifier

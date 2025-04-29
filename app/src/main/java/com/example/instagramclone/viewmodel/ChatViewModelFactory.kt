@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
 
-class ChatViewModelFactory(private val userId: Int, private val retrofitInterfaceMain: RetrofitInterfaceMain) : ViewModelProvider.Factory {
+class ChatViewModelFactory(private val userId: Int, private val retrofitInterfaceMain: RetrofitInterfaceMain, private val mainViewModel: MainViewModel) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ChatViewModel(userId, retrofitInterfaceMain) as T
+        return ChatViewModel(userId, retrofitInterfaceMain, mainViewModel) as T
     }
 }

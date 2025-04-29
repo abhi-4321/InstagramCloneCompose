@@ -165,7 +165,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable<Screen.Chat> {
                     val args = it.toRoute<Screen.Chat>()
-                    Chat(receiverId = args.receiverId, senderId = args.senderId, retrofitInterfaceMain = retrofitInterfaceMain)
+                    Chat(receiverId = args.receiverId, profileImageUrl = args.profileImageUrl, fullName = args.fullName, username = args.username , senderId = args.senderId, retrofitInterfaceMain = retrofitInterfaceMain, mainViewModel = viewModel)
                 }
                 composable<Screen.NewMessage> {
                     NewMessage(viewModel = viewModel, navController = navController)
