@@ -69,6 +69,7 @@ import androidx.wear.compose.material.rememberSwipeableState
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.model.Chat
+import com.example.instagramclone.model.MessageGroup
 import com.example.instagramclone.model.ReceiverInfo
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
 import com.example.instagramclone.ui.theme.PinkDark
@@ -81,7 +82,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.Dispatcher
+import okhttp3.internal.format
+import java.time.Duration
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
+import java.util.Locale
+import kotlin.collections.forEachIndexed
+import kotlin.math.absoluteValue
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -122,7 +132,10 @@ fun Chat(
     }
 
     Column(
-        modifier = Modifier.statusBarsPadding().fillMaxSize().padding(top = 5.dp)
+        modifier = Modifier
+            .statusBarsPadding()
+            .fillMaxSize()
+            .padding(top = 5.dp)
     ) {
         // 1. Top Header - Always at top
         Row(
@@ -233,7 +246,12 @@ fun Chat(
                     is MainViewModel.ApiResponse.Success -> {
                         item {
                             Spacer(modifier.height(15.dp))
-                            Column(modifier.fillMaxWidth().wrapContentHeight(),horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Image(
                                     painter = rememberImagePainter(data = profileImageUrl) { R.drawable.user },
                                     contentDescription = "menu",
@@ -268,31 +286,65 @@ fun Chat(
                                         text = "View Profile",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        modifier = Modifier.wrapContentSize().padding(horizontal = 10.dp, vertical = 6.dp)
+                                        modifier = Modifier
+                                            .wrapContentSize()
+                                            .padding(horizontal = 10.dp, vertical = 6.dp)
                                     )
                                 }
                             }
-                            Spacer(modifier.height(40.dp))
+                            Spacer(modifier.height(30.dp))
                         }
 
                         val list = (previousChats as MainViewModel.ApiResponse.Success).data!!
-                        val groupedMessages = groupConsecutiveMessages(list)
+                        val groupedMessages = groupConsecutiveMessagesWithTimestamps(list)
 
                         Log.d("Chats", list.toString())
 
                         coroutineScope.launch {
-                            listState.animateScrollToItem(list.size-1)
+                            listState.animateScrollToItem(list.size - 1)
                         }
 
-                        groupedMessages.forEachIndexed { groupIndex, group ->
+                        groupedMessages.forEachIndexed { groupIndex: Int, messageGroup: MessageGroup ->
+                            val group = messageGroup.messages
                             val isFromCurrentUser = group.first().senderId == senderId
+
+                            // Only display time if this group should show it
+                            if (messageGroup.shouldDisplayTime) {
+                                item {
+                                    Spacer(modifier.height(15.dp))
+                                    val time = formatTimestamp(timestamp = group.first().timestamp)
+
+                                    Row(
+                                        modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight(),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Text(
+                                            time,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                    Spacer(modifier.height(35.dp))
+
+                                }
+                            }
 
                             items(group.size) { index ->
                                 val message = group[index]
                                 val isFirstInGroup = index == 0
                                 val isLastInGroup = index == group.size - 1
 
-                                ChatBubble(message,isFromCurrentUser,isFirstInGroup,isLastInGroup,isLastInGroup && !isFromCurrentUser, profileImageUrl)
+                                ChatBubble(
+                                    message,
+                                    isFromCurrentUser,
+                                    isFirstInGroup,
+                                    isLastInGroup,
+                                    isLastInGroup && !isFromCurrentUser,
+                                    profileImageUrl
+                                )
 
                                 if (!isLastInGroup) {
                                     Spacer(modifier = Modifier.height(2.dp))
@@ -301,89 +353,121 @@ fun Chat(
 
                             item { Spacer(modifier = Modifier.height(12.dp)) }
                         }
+
+                        /*                      groupedMessages.forEachIndexed { groupIndex, group ->
+                                                  val isFromCurrentUser = group.first().senderId == senderId
+
+                                                  val time = formatTimestamp(timestamp = group.first().timestamp)
+
+                                                  item {
+                                                      Spacer(modifier.height(15.dp))
+                                                      if (time.isNotEmpty()) {
+                                                          Row(modifier.fillMaxWidth().wrapContentHeight(), horizontalArrangement = Arrangement.Center) {
+                                                              Text(time, fontSize = 13.sp, fontWeight = FontWeight.Normal, color = Color.Gray)
+                                                          }
+
+                                                          Spacer(modifier.height(35.dp))
+                                                      }
+                                                  }
+
+                                                  items(group.size) { index ->
+                                                      val message = group[index]
+                                                      val isFirstInGroup = index == 0
+                                                      val isLastInGroup = index == group.size - 1
+
+                                                      ChatBubble(message,isFromCurrentUser,isFirstInGroup,isLastInGroup,isLastInGroup && !isFromCurrentUser, profileImageUrl)
+
+                                                      if (!isLastInGroup) {
+                                                          Spacer(modifier = Modifier.height(2.dp))
+                                                      }
+                                                  }
+
+                                                  item { Spacer(modifier = Modifier.height(12.dp)) }
+                                              }*/
                     }
                 }
-              /*  items(sampleChatMessages.size) { index ->
-                    if (sampleChatMessages[index].senderId == senderId) {
-                        Spacer(modifier.height(10.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 10.dp)
-                                    .background(
-                                        color = Purple,
-                                        shape = RoundedCornerShape(28.dp)
-                                    )
-                                    .padding(
-                                        horizontal = 15.dp,
-                                        vertical = 10.dp
-                                    ) // Inner padding
-                            ) {
-                                Text(
-                                    text = sampleChatMessages[index].chat,
-                                    fontSize = 14.sp,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Normal,
-                                    modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
-                                )
-                            }
-                        }
-                    } else {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.p),
-                                contentDescription = "menu",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .padding(top = 10.dp, start = 10.dp)
-                                    .size(35.dp)
-                                    .aspectRatio(1f, matchHeightConstraintsFirst = true)
-                                    .padding((1.5).dp)
-                                    .clip(CircleShape)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 10.dp)
-                                    .background(
-                                        color = WhiteVar2,
-                                        shape = RoundedCornerShape(28.dp)
-                                    )
-                                    .padding(
-                                        horizontal = 15.dp,
-                                        vertical = 10.dp
-                                    ) // Inner padding
-                            ) {
-                                Text(
-                                    text = sampleChatMessages[index].chat,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                }*/
+                /*  items(sampleChatMessages.size) { index ->
+                      if (sampleChatMessages[index].senderId == senderId) {
+                          Spacer(modifier.height(10.dp))
+                          Row(
+                              modifier = Modifier.fillMaxWidth(),
+                              horizontalArrangement = Arrangement.End
+                          ) {
+                              Box(
+                                  modifier = Modifier
+                                      .padding(horizontal = 10.dp)
+                                      .background(
+                                          color = Purple,
+                                          shape = RoundedCornerShape(28.dp)
+                                      )
+                                      .padding(
+                                          horizontal = 15.dp,
+                                          vertical = 10.dp
+                                      ) // Inner padding
+                              ) {
+                                  Text(
+                                      text = sampleChatMessages[index].chat,
+                                      fontSize = 14.sp,
+                                      color = Color.White,
+                                      fontWeight = FontWeight.Normal,
+                                      modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
+                                  )
+                              }
+                          }
+                      } else {
+                          Row(
+                              modifier = Modifier.fillMaxWidth(),
+                              horizontalArrangement = Arrangement.Start
+                          ) {
+                              Image(
+                                  painter = painterResource(id = R.drawable.p),
+                                  contentDescription = "menu",
+                                  contentScale = ContentScale.Crop,
+                                  modifier = Modifier
+                                      .padding(top = 10.dp, start = 10.dp)
+                                      .size(35.dp)
+                                      .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                                      .padding((1.5).dp)
+                                      .clip(CircleShape)
+                              )
+                              Box(
+                                  modifier = Modifier
+                                      .padding(horizontal = 10.dp)
+                                      .background(
+                                          color = WhiteVar2,
+                                          shape = RoundedCornerShape(28.dp)
+                                      )
+                                      .padding(
+                                          horizontal = 15.dp,
+                                          vertical = 10.dp
+                                      ) // Inner padding
+                              ) {
+                                  Text(
+                                      text = sampleChatMessages[index].chat,
+                                      fontSize = 14.sp,
+                                      fontWeight = FontWeight.Normal,
+                                      modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
+                                  )
+                              }
+                          }
+                      }
+                      Spacer(modifier = Modifier.height(6.dp))
+                  }*/
             }
         }
 
         // 3. Input area - Always at bottom
 
-        Column(modifier.fillMaxWidth().imePadding()) {
+        Column(modifier
+            .fillMaxWidth()
+            .imePadding()) {
             Box(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .background(color = WhiteVar2, shape = RoundedCornerShape(28.dp))
-                    .padding(horizontal = 5.dp, vertical = 5.dp)
-                , // Inner padding
+                    .padding(horizontal = 5.dp, vertical = 5.dp), // Inner padding
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -471,7 +555,7 @@ fun Chat(
                             .background(color = Purple, shape = RoundedCornerShape(14.dp))
                             .clickable {
                                 val list = listOf(senderId, receiverId).sorted()
-                                val id = list.joinToString( "_" )
+                                val id = list.joinToString("_")
                                 chatViewModel.sendMessage(
                                     Chat(
                                         id = id,
@@ -487,9 +571,10 @@ fun Chat(
                                 focusManager.clearFocus()
 
                                 if (previousChats is MainViewModel.ApiResponse.Success) {
-                                    val list = (previousChats as MainViewModel.ApiResponse.Success).data!!
+                                    val list =
+                                        (previousChats as MainViewModel.ApiResponse.Success).data!!
                                     coroutineScope.launch {
-                                        listState.animateScrollToItem(list.size-1)
+                                        listState.animateScrollToItem(list.size - 1)
                                     }
                                 }
                             },
@@ -510,35 +595,111 @@ fun Chat(
     }
 }
 
-private fun groupConsecutiveMessages(
-    messages: List<Chat>,
-): List<List<Chat>> {
-    val groupedMessages = mutableListOf<List<Chat>>()
-    var currentGroup = mutableListOf<Chat>()
-    var currentSenderId = 0
+private fun groupConsecutiveMessagesWithTimestamps(
+    messages: List<Chat>
+): List<MessageGroup> {
+    val groupedMessages = mutableListOf<MessageGroup>()
 
-    messages.forEach { message ->
-        if (currentSenderId == 0 || currentSenderId == message.senderId) {
+    if (messages.isEmpty()) return groupedMessages
+
+    // Force timestamp on the very first message
+    var forceFirstMessageTimestamp = true
+
+    var currentGroup = mutableListOf<Chat>()
+    var currentSenderId = messages.firstOrNull()?.senderId ?: 0
+    var lastMessageTime: ZonedDateTime? = null
+
+    messages.forEachIndexed { index, message ->
+        val messageTime = if (!message.timestamp.isNullOrEmpty()) {
+            ZonedDateTime.parse(message.timestamp).withZoneSameInstant(ZoneId.systemDefault())
+        } else null
+
+        // For the first message, initialize the group
+        if (index == 0) {
+            currentGroup.add(message)
+            lastMessageTime = messageTime
+            return@forEachIndexed
+        }
+
+        val timeDifference = if (lastMessageTime != null && messageTime != null) {
+            Duration.between(lastMessageTime, messageTime).toMinutes().absoluteValue
+        } else 0
+
+        // Start a new group if:
+        // 1. Sender ID changes OR
+        // 2. Time difference is more than 30 minutes (1/2 hour)
+        if (currentSenderId != message.senderId || timeDifference >= 30) {
+            // Add current group to the grouped messages list
+            if (currentGroup.isNotEmpty()) {
+                // Always show timestamp for first group
+                val shouldDisplayTime = forceFirstMessageTimestamp || (timeDifference >= 30)
+                groupedMessages.add(MessageGroup(currentGroup.toList(), shouldDisplayTime))
+                forceFirstMessageTimestamp = false
+            }
+
+            // Start a new group
+            currentGroup = mutableListOf(message)
+            currentSenderId = message.senderId
+        } else {
             // Continue the current group
             currentGroup.add(message)
-        } else {
-            // Start a new group
-            if (currentGroup.isNotEmpty()) {
-                groupedMessages.add(currentGroup.toList())
-            }
-            currentGroup = mutableListOf(message)
         }
-        currentSenderId = message.senderId
+
+        // Update last message time
+        lastMessageTime = messageTime
     }
 
     // Add the last group if not empty
     if (currentGroup.isNotEmpty()) {
-        groupedMessages.add(currentGroup.toList())
+        // If this is the only group (i.e., first messages), force timestamp
+        val shouldDisplayTime = forceFirstMessageTimestamp || groupedMessages.isEmpty()
+        groupedMessages.add(MessageGroup(currentGroup.toList(), shouldDisplayTime))
+    }
+
+    // Final safety check: force the very first group to show timestamp
+    if (groupedMessages.isNotEmpty()) {
+        val firstGroup = groupedMessages.first()
+        if (!firstGroup.shouldDisplayTime) {
+            groupedMessages[0] = MessageGroup(firstGroup.messages, true)
+        }
     }
 
     return groupedMessages
 }
 
+fun formatTimestamp(timestamp: String?): String {
+    if (timestamp.isNullOrEmpty()) return ""
+
+    val inputTime = ZonedDateTime.parse(timestamp).withZoneSameInstant(ZoneId.systemDefault())
+    val now = ZonedDateTime.now(ZoneId.systemDefault())
+
+    val duration = Duration.between(inputTime, now)
+    val daysBetween = ChronoUnit.DAYS.between(inputTime.toLocalDate(), now.toLocalDate())
+    val yearsBetween = ChronoUnit.YEARS.between(inputTime.toLocalDate(), now.toLocalDate())
+
+    return when {
+        duration.toHours() < 24 -> {
+            "Today" + inputTime.format(DateTimeFormatter.ofPattern(" h:mm a", Locale.getDefault()))
+        }
+
+        daysBetween < 7 -> inputTime.dayOfWeek.getDisplayName(
+            TextStyle.SHORT,
+            Locale.getDefault()
+        ) + inputTime.format(DateTimeFormatter.ofPattern(" h:mm a", Locale.getDefault())) // "Mon"
+        yearsBetween < 1 -> inputTime.format(
+            DateTimeFormatter.ofPattern(
+                "MMM d, h:mm a",
+                Locale.getDefault()
+            )
+        ) // "Apr 2, 10:50 AM"
+        else -> inputTime.format(
+            DateTimeFormatter.ofPattern(
+                "MMM d, yyyy",
+                Locale.getDefault()
+            )
+        ) // "Apr 12, 2021"
+    }
+}
 
 @OptIn(ExperimentalWearMaterialApi::class)
 @Composable
@@ -577,11 +738,13 @@ fun SwipeableMessageItem(
                                     // Animate back
                                     offsetX.animateTo(0f)
                                 }
+
                                 offsetX.value <= timeThreshold -> {
                                     onTimeSwipe()
                                     // Animate back
                                     offsetX.animateTo(0f)
                                 }
+
                                 else -> {
                                     // Not enough, animate back to original position
                                     offsetX.animateTo(0f)
@@ -598,7 +761,8 @@ fun SwipeableMessageItem(
                         change.consume()
                         coroutineScope.launch {
                             // Limit dragging direction based on sender
-                            val canDragRight = !isFromCurrentUser // Only other user's messages can be replied to
+                            val canDragRight =
+                                !isFromCurrentUser // Only other user's messages can be replied to
                             val canDragLeft = true // All messages can show time
 
                             val newValue = offsetX.value + dragAmount
