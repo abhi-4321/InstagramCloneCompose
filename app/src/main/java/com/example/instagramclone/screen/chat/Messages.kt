@@ -71,10 +71,12 @@ fun Messages(
 
     val userDetailsState by viewModel.liveData.collectAsState()
 
+    var username by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
     LaunchedEffect(userDetailsState) {
         if (userDetailsState is MainViewModel.ApiResponse.Success) {
             imageUrl = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.profileImageUrl
+            username = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.username
         }
     }
 
@@ -109,7 +111,7 @@ fun Messages(
                 )
                 Spacer(modifier.width(10.dp))
                 Text(
-                    text = "_d_evil_02",
+                    text = username,
                     fontSize = 21.sp,
                     fontWeight = FontWeight.Bold
                 )

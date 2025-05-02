@@ -1,16 +1,24 @@
 package com.example.instagramclone
 
+import android.content.ContentUris
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,6 +55,8 @@ class LoginActivity : ComponentActivity() {
                 getColor(R.color.black)
             )
         )
+
+        checkAndRequestPermission()
 
         val retrofitInterfaceLogin = RetrofitInstanceLogin.instance
         val loginViewModel: LoginViewModel by viewModels {
@@ -155,6 +165,21 @@ class LoginActivity : ComponentActivity() {
             }
             composable<Screen.ForgotPassword> {
                 ForgotPassword(navController = navController)
+            }
+        }
+    }
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (!isGranted) {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    fun checkAndRequestPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
             }
         }
     }

@@ -1,18 +1,26 @@
 package com.example.instagramclone
 
 import android.annotation.SuppressLint
+import android.content.ContentUris
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +36,7 @@ import com.example.instagramclone.screen.chat.Chat
 import com.example.instagramclone.screen.chat.Messages
 import com.example.instagramclone.screen.chat.NewMessage
 import com.example.instagramclone.screen.main.Create
+import com.example.instagramclone.screen.main.EditPost
 import com.example.instagramclone.screen.main.Home
 import com.example.instagramclone.screen.main.Profile
 import com.example.instagramclone.screen.main.Reels
@@ -38,6 +47,8 @@ import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.MainViewModelFactory
 
 class MainActivity : ComponentActivity() {
+
+    var isPermitted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +61,8 @@ class MainActivity : ComponentActivity() {
         )
 
         val token = intent.getStringExtra("token") ?: ""
+
+        checkAndRequestPermission()
 
         val retrofitInterfaceMain = RetrofitInstanceMain.getApiService(token)
         val mainViewModelFactory = MainViewModelFactory(retrofitInterfaceMain)
@@ -152,7 +165,9 @@ class MainActivity : ComponentActivity() {
                     exitTransition = { null },
                     popEnterTransition = { null }
                 ) {
-                    Create(navController = navController)
+                    Create(navController = navController) {
+                        return@Create loadImages()
+                    }
                 }
                 composable<Screen.Settings> {
                     Settings(navController = navController, viewModel = viewModel) {
@@ -170,7 +185,64 @@ class MainActivity : ComponentActivity() {
                 composable<Screen.NewMessage> {
                     NewMessage(viewModel = viewModel, navController = navController)
                 }
+
+                composable<Screen.EditPost> {
+                    val args = it.toRoute<Screen.EditPost>()
+                    EditPost(navController = navController, uri = args.uri)
+                }
             }
         }
+    }
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                isPermitted = true
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                isPermitted = false
+            }
+        }
+
+    fun checkAndRequestPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
+            }
+        } else {
+            isPermitted = true
+        }
+    }
+
+    fun loadImages() : List<Uri> {
+        if (!isPermitted)
+            return emptyList()
+
+        val imageList = mutableListOf<Uri>()
+
+        val projection = arrayOf(MediaStore.Images.Media._ID)
+        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
+
+        val query = contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            null,
+            null,
+            sortOrder
+        )
+
+        query?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                val contentUri = ContentUris.withAppendedId(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+                )
+                imageList.add(contentUri)
+            }
+        }
+
+        return imageList
     }
 }

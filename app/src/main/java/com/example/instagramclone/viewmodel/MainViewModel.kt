@@ -121,6 +121,12 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
         _chatUsersFlow.value = ApiResponse.Success(updatedUsers)
     }
 
+    fun createPost(uri: String) {
+        viewModelScope.launch {
+
+        }
+    }
+
     sealed class ApiResponse<out T> {
         data class Success<T>(val data: T?) : ApiResponse<T>()
         data class Failure(val error: String?): ApiResponse<Nothing>()
