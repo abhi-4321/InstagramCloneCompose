@@ -2,6 +2,7 @@ package com.example.instagramclone.screen.main
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,14 +47,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.WhiteVar2
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -76,13 +76,14 @@ fun Create(
 
     // First load - get the first batch of images and the first image
     LaunchedEffect(Unit) {
-        val initialImages = withContext(Dispatchers.IO) {
-            onCreate(0)
-        }
+        val initialImages = onCreate(0)
+
         loadedImages.addAll(initialImages)
 
+        Log.d("CreateCompose", "Initial Images : ${initialImages.size}")
+
         if (initialImages.isNotEmpty()) {
-            selectedUri = initialImages[0].toString()
+            selectedUri = initialImages[0].first.toString()
             firstImageLoaded = true
         }
 
@@ -115,9 +116,8 @@ fun Create(
             currentPage++
 
             val nextOffset = currentPage * imagesPerPage
-            val nextImages = withContext(Dispatchers.IO) {
-                onCreate(nextOffset)
-            }
+            val nextImages = onCreate(nextOffset)
+
 
             loadedImages.addAll(nextImages)
 
@@ -191,7 +191,7 @@ fun Create(
                     ) {
                         Image(
                             modifier = Modifier.fillMaxSize(),
-                            painter = rememberImagePainter(data = loadedImages[0].first),
+                            painter = rememberImagePainter(data = selectedUri.toUri()),
                             contentDescription = null,
                             contentScale = ContentScale.Crop
                         )
@@ -298,7 +298,7 @@ fun Create(
                         .fillMaxWidth()
                         .padding(horizontal = 0.75.dp)
                 ) {
-                    chunkedImages[rowIndex].forEach { uri ->
+                    chunkedImages[rowIndex].forEach { pair ->
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -307,13 +307,13 @@ fun Create(
                         ) {
                             Image(
                                 modifier = Modifier.fillMaxSize(),
-                                painter = rememberImagePainter(data = uri.second),
+                                painter = rememberImagePainter(data = pair.second),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop
                             )
 
                             // Highlight selected image
-                            if (uri.toString() == selectedUri) {
+                            if (pair.first.toString() == selectedUri) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -325,7 +325,9 @@ fun Create(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .clickable { selectedUri = uri.toString() }
+                                    .clickable {
+                                        selectedUri = pair.first.toString()
+                                    }
                             )
                         }
                     }
