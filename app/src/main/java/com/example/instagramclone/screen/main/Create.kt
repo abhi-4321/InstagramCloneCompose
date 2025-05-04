@@ -1,5 +1,6 @@
 package com.example.instagramclone.screen.main
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,15 +21,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,26 +52,98 @@ import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.WhiteVar2
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Create(modifier: Modifier = Modifier, navController: NavController = rememberNavController(), onCreate: () -> List<Uri>) {
-
-    val list = onCreate()
-
+fun Create(
+    modifier: Modifier = Modifier,
+    navController: NavController = rememberNavController(),
+    onCreate: suspend (offset: Int) -> List<Pair<Uri,Bitmap?>>
+) {
+    // State for pagination
+    val loadedImages = remember { mutableStateListOf<Pair<Uri,Bitmap?>>() }
+    var firstImageLoaded by remember { mutableStateOf(false) }
+    var currentPage by remember { mutableIntStateOf(0) }
+    val imagesPerPage = 12
+    var isLoading by remember { mutableStateOf(false) }
+    var hasMoreImages by remember { mutableStateOf(true) }
     var selectedUri by remember { mutableStateOf("") }
+
+    // Scroll state for infinite scrolling detection
+    val listState = rememberLazyListState()
+
+    // First load - get the first batch of images and the first image
+    LaunchedEffect(Unit) {
+        val initialImages = withContext(Dispatchers.IO) {
+            onCreate(0)
+        }
+        loadedImages.addAll(initialImages)
+
+        if (initialImages.isNotEmpty()) {
+            selectedUri = initialImages[0].toString()
+            firstImageLoaded = true
+        }
+
+        // If we got fewer images than requested, we've loaded all images
+        if (initialImages.size < imagesPerPage) {
+            hasMoreImages = false
+        }
+    }
+
+    // Detect when we need to load more images
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            if (!isLoading && hasMoreImages) {
+                val layoutInfo = listState.layoutInfo
+                val totalItemsNumber = layoutInfo.totalItemsCount
+                val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1
+
+                // Load more when we're 3 items from the end
+                lastVisibleItemIndex > totalItemsNumber - 2
+            } else {
+                false
+            }
+        }
+    }
+
+    // Load more images when needed
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore && !isLoading) {
+            isLoading = true
+            currentPage++
+
+            val nextOffset = currentPage * imagesPerPage
+            val nextImages = withContext(Dispatchers.IO) {
+                onCreate(nextOffset)
+            }
+
+            loadedImages.addAll(nextImages)
+
+            // If we got fewer images than requested, we've loaded all images
+            if (nextImages.size < imagesPerPage) {
+                hasMoreImages = false
+            }
+
+            isLoading = false
+        }
+    }
 
     Column(
         modifier
             .statusBarsPadding()
             .fillMaxHeight()
     ) {
+        // Top bar
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = modifier
+                .padding(top = 10.dp)
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp)
+                .background(color = Color.White)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -84,120 +161,196 @@ fun Create(modifier: Modifier = Modifier, navController: NavController = remembe
 
                 Text("New post", fontWeight = FontWeight.Bold, fontSize = 21.sp)
             }
-            Text("Next", color = Color.Blue, fontSize = 16.sp, fontWeight = FontWeight.Medium, modifier = modifier.clickable {
-                navController.navigate(Screen.EditPost(selectedUri))
-            })
+            Text(
+                text = "Next",
+                color = Color.Blue,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = modifier
+                    .clickable {
+                        if (selectedUri.isNotEmpty()) {
+                            navController.navigate(Screen.EditPost(selectedUri))
+                        }
+                    }
+            )
         }
 
-        LazyColumn {
+        // Content area with LazyColumn
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState
+        ) {
             // Full-width image
             item {
-                Spacer(modifier.height(10.dp))
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f),
-                    painter = rememberImagePainter(data = if (list.isNotEmpty()) list[0] else ""),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-                selectedUri = if (list.isNotEmpty()) list[0].toString() else ""
+                Spacer(modifier = Modifier.height(10.dp))
+                if (firstImageLoaded && loadedImages.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                    ) {
+                        Image(
+                            modifier = Modifier.fillMaxSize(),
+                            painter = rememberImagePainter(data = loadedImages[0].first),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .background(Color.LightGray),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(color = Color.White)
+                        } else {
+                            Text("No images found", color = Color.White)
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(2.dp))
             }
 
             // Sticky header
             stickyHeader {
-                Row(
-                    modifier
+                Box(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(horizontal = 10.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .background(Color.White)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Recents",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Icon(
-                            painter = painterResource(id = R.drawable.baseline_keyboard_arrow_down_24),
-                            contentDescription = null,
-                            modifier = modifier
-                                .scale(0.8f),
-                            tint = Color.Black
-                        )
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Row(
-                            modifier = Modifier
-                                .padding(horizontal = 5.dp)
-                                .background(
-                                    color = WhiteVar2,
-                                    shape = RoundedCornerShape(24.dp)
-                                ).padding(horizontal = 10.dp, vertical = 5.dp)
-                        // Inner padding
-                        ) {
-                            Spacer(modifier.width(3.dp))
-                            Icon(
-                                painter = painterResource(R.drawable.baseline_filter_none_24),
-                                contentDescription = null,
-                                modifier = modifier.size(16.dp)
-                            )
-
-                            Spacer(modifier.width(5.dp))
-
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Select multiple",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal,
-                                modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
+                                text = "Recents",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_keyboard_arrow_down_24),
+                                contentDescription = null,
+                                modifier = Modifier.scale(0.8f),
+                                tint = Color.Black
                             )
                         }
 
-                        Spacer(modifier.width(5.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(horizontal = 5.dp)
+                                    .background(
+                                        color = WhiteVar2,
+                                        shape = RoundedCornerShape(24.dp)
+                                    )
+                                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                            ) {
+                                Spacer(modifier = Modifier.width(3.dp))
+                                Icon(
+                                    painter = painterResource(R.drawable.baseline_filter_none_24),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
 
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    color = WhiteVar2,
-                                    shape = RoundedCornerShape(24.dp)
-                                ).padding(5.dp)
-                        // Inner padding
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.outline_camera_alt_24),
-                                contentDescription = null,
-                                modifier = modifier.size(22.dp)
-                            )
+                                Spacer(modifier = Modifier.width(5.dp))
+
+                                Text(
+                                    text = "Select multiple",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(5.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = WhiteVar2,
+                                        shape = RoundedCornerShape(24.dp)
+                                    )
+                                    .padding(5.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.outline_camera_alt_24),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
                         }
                     }
                 }
-
-                Spacer(modifier.height(2.dp))
-
             }
 
-            // Grid items inside a LazyVerticalGrid
-            item {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(4),
+            // Grid items with pagination
+            val chunkedImages = loadedImages.chunked(4)
+            items(chunkedImages.size) { rowIndex ->
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(600.dp)
-                        .scale(1.01f), // Set height to make it scrollable
-                    userScrollEnabled = false // Prevent nested scroll conflict
+                        .padding(horizontal = 0.75.dp)
                 ) {
-                    items(list.size) {
-                        Image(
+                    chunkedImages[rowIndex].forEach { uri ->
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding((0.75).dp)
-                                .aspectRatio(1f),
-                            painter = rememberImagePainter(data = list[it]),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
+                                .weight(1f)
+                                .padding(0.75.dp)
+                                .aspectRatio(1f)
+                        ) {
+                            Image(
+                                modifier = Modifier.fillMaxSize(),
+                                painter = rememberImagePainter(data = uri.second),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop
+                            )
+
+                            // Highlight selected image
+                            if (uri.toString() == selectedUri) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color(0x33FFFFFF))
+                                )
+                            }
+
+                            // Make each grid image clickable
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clickable { selectedUri = uri.toString() }
+                            )
+                        }
+                    }
+
+                    // Fill empty spaces in the last row if needed
+                    val emptySpaces = 4 - chunkedImages[rowIndex].size
+                    repeat(emptySpaces) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+
+            // Loading indicator at the bottom
+            if (isLoading || hasMoreImages) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(30.dp),
+                            color = Color.Gray,
+                            strokeWidth = 2.dp
                         )
                     }
                 }

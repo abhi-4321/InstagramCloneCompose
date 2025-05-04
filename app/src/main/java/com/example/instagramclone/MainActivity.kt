@@ -1,13 +1,18 @@
 package com.example.instagramclone
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
+import android.util.Size
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -165,8 +170,8 @@ class MainActivity : ComponentActivity() {
                     exitTransition = { null },
                     popEnterTransition = { null }
                 ) {
-                    Create(navController = navController) {
-                        return@Create loadImages()
+                    Create(navController = navController) { offset ->
+                        return@Create loadImageThumbnails(offset)
                     }
                 }
                 composable<Screen.Settings> {
@@ -188,7 +193,7 @@ class MainActivity : ComponentActivity() {
 
                 composable<Screen.EditPost> {
                     val args = it.toRoute<Screen.EditPost>()
-                    EditPost(navController = navController, uri = args.uri)
+                    EditPost(navController = navController, uri = args.uri, viewModel = viewModel)
                 }
             }
         }
@@ -214,35 +219,168 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun loadImages() : List<Uri> {
-        if (!isPermitted)
-            return emptyList()
+    suspend fun loadImageThumbnails(offset: Int = 0, limit: Int = 12): List<Pair<Uri, Bitmap?>> {
+        val thumbnailList = mutableListOf<Pair<Uri, Bitmap?>>()
 
-        val imageList = mutableListOf<Uri>()
-
-        val projection = arrayOf(MediaStore.Images.Media._ID)
-        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
-
-        val query = contentResolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            null,
-            null,
-            sortOrder
+        // Define the projection
+        val projection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME
         )
 
-        query?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
 
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val contentUri = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+        // For Android 10 (API 29) and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val queryArgs = Bundle().apply {
+                putInt(ContentResolver.QUERY_ARG_LIMIT, limit)
+                putInt(ContentResolver.QUERY_ARG_OFFSET, offset)
+                putStringArray(
+                    ContentResolver.QUERY_ARG_SORT_COLUMNS,
+                    arrayOf(MediaStore.Images.Media.DATE_ADDED)
                 )
-                imageList.add(contentUri)
+                putInt(
+                    ContentResolver.QUERY_ARG_SORT_DIRECTION,
+                    ContentResolver.QUERY_SORT_DIRECTION_DESCENDING
+                )
+            }
+
+            val query = contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                queryArgs,
+                null
+            )
+
+            query?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(idColumn)
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        id
+                    )
+
+                    // Load a thumbnail instead of the full image
+                    val thumbnail = getThumbnail(contentUri, 150)
+                    thumbnailList.add(Pair(contentUri, thumbnail))
+                }
+            }
+        } else {
+            // For older Android versions
+            val query = contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                sortOrder
+            )
+
+            query?.use { cursor ->
+                if (offset > 0 && cursor.count >= offset) {
+                    cursor.moveToPosition(offset - 1)
+                }
+
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                var count = 0
+
+                while (cursor.moveToNext() && count < limit) {
+                    val id = cursor.getLong(idColumn)
+                    val contentUri = ContentUris.withAppendedId(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        id
+                    )
+
+                    // Load a thumbnail instead of the full image
+                    val thumbnail = getThumbnail(contentUri, 150)
+                    thumbnailList.add(Pair(contentUri, thumbnail))
+                    count++
+                }
             }
         }
 
-        return imageList
+        return thumbnailList
+    }
+
+    // Helper function to get thumbnails efficiently
+    private fun getThumbnail(uri: Uri, size: Int): Bitmap? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Use the built-in thumbnail API for Android 10+
+                contentResolver.loadThumbnail(uri, Size(size, size), null)
+            } else {
+                // For older versions, use the MediaStore thumbnail API or create your own
+                val thumbnailId = getImageThumbnailId(uri)
+                if (thumbnailId != null) {
+                    MediaStore.Images.Thumbnails.getThumbnail(
+                        contentResolver,
+                        thumbnailId,
+                        MediaStore.Images.Thumbnails.MINI_KIND,
+                        null
+                    )
+                } else {
+                    // Fallback - load and resize the image
+                    createThumbnailFromUri(uri, size)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("ImageLoader", "Error loading thumbnail: ${e.message}")
+            null
+        }
+    }
+
+    // Helper for older Android versions
+    private fun getImageThumbnailId(imageUri: Uri): Long? {
+        val id = imageUri.lastPathSegment?.toLongOrNull()
+        return id
+    }
+
+    // Create a thumbnail by loading and resizing the full image (as fallback)
+    // Use this only if necessary as it's resource-intensive
+    private fun createThumbnailFromUri(uri: Uri, size: Int): Bitmap? {
+        return try {
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                // First decode with inJustDecodeBounds=true to check dimensions
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                BitmapFactory.decodeStream(inputStream, null, options)
+
+                // Calculate inSampleSize
+                options.inSampleSize = calculateInSampleSize(options, size, size)
+
+                // Decode bitmap with inSampleSize set
+                options.inJustDecodeBounds = false
+
+                // Reopen the stream since we've consumed it
+                contentResolver.openInputStream(uri)?.use { newInputStream ->
+                    BitmapFactory.decodeStream(newInputStream, null, options)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("ImageLoader", "Error creating thumbnail: ${e.message}")
+            null
+        }
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        // Raw height and width of image
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width
+            while ((halfHeight / inSampleSize) >= reqHeight && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
     }
 }
