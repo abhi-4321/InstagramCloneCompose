@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -53,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.StoryDisplayUser
@@ -93,8 +97,7 @@ fun Home(
         modifier = modifier
             .fillMaxSize()
             .background(color = Color.White)
-            .statusBarsPadding()
-            .padding(bottom = 60.dp),
+            .padding(top = 35.dp, bottom = 60.dp),
     ) {
 
         item {
@@ -145,9 +148,15 @@ fun Home(
                                 modifier.wrapContentSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                RoundImage(
-                                    image = "",
-                                    modifier = modifier.size(70.dp)
+                                AsyncImage(
+                                    model = if (imageUrl.isEmpty()) R.drawable.user else imageUrl,
+                                    contentDescription = "menu",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = modifier
+                                        .size(70.dp)
+                                        .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                                        .padding(3.dp)
+                                        .clip(CircleShape)
                                 )
                                 Spacer(modifier = modifier.height(5.dp))
                                 Text(
@@ -168,8 +177,8 @@ fun Home(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(modifier.wrapContentSize(), contentAlignment = Alignment.BottomEnd) {
-                                    Image(
-                                        painter = rememberImagePainter(data = imageUrl),
+                                    AsyncImage(
+                                        model = if (imageUrl.isEmpty()) R.drawable.user else imageUrl,
                                         contentDescription = "menu",
                                         contentScale = ContentScale.Crop,
                                         modifier = modifier
@@ -202,8 +211,8 @@ fun Home(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(modifier.wrapContentSize(), contentAlignment = Alignment.BottomEnd) {
-                                    Image(
-                                        painter = rememberImagePainter(data = imageUrl),
+                                    AsyncImage(
+                                        model = if (imageUrl.isEmpty()) R.drawable.user else imageUrl,
                                         contentDescription = "menu",
                                         contentScale = ContentScale.Crop,
                                         modifier = modifier

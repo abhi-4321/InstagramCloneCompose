@@ -47,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -61,6 +62,8 @@ import com.example.instagramclone.ui.theme.Green
 import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.viewmodel.LoginViewModel
 import kotlinx.coroutines.delay
+import java.util.Locale
+import kotlin.random.Random
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
@@ -70,14 +73,15 @@ fun Username(
     viewModel: LoginViewModel
 ) {
     var textName by remember {
-        mutableStateOf("abbi")
+        mutableStateOf("")
     }
 
-    var isValidUsername by remember {
-        mutableStateOf(false)
+    LaunchedEffect(Unit) {
+        textName = (viewModel.registrationDetails.fullName!!.replace(" ", "").lowercase()) + Random.nextInt(10000).toString()
     }
 
     val context = LocalContext.current
+    val usernameState by viewModel.usernameState.collectAsState()
 
     // Create an interaction source to track focus state
     val interactionSourceUsername = remember { MutableInteractionSource() }
@@ -159,17 +163,8 @@ fun Username(
             ),
             trailingIcon = {
                 if (textName.isNotEmpty()) {
-                    LaunchedEffect(true) {
-                        delay(1000)
-                        viewModel.validateUsername(textName)
-                    }
-
-                    val usernameState by viewModel.usernameState.collectAsState()
-
                     when(usernameState) {
-                        LoginViewModel.UsernameState.Empty -> {
-                            isValidUsername = false
-                        }
+                        LoginViewModel.UsernameState.Empty -> {}
                         LoginViewModel.UsernameState.Error -> {
                             Icon(
                                 painter = painterResource(id = R.drawable.round_error_outline_24),
@@ -177,9 +172,8 @@ fun Username(
                                 modifier
                                     .size(20.dp)
                                     .scale(1.2f),
-                                tint = Green
+                                tint = Color.Red
                             )
-                            isValidUsername = false
                             Toast.makeText(context, "Unknown error occurred", Toast.LENGTH_SHORT).show()
                         }
                         LoginViewModel.UsernameState.Invalid -> {
@@ -189,9 +183,9 @@ fun Username(
                                 modifier
                                     .size(20.dp)
                                     .scale(1.2f),
-                                tint = Green
+                                tint = Color.Red
                             )
-                            isValidUsername = false
+                            Toast.makeText(context, "Username is taken", Toast.LENGTH_SHORT).show()
                         }
                         LoginViewModel.UsernameState.Valid -> {
                             Icon(
@@ -202,7 +196,9 @@ fun Username(
                                     .scale(1.2f),
                                 tint = Green
                             )
-                            isValidUsername = true
+
+                            viewModel.registrationDetails.username = textName
+                            navController.navigate(Screen.TermsAndPolicies)
                         }
                         LoginViewModel.UsernameState.Validating -> {
                             Icon(
@@ -213,12 +209,8 @@ fun Username(
                                     .scale(1.2f),
                                 tint = Green
                             )
-                            isValidUsername = false
                         }
                     }
-                } else {
-                    isValidUsername = false
-                    Icon(painter = painterResource(0), contentDescription = null)
                 }
             },
             interactionSource = interactionSourceUsername
@@ -230,14 +222,7 @@ fun Username(
                     Toast.makeText(context, "Username can not be empty", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
-
-                if (isValidUsername.not()) {
-                    Toast.makeText(context, "Username already exists", Toast.LENGTH_SHORT).show()
-                    return@Button
-                }
-
-                viewModel.registrationDetails.username = textName
-                navController.navigate(Screen.TermsAndPolicies)
+                viewModel.validateUsername(textName)
             },
             modifier = modifier
                 .fillMaxWidth()

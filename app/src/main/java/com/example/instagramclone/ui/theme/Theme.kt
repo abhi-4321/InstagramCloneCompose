@@ -22,6 +22,8 @@ private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
     tertiary = Pink40,
+    background = Color.White,
+    surface = Color.White,
 
 //     Other default colors to override
 /*    background = Color(0xFFFFFBFE),
@@ -42,7 +44,7 @@ fun InstagramCloneTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            dynamicLightColorScheme(context)
+            LightColorScheme
         }
         else -> LightColorScheme
     }

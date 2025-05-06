@@ -57,6 +57,7 @@ fun EditPost(
     Column(
         modifier
             .statusBarsPadding()
+            .padding(top = 10.dp)
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

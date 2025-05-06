@@ -23,9 +23,16 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -58,12 +65,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(
-                getColor(R.color.white),
-                getColor(R.color.black)
-            )
-        )
+        window.statusBarColor = Color.Transparent.toArgb()
+        window.navigationBarColor = Color.Transparent.toArgb()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
 
         val token = intent.getStringExtra("token") ?: ""
 
@@ -109,8 +117,10 @@ class MainActivity : ComponentActivity() {
         val showBottomBar = items.any { currentDestination?.hasRoute(it.screen::class) == true }
 
         Scaffold(
+            containerColor = Color.White, // Important: Set background color explicitly
+            contentColor = Color.Black,
             bottomBar = {
-                if (showBottomBar) {
+                if (showBottomBar && currentDestination?.hasRoute(Screen.Create::class) == false) {
                     BottomNavigationBar(
                         navController = navController,
                         currentDestination = currentDestination
@@ -124,7 +134,7 @@ class MainActivity : ComponentActivity() {
                 enterTransition = { slideLeftHorizontallyEnter },
                 exitTransition = { slideLeftHorizontallyExit },
                 popExitTransition = { slideRightHorizontallyPopEnter },
-                popEnterTransition = { slideRightHorizontallyPopExit }
+                popEnterTransition = { slideRightHorizontallyPopExit },
             ) {
                 composable<Screen.Profile>(
                     enterTransition = { null },

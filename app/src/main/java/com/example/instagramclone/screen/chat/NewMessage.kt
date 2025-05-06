@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.ReceiverInfo
 import com.example.instagramclone.navigation.Screen
@@ -193,9 +194,8 @@ fun NewMessage(
                                 modifier.wrapContentSize(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Image(
-//                                    painter = painterResource(id = R.drawable.p),
-                                    painter = rememberImagePainter(data = list[it].profileImageUrl) { R.drawable.user },
+                                AsyncImage(
+                                    model = if (list[it].profileImageUrl.isEmpty()) { R.drawable.user } else list[it].profileImageUrl,
                                     contentDescription = "menu",
                                     contentScale = ContentScale.Crop,
                                     modifier = modifier

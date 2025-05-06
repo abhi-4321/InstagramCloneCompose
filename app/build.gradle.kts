@@ -90,6 +90,8 @@ dependencies {
     annotationProcessor(libs.androidx.room.compiler)
     //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.compiler)
+    implementation(libs.coil3.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     implementation(libs.okhttp)
 

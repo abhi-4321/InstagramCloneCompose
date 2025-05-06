@@ -3,6 +3,8 @@ package com.example.instagramclone.screen.main
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +14,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -62,6 +67,7 @@ fun Create(
     navController: NavController = rememberNavController(),
     onCreate: suspend (offset: Int) -> List<Pair<Uri,Bitmap?>>
 ) {
+
     // State for pagination
     val loadedImages = remember { mutableStateListOf<Pair<Uri,Bitmap?>>() }
     var firstImageLoaded by remember { mutableStateOf(false) }
@@ -132,7 +138,7 @@ fun Create(
 
     Column(
         modifier
-            .statusBarsPadding()
+            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
             .fillMaxHeight()
     ) {
         // Top bar

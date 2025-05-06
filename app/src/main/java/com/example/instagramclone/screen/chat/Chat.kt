@@ -67,6 +67,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.rememberSwipeableState
 import coil.compose.rememberImagePainter
+import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.model.MessageGroup
@@ -149,8 +150,8 @@ fun Chat(
 
                 Spacer(modifier = Modifier.width(15.dp))
 
-                Image(
-                    painter = rememberImagePainter(data = profileImageUrl) { R.drawable.user },
+                AsyncImage(
+                    model = if (profileImageUrl.isEmpty()) { R.drawable.user } else profileImageUrl,
                     contentDescription = "menu",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -246,8 +247,8 @@ fun Chat(
                                     .wrapContentHeight(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Image(
-                                    painter = rememberImagePainter(data = profileImageUrl) { R.drawable.user },
+                                AsyncImage(
+                                    model = if (profileImageUrl.isEmpty()) { R.drawable.user } else profileImageUrl,
                                     contentDescription = "menu",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -347,106 +348,8 @@ fun Chat(
 
                             item { Spacer(modifier = Modifier.height(12.dp)) }
                         }
-
-                        /*                      groupedMessages.forEachIndexed { groupIndex, group ->
-                                                  val isFromCurrentUser = group.first().senderId == senderId
-
-                                                  val time = formatTimestamp(timestamp = group.first().timestamp)
-
-                                                  item {
-                                                      Spacer(modifier.height(15.dp))
-                                                      if (time.isNotEmpty()) {
-                                                          Row(modifier.fillMaxWidth().wrapContentHeight(), horizontalArrangement = Arrangement.Center) {
-                                                              Text(time, fontSize = 13.sp, fontWeight = FontWeight.Normal, color = Color.Gray)
-                                                          }
-
-                                                          Spacer(modifier.height(35.dp))
-                                                      }
-                                                  }
-
-                                                  items(group.size) { index ->
-                                                      val message = group[index]
-                                                      val isFirstInGroup = index == 0
-                                                      val isLastInGroup = index == group.size - 1
-
-                                                      ChatBubble(message,isFromCurrentUser,isFirstInGroup,isLastInGroup,isLastInGroup && !isFromCurrentUser, profileImageUrl)
-
-                                                      if (!isLastInGroup) {
-                                                          Spacer(modifier = Modifier.height(2.dp))
-                                                      }
-                                                  }
-
-                                                  item { Spacer(modifier = Modifier.height(12.dp)) }
-                                              }*/
                     }
                 }
-                /*  items(sampleChatMessages.size) { index ->
-                      if (sampleChatMessages[index].senderId == senderId) {
-                          Spacer(modifier.height(10.dp))
-                          Row(
-                              modifier = Modifier.fillMaxWidth(),
-                              horizontalArrangement = Arrangement.End
-                          ) {
-                              Box(
-                                  modifier = Modifier
-                                      .padding(horizontal = 10.dp)
-                                      .background(
-                                          color = Purple,
-                                          shape = RoundedCornerShape(28.dp)
-                                      )
-                                      .padding(
-                                          horizontal = 15.dp,
-                                          vertical = 10.dp
-                                      ) // Inner padding
-                              ) {
-                                  Text(
-                                      text = sampleChatMessages[index].chat,
-                                      fontSize = 14.sp,
-                                      color = Color.White,
-                                      fontWeight = FontWeight.Normal,
-                                      modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
-                                  )
-                              }
-                          }
-                      } else {
-                          Row(
-                              modifier = Modifier.fillMaxWidth(),
-                              horizontalArrangement = Arrangement.Start
-                          ) {
-                              Image(
-                                  painter = painterResource(id = R.drawable.p),
-                                  contentDescription = "menu",
-                                  contentScale = ContentScale.Crop,
-                                  modifier = Modifier
-                                      .padding(top = 10.dp, start = 10.dp)
-                                      .size(35.dp)
-                                      .aspectRatio(1f, matchHeightConstraintsFirst = true)
-                                      .padding((1.5).dp)
-                                      .clip(CircleShape)
-                              )
-                              Box(
-                                  modifier = Modifier
-                                      .padding(horizontal = 10.dp)
-                                      .background(
-                                          color = WhiteVar2,
-                                          shape = RoundedCornerShape(28.dp)
-                                      )
-                                      .padding(
-                                          horizontal = 15.dp,
-                                          vertical = 10.dp
-                                      ) // Inner padding
-                              ) {
-                                  Text(
-                                      text = sampleChatMessages[index].chat,
-                                      fontSize = 14.sp,
-                                      fontWeight = FontWeight.Normal,
-                                      modifier = Modifier.widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.6f)
-                                  )
-                              }
-                          }
-                      }
-                      Spacer(modifier = Modifier.height(6.dp))
-                  }*/
             }
         }
 
@@ -890,8 +793,8 @@ fun ChatBubble(
             horizontalArrangement = Arrangement.Start
         ) {
             if (showProfileImage) {
-                Image(
-                    painter = rememberImagePainter(data = profileImageUrl) { R.drawable.user },
+                AsyncImage(
+                    model = if (profileImageUrl.isEmpty()) { R.drawable.user } else profileImageUrl,
                     contentDescription = "menu",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

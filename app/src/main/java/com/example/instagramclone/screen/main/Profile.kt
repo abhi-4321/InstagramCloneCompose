@@ -63,6 +63,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.HighlightItem
 import com.example.instagramclone.model.Post
@@ -249,12 +250,11 @@ fun PostSection(
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(3),Modifier.scale(1.01f)) {
         items(posts.size) {
-            Image(
+            AsyncImage(
                 modifier = modifier
                     .padding((0.75).dp)
                     .aspectRatio(1f),
-//                painter = painterResource(id = R.drawable.p),
-                painter = rememberImagePainter(data = posts[it].postUrl) { error(R.drawable.instagram) },
+                model = if (posts[it].postUrl.isEmpty()) { R.drawable.baseline_more_horiz_24 } else posts[it].postUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )
@@ -489,9 +489,8 @@ fun Line() {
 
 @Composable
 fun RoundImage(image: String, modifier: Modifier) {
-    Image(
-//        painter = painterResource(id = R.drawable.p),
-        painter = if (image.isEmpty()) painterResource(id = R.drawable.user) else rememberImagePainter(data = image) { error(R.drawable.user) },
+    AsyncImage(
+        model = if (image.isEmpty()) R.drawable.user else image,
         contentDescription = "menu",
         contentScale = ContentScale.Crop,
         modifier = modifier
