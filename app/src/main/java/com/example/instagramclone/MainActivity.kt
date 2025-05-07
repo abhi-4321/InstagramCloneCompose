@@ -26,6 +26,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -33,12 +34,19 @@ import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.example.instagramclone.navigation.BottomBarDestinations
 import com.example.instagramclone.navigation.BottomNavigationBar
 import com.example.instagramclone.navigation.Screen
@@ -57,6 +65,12 @@ import com.example.instagramclone.screen.util.Settings
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.MainViewModelFactory
+import com.example.instagramclone.worker.PostWorker
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import java.util.UUID
+import java.util.concurrent.Executor
 
 class MainActivity : ComponentActivity() {
 
@@ -88,7 +102,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             InstagramCloneTheme {
-                Main(viewModel, retrofitInterfaceMain)
+                Main(viewModel, retrofitInterfaceMain, token)
             }
         }
     }
@@ -96,7 +110,11 @@ class MainActivity : ComponentActivity() {
     //@Preview(showSystemUi = true)
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @Composable
-    fun Main(viewModel: MainViewModel, retrofitInterfaceMain: RetrofitInterfaceMain) {
+    fun Main(
+        viewModel: MainViewModel,
+        retrofitInterfaceMain: RetrofitInterfaceMain,
+        token: String
+    ) {
         val navController = rememberNavController()
 
         val slideTime = 300
@@ -143,7 +161,7 @@ class MainActivity : ComponentActivity() {
                     popEnterTransition = { null }
                 ) {
                     Profile(viewModel = viewModel, navController = navController) {
-                        startActivity(Intent(this@MainActivity,LoginActivity::class.java))
+                        startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         finish()
                     }
                 }
@@ -186,7 +204,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable<Screen.Settings> {
                     Settings(navController = navController, viewModel = viewModel) {
-                        startActivity(Intent(this@MainActivity,LoginActivity::class.java))
+                        startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         finish()
                     }
                 }
@@ -195,7 +213,15 @@ class MainActivity : ComponentActivity() {
                 }
                 composable<Screen.Chat> {
                     val args = it.toRoute<Screen.Chat>()
-                    Chat(receiverId = args.receiverId, profileImageUrl = args.profileImageUrl, fullName = args.fullName, username = args.username , senderId = args.senderId, retrofitInterfaceMain = retrofitInterfaceMain, mainViewModel = viewModel)
+                    Chat(
+                        receiverId = args.receiverId,
+                        profileImageUrl = args.profileImageUrl,
+                        fullName = args.fullName,
+                        username = args.username,
+                        senderId = args.senderId,
+                        retrofitInterfaceMain = retrofitInterfaceMain,
+                        mainViewModel = viewModel
+                    )
                 }
                 composable<Screen.NewMessage> {
                     NewMessage(viewModel = viewModel, navController = navController)
@@ -203,7 +229,45 @@ class MainActivity : ComponentActivity() {
 
                 composable<Screen.EditPost> {
                     val args = it.toRoute<Screen.EditPost>()
-                    EditPost(navController = navController, uri = args.uri, viewModel = viewModel)
+                    EditPost(navController = navController, uri = args.uri) { caption, imageUri ->
+
+                        val inputData = workDataOf(
+                            "caption" to caption,
+                            "uri" to imageUri,
+                            "token" to token
+                        )
+
+                        val uuid = UUID.randomUUID()
+
+                        val workRequest =
+                            OneTimeWorkRequestBuilder<PostWorker>().setInputData(inputData).setId(
+                                uuid
+                            ).build()
+
+                        val workManager = WorkManager.getInstance(applicationContext)
+                        workManager.enqueueUniqueWork(
+                            "Post",
+                            ExistingWorkPolicy.APPEND, workRequest
+                        )
+
+                        lifecycleScope.launch {
+                            workManager.getWorkInfoByIdFlow(uuid).collectLatest {
+                                when (it?.state) {
+                                    WorkInfo.State.ENQUEUED -> {
+                                        Toast.makeText(this@MainActivity,"Creating post", Toast.LENGTH_SHORT).show()
+                                    }
+                                    WorkInfo.State.SUCCEEDED -> {
+                                        Toast.makeText(this@MainActivity,"Post created successfully", Toast.LENGTH_SHORT).show()
+                                        viewModel.fetchFeed()
+                                    }
+                                    WorkInfo.State.FAILED , WorkInfo.State.CANCELLED -> {
+                                        Toast.makeText(this@MainActivity,"Error in creating post", Toast.LENGTH_SHORT).show()
+                                    }
+                                    else -> {}
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -220,7 +284,11 @@ class MainActivity : ComponentActivity() {
         }
 
     fun checkAndRequestPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
             }
@@ -374,7 +442,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
         // Raw height and width of image
         val height = options.outHeight
         val width = options.outWidth

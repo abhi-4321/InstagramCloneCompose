@@ -1,6 +1,5 @@
 package com.example.instagramclone.screen.main
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,14 +30,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.navigation.NavController
+import androidx.work.WorkManager
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.ui.theme.Blue
@@ -49,8 +49,8 @@ import com.example.instagramclone.viewmodel.MainViewModel
 fun EditPost(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: MainViewModel,
-    uri: String
+    uri: String,
+    startWorker: (caption: String, imageUri: String) -> Unit
 ) {
     var textCaptionState by remember { mutableStateOf("") }
 
@@ -134,7 +134,7 @@ fun EditPost(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .clickable {
-                    viewModel.createPost(uri)
+                    startWorker(textCaptionState, uri)
                 }
                 .background(color = Blue,shape = RoundedCornerShape(8.dp)),
             horizontalArrangement = Arrangement.Center

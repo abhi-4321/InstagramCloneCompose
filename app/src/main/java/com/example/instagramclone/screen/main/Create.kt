@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -309,6 +311,9 @@ fun Create(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(0.75.dp)
+                                .clickable {
+                                    selectedUri = pair.first.toString()
+                                }
                                 .aspectRatio(1f)
                         ) {
                             Image(
@@ -323,18 +328,18 @@ fun Create(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color(0x33FFFFFF))
+                                        .background(Color(0x33D7D7D7))
                                 )
                             }
-
+                            /*
                             // Make each grid image clickable
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clickable {
-                                        selectedUri = pair.first.toString()
+
                                     }
-                            )
+                            )*/
                         }
                     }
 

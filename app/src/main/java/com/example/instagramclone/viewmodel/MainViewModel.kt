@@ -14,6 +14,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.EMPTY_REQUEST
+import java.io.File
 
 class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : ViewModel() {
 
@@ -102,28 +108,6 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
             } else {
                 _allChatUsersFlow.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
             }
-        }
-    }
-
-    fun updateLastMessage(userId: Int, newMessage: String, timestamp: String) {
-        val currentUsers = (_chatUsersFlow.value as? ApiResponse.Success)?.data ?: return
-
-        // Create a new list with the updated last message for the specific user
-        val updatedUsers = currentUsers.map { user ->
-            if (user.receiverId == userId) {
-                user.copy(lastChat = user.lastChat.copy(chat = newMessage, timestamp = timestamp))
-            } else {
-                user
-            }
-        }
-
-        // Update the state flow with the new list
-        _chatUsersFlow.value = ApiResponse.Success(updatedUsers)
-    }
-
-    fun createPost(uri: String) {
-        viewModelScope.launch {
-
         }
     }
 
