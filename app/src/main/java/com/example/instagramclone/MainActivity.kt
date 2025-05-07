@@ -71,6 +71,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.UUID
 import java.util.concurrent.Executor
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
 
@@ -240,13 +241,11 @@ class MainActivity : ComponentActivity() {
                         val uuid = UUID.randomUUID()
 
                         val workRequest =
-                            OneTimeWorkRequestBuilder<PostWorker>().setInputData(inputData).setId(
-                                uuid
-                            ).build()
+                            OneTimeWorkRequestBuilder<PostWorker>().setInputData(inputData).setId(uuid).build()
 
-                        val workManager = WorkManager.getInstance(applicationContext)
+                        val workManager = WorkManager.getInstance(this@MainActivity)
                         workManager.enqueueUniqueWork(
-                            "Post",
+                            Random.nextInt().toString(),
                             ExistingWorkPolicy.APPEND, workRequest
                         )
 
@@ -261,7 +260,7 @@ class MainActivity : ComponentActivity() {
                                         viewModel.fetchFeed()
                                     }
                                     WorkInfo.State.FAILED , WorkInfo.State.CANCELLED -> {
-                                        Toast.makeText(this@MainActivity,"Error in creating post", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this@MainActivity,"Error in creating post : ${it.stopReason}", Toast.LENGTH_SHORT).show()
                                     }
                                     else -> {}
                                 }
