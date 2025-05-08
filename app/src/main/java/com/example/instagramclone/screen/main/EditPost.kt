@@ -41,6 +41,7 @@ import androidx.navigation.NavController
 import androidx.work.WorkManager
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.viewmodel.MainViewModel
@@ -135,6 +136,7 @@ fun EditPost(
                 .wrapContentHeight()
                 .clickable {
                     startWorker(textCaptionState, uri)
+                    navController.popBackStack(Screen.Create,true)
                 }
                 .background(color = Blue,shape = RoundedCornerShape(8.dp)),
             horizontalArrangement = Arrangement.Center

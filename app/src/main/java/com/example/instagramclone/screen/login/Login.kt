@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,14 +52,18 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.model.LoginRequest
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
@@ -78,6 +84,14 @@ fun Login(
 
     var textPasswordState by remember {
         mutableStateOf("")
+    }
+
+    var isVisible by remember {
+        mutableStateOf(false)
+    }
+
+    val passwordHiddenState by remember {
+        derivedStateOf { "\u25cf".repeat(textPasswordState.length) }
     }
 
     // Create an interaction source to track focus state
@@ -117,16 +131,16 @@ fun Login(
 
         is LoginViewModel.LoginState.Success -> {
             LaunchedEffect(true) {
-//                viewModel.saveToken(token = (loginState as LoginViewModel.LoginState.Success).token)
                 val token = (loginState as LoginViewModel.LoginState.Success).token
                 val saved = SessionManager.saveToken(context.applicationContext, token = token)
                 if (saved) {
                     launchActivity(token)
                 } else {
-                    Toast.makeText(context,"Error saving token", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Error saving token", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
         else -> {}
     }
 
@@ -210,45 +224,71 @@ fun Login(
             interactionSource = interactionSourceUsername
         )
         Spacer(modifier.height(10.dp))
-        TextField(
-            value = textPasswordState,
-            onValueChange = { textPasswordState = it },
-            textStyle = LocalTextStyle.current.copy(
-                textAlign = TextAlign.Start,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal
-            ),
-            label = {
-                Text(
-                    "Password",
-                    fontSize = labelFontSizePass.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Gray
-                )
-            },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done // Prevents multiline actions
-            ),
-            singleLine = true, // Ensures it's a single-line field
-            modifier = modifier
-                .padding(horizontal = 15.dp)
+        Box(
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .border(
-                    BorderStroke(1.dp, MoreLightGray),
-                    RoundedCornerShape(15.dp)
+                .wrapContentHeight()
+                .padding(horizontal = 15.dp)
+        ) {
+            TextField(
+                value = if (isVisible) textPasswordState else passwordHiddenState,
+                onValueChange = { textPasswordState = it },
+                textStyle = LocalTextStyle.current.copy(
+                    textAlign = TextAlign.Start,
+                    fontSize = if (isVisible) 16.sp else 15.sp,
+                    fontWeight = FontWeight.Normal
                 ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,  // Make background transparent
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                cursorColor = Color.Black, // Set cursor color
-                focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
-                unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
-                disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
-            ),
-            interactionSource = interactionSourcePassword
-        )
+                label = {
+                    Text(
+                        "Password",
+                        fontSize = labelFontSizePass.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Gray
+                    )
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done // Prevents multiline actions
+                ),
+                singleLine = true, // Ensures it's a single-line field
+                modifier = modifier
+                    .align(Alignment.CenterStart)
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .border(
+                        BorderStroke(1.dp, MoreLightGray),
+                        RoundedCornerShape(15.dp)
+                    )
+                    .padding(end = 30.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,  // Make background transparent
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    cursorColor = Color.Black, // Set cursor color
+                    focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
+                    unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
+                    disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
+                ),
+                interactionSource = interactionSourcePassword,
+            )
+            Icon(
+                painter = painterResource(
+                    if (isVisible) {
+                        R.drawable.visibility_off
+                    } else {
+                        R.drawable.visibility_on
+                    }
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd)
+                    .clickable {
+                        isVisible = !isVisible
+                    }
+            )
+        }
+
         Spacer(modifier.height(10.dp))
         Button(
             onClick = {
@@ -257,7 +297,7 @@ fun Login(
                         .show()
                 } else {
                     if (textNameState.contains("@gmail.com")) {
-                        viewModel.login(LoginRequest(textNameState,null, textPasswordState))
+                        viewModel.login(LoginRequest(textNameState, null, textPasswordState))
                     } else {
                         viewModel.login(LoginRequest(null, textNameState, textPasswordState))
                     }

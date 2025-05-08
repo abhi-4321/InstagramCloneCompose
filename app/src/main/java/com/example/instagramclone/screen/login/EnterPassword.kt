@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,10 +32,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -42,23 +45,38 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.viewmodel.LoginViewModel
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
-fun EnterPassword(modifier: Modifier = Modifier, navController: NavController, viewModel: LoginViewModel) {
+fun EnterPassword(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: LoginViewModel
+) {
     var textName by remember {
         mutableStateOf("")
+    }
+
+    var isVisible by remember {
+        mutableStateOf(false)
+    }
+
+    val passwordHiddenState by remember {
+        derivedStateOf { "\u25cf".repeat(textName.length) }
     }
 
     val context = LocalContext.current
@@ -89,8 +107,7 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController, v
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() }
-            ,
+                .clickable { navController.navigateUp() },
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -106,44 +123,69 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController, v
             fontWeight = FontWeight.Medium
         )
         Spacer(modifier.height(20.dp))
-        TextField(
-            value = textName,
-            onValueChange = { textName = it },
-            textStyle = LocalTextStyle.current.copy(
-                textAlign = TextAlign.Start,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Normal
-            ),
-            label = {
-                Text(
-                    "Password",
-                    fontSize = labelFontSizeName.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Gray
-                )
-            },
-            modifier = modifier
+        Box(
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .border(
-                    BorderStroke(1.dp, MoreLightGray),
-                    RoundedCornerShape(15.dp)
+                .wrapContentHeight()
+        ) {
+            TextField(
+                value = if (isVisible) textName else passwordHiddenState,
+                onValueChange = { textName = it },
+                textStyle = LocalTextStyle.current.copy(
+                    textAlign = TextAlign.Start,
+                    fontSize = if (isVisible) 16.sp else 15.sp,
+                    fontWeight = FontWeight.Normal
                 ),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Done // Prevents multiline actions
-            ),
-            singleLine = true, // Ensures it's a single-line field
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,  // Make background transparent
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                cursorColor = Color.Black, // Set cursor color
-                focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
-                unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
-                disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
-            ),
-            interactionSource = interactionSourceUsername
-        )
+                label = {
+                    Text(
+                        "Password",
+                        fontSize = labelFontSizeName.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color.Gray
+                    )
+                },
+                modifier = modifier
+                    .align(Alignment.CenterStart)
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .border(
+                        BorderStroke(1.dp, MoreLightGray),
+                        RoundedCornerShape(15.dp)
+                    )
+                    .padding(end = 30.dp),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done // Prevents multiline actions
+                ),
+                singleLine = true, // Ensures it's a single-line field
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,  // Make background transparent
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    cursorColor = Color.Black, // Set cursor color
+                    focusedIndicatorColor = Color.Transparent,  // Remove bottom line when focused
+                    unfocusedIndicatorColor = Color.Transparent,  // Remove bottom line when not focused
+                    disabledIndicatorColor = Color.Transparent,  // Remove bottom line when disabled
+                ),
+                interactionSource = interactionSourceUsername
+            )
+            Icon(
+                painter = painterResource(
+                    if (isVisible) {
+                        R.drawable.visibility_off
+                    } else {
+                        R.drawable.visibility_on
+                    }
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(end = 15.dp)
+                    .size(24.dp)
+                    .align(Alignment.CenterEnd)
+                    .clickable {
+                        isVisible = !isVisible
+                    }
+            )
+        }
         Spacer(modifier.height(15.dp))
         Button(
             onClick = {
@@ -153,12 +195,17 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController, v
                 }
 
                 if (textName.length < 6) {
-                    Toast.makeText(context, "Password length must be greater than 6", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Password length must be greater than 6",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     return@Button
                 }
 
                 if (textName.all { it.isLetter() }) {
-                    Toast.makeText(context, "Password must be contain 1 digit", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Password must be contain 1 digit", Toast.LENGTH_SHORT)
+                        .show()
                     return@Button
                 }
                 viewModel.registrationDetails.password = textName
@@ -180,12 +227,14 @@ fun EnterPassword(modifier: Modifier = Modifier, navController: NavController, v
             )
         }
         Spacer(modifier.weight(1f, true))
-        Row(modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp)
-            .clickable {
-                navController.popBackStack(Screen.Login, false)
-            }, horizontalArrangement = Arrangement.Center) {
+        Row(
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp)
+                .clickable {
+                    navController.popBackStack(Screen.Login, false)
+                }, horizontalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = "I already have an account",
                 fontSize = 15.sp,

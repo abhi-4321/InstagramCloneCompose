@@ -257,7 +257,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                     WorkInfo.State.SUCCEEDED -> {
                                         Toast.makeText(this@MainActivity,"Post created successfully", Toast.LENGTH_SHORT).show()
-                                        viewModel.fetchFeed()
+                                        viewModel.fetchUser()
                                     }
                                     WorkInfo.State.FAILED , WorkInfo.State.CANCELLED -> {
                                         Toast.makeText(this@MainActivity,"Error in creating post : ${it.stopReason}", Toast.LENGTH_SHORT).show()
