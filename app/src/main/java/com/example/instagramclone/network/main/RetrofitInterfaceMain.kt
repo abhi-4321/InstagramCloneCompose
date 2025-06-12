@@ -5,6 +5,7 @@ import com.example.instagramclone.model.ChatDisplayUser
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.StoryDisplayUser
+import com.example.instagramclone.model.StoryItem
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -47,4 +48,7 @@ interface RetrofitInterfaceMain {
     @Multipart
     @POST("/post")
     suspend fun createPost(@Part("caption") caption: RequestBody, @Part image: MultipartBody.Part): Response<Void>
+
+    @GET("/story/{userId}")
+    suspend fun getStories(@Path("userId") userId: Int) : Response<List<StoryItem>>
 }

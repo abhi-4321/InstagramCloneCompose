@@ -15,23 +15,23 @@ import android.util.Log
 import android.util.Size
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
@@ -45,8 +45,8 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.navigation.BottomBarDestinations
 import com.example.instagramclone.navigation.BottomNavigationBar
 import com.example.instagramclone.navigation.Screen
@@ -61,16 +61,17 @@ import com.example.instagramclone.screen.main.Home
 import com.example.instagramclone.screen.main.Profile
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
+import com.example.instagramclone.screen.main.Story
 import com.example.instagramclone.screen.util.Settings
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.MainViewModelFactory
+import com.example.instagramclone.viewmodel.StoryViewModel
+import com.example.instagramclone.viewmodel.StoryViewModelFactory
 import com.example.instagramclone.worker.PostWorker
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.UUID
-import java.util.concurrent.Executor
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
@@ -94,16 +95,22 @@ class MainActivity : ComponentActivity() {
 
         val retrofitInterfaceMain = RetrofitInstanceMain.getApiService(token)
         val mainViewModelFactory = MainViewModelFactory(retrofitInterfaceMain)
+        val storyViewModelFactory = StoryViewModelFactory(retrofitInterfaceMain)
 
         val viewModel by viewModels<MainViewModel> {
             mainViewModelFactory
         }
 
+        val storyViewModel by viewModels<StoryViewModel> {
+            storyViewModelFactory
+        }
+
         viewModel.fetchUser()
+        storyViewModel.fetchDisplayUsers()
 
         setContent {
             InstagramCloneTheme {
-                Main(viewModel, retrofitInterfaceMain, token)
+                Main(viewModel, retrofitInterfaceMain, token, storyViewModel)
             }
         }
     }
@@ -114,9 +121,35 @@ class MainActivity : ComponentActivity() {
     fun Main(
         viewModel: MainViewModel,
         retrofitInterfaceMain: RetrofitInterfaceMain,
-        token: String
+        token: String,
+        storyViewModel: StoryViewModel
     ) {
         val navController = rememberNavController()
+        val storyListState = storyViewModel.liveDataStory.collectAsState()
+
+        var list by remember {
+            mutableStateOf(emptyList<StoryDisplayUser>())
+        }
+
+        var currentDuIndex by remember {
+            mutableIntStateOf(-1)
+        }
+
+        LaunchedEffect(storyListState.value) {
+            when (storyListState.value) {
+                is MainViewModel.ApiResponse.Failure -> {
+                    currentDuIndex = -1
+                }
+
+                MainViewModel.ApiResponse.Idle -> {}
+                MainViewModel.ApiResponse.Loading -> {}
+                is MainViewModel.ApiResponse.Success<List<StoryDisplayUser>> -> {
+                    list =
+                        (storyListState.value as MainViewModel.ApiResponse.Success<List<StoryDisplayUser>>).data!!
+                    currentDuIndex = 0
+                }
+            }
+        }
 
         val slideTime = 300
         val slideLeftHorizontallyEnter = // New screen coming left from right after new screen enter
@@ -174,8 +207,11 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Home(
                         navController = navController,
-                        viewModel = viewModel
-                    )
+                        viewModel = viewModel,
+                        storyViewModel = storyViewModel
+                    ) { displayUser ->
+                        currentDuIndex = list.indexOfFirst { it.userId == displayUser.userId }
+                    }
                 }
                 composable<Screen.Search>(
                     enterTransition = { null },
@@ -241,7 +277,8 @@ class MainActivity : ComponentActivity() {
                         val uuid = UUID.randomUUID()
 
                         val workRequest =
-                            OneTimeWorkRequestBuilder<PostWorker>().setInputData(inputData).setId(uuid).build()
+                            OneTimeWorkRequestBuilder<PostWorker>().setInputData(inputData)
+                                .setId(uuid).build()
 
                         val workManager = WorkManager.getInstance(this@MainActivity)
                         workManager.enqueueUniqueWork(
@@ -253,20 +290,83 @@ class MainActivity : ComponentActivity() {
                             workManager.getWorkInfoByIdFlow(uuid).collectLatest {
                                 when (it?.state) {
                                     WorkInfo.State.ENQUEUED -> {
-                                        Toast.makeText(this@MainActivity,"Creating post", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Creating post",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
+
                                     WorkInfo.State.SUCCEEDED -> {
-                                        Toast.makeText(this@MainActivity,"Post created successfully", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Post created successfully",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         viewModel.fetchUser()
                                     }
-                                    WorkInfo.State.FAILED , WorkInfo.State.CANCELLED -> {
-                                        Toast.makeText(this@MainActivity,"Error in creating post : ${it.stopReason}", Toast.LENGTH_SHORT).show()
+
+                                    WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -> {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Error in creating post : ${it.stopReason}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
+
                                     else -> {}
                                 }
                             }
                         }
                     }
+                }
+
+                composable<Screen.Story> {
+                    val args = it.toRoute<Screen.Story>()
+
+                    Story(
+                        userId = args.userId,
+                        username = args.username,
+                        fullName = args.fullName,
+                        profileImageUrl = args.profileImageUrl,
+                        viewModel = viewModel,
+                        onNavigateToNextUser = {
+                            if (currentDuIndex < list.size - 1) {
+                                currentDuIndex++
+                                navController.navigate(
+                                    route = Screen.Story(
+                                        list[currentDuIndex].userId,
+                                        list[currentDuIndex].profileImageUrl,
+                                        list[currentDuIndex].username,
+                                        list[currentDuIndex].fullName
+                                    ),
+                                ) {
+                                    launchSingleTop = true
+                                }
+                            } else {
+                                currentDuIndex = -1
+                                navController.navigateUp()
+                            }
+                        },
+                        onNavigateToPreviousUser = {
+                            if (currentDuIndex > 0) {
+                                currentDuIndex--
+                                navController.navigate(
+                                    route = Screen.Story(
+                                        list[currentDuIndex].userId,
+                                        list[currentDuIndex].profileImageUrl,
+                                        list[currentDuIndex].username,
+                                        list[currentDuIndex].fullName
+                                    ),
+                                ) {
+                                    launchSingleTop = true
+                                }
+                            } else {
+                                currentDuIndex = -1
+                                navController.navigateUp()
+                            }
+                        }
+                    )
                 }
             }
         }

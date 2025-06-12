@@ -1,7 +1,6 @@
 package com.example.instagramclone.screen.main
 
 import android.util.Log
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -58,22 +53,24 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
-import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Pink
 import com.example.instagramclone.viewmodel.MainViewModel
+import com.example.instagramclone.viewmodel.StoryViewModel
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp")
 @Composable
 fun Home(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    storyViewModel: StoryViewModel,
+    storyClicked: (displayUser: StoryDisplayUser) -> Unit
 ) {
     val context = LocalContext.current
 
-    val displayListState by viewModel.liveDataStory.collectAsState()
+    val displayListState by storyViewModel.liveDataStory.collectAsState()
     val postsListState by viewModel.liveDataFeed.collectAsState()
 
     val userDetailsState by viewModel.liveData.collectAsState()
@@ -89,7 +86,8 @@ fun Home(
     // When userDetailsState updates, update imageUrl
     LaunchedEffect(userDetailsState) {
         if (userDetailsState is MainViewModel.ApiResponse.Success) {
-            imageUrl = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.profileImageUrl
+            imageUrl =
+                (userDetailsState as MainViewModel.ApiResponse.Success).data!!.profileImageUrl
         }
     }
 
@@ -126,8 +124,7 @@ fun Home(
                             .padding(top = 3.dp)
                             .clickable {
                                 navController.navigate(Screen.Messages)
-                            }
-                        ,
+                            },
                         painter = painterResource(id = R.drawable.share),
                         contentDescription = null
                     )
@@ -140,7 +137,7 @@ fun Home(
                     .wrapContentHeight(),
                 state = rememberLazyListState()
             ) {
-                when(displayListState) {
+                when (displayListState) {
                     is MainViewModel.ApiResponse.Failure -> {
                         item {
                             Spacer(modifier = modifier.width(15.dp))
@@ -165,9 +162,14 @@ fun Home(
                                 )
                             }
                         }
-                        Log.d("ResultApi","List Display : failed")
-                        Toast.makeText(context,"Failed to fetch the display users : ${(displayListState as MainViewModel.ApiResponse.Failure).error}",Toast.LENGTH_SHORT).show()
+                        Log.d("ResultApi", "List Display : failed")
+                        Toast.makeText(
+                            context,
+                            "Failed to fetch the display users : ${(displayListState as MainViewModel.ApiResponse.Failure).error}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+
                     MainViewModel.ApiResponse.Idle -> {}
                     MainViewModel.ApiResponse.Loading -> {
                         item {
@@ -176,7 +178,10 @@ fun Home(
                                 modifier.wrapContentSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Box(modifier.wrapContentSize(), contentAlignment = Alignment.BottomEnd) {
+                                Box(
+                                    modifier.wrapContentSize(),
+                                    contentAlignment = Alignment.BottomEnd
+                                ) {
                                     AsyncImage(
                                         model = if (imageUrl.isEmpty()) R.drawable.user else imageUrl,
                                         contentDescription = "menu",
@@ -187,10 +192,15 @@ fun Home(
                                             .padding(3.dp)
                                             .clip(CircleShape)
                                     )
-                                    Image(modifier = modifier.border(
-                                        BorderStroke(2.dp,Color.White), shape = CircleShape
-                                    ).size(20.dp)
-                                        , painter = painterResource(R.drawable.round_add_circle_24), contentDescription = null)
+                                    Image(
+                                        modifier = modifier
+                                            .border(
+                                                BorderStroke(2.dp, Color.White), shape = CircleShape
+                                            )
+                                            .size(20.dp),
+                                        painter = painterResource(R.drawable.round_add_circle_24),
+                                        contentDescription = null
+                                    )
                                 }
                                 Spacer(modifier = modifier.height(5.dp))
                                 Text(
@@ -199,8 +209,9 @@ fun Home(
                                 )
                             }
                         }
-                        Log.d("ResultApi","List Display : loading")
+                        Log.d("ResultApi", "List Display : loading")
                     }
+
                     is MainViewModel.ApiResponse.Success<*> -> {
                         val list = (displayListState as MainViewModel.ApiResponse.Success).data!!
 
@@ -210,7 +221,10 @@ fun Home(
                                 modifier.wrapContentSize(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Box(modifier.wrapContentSize(), contentAlignment = Alignment.BottomEnd) {
+                                Box(
+                                    modifier.wrapContentSize(),
+                                    contentAlignment = Alignment.BottomEnd
+                                ) {
                                     AsyncImage(
                                         model = if (imageUrl.isEmpty()) R.drawable.user else imageUrl,
                                         contentDescription = "menu",
@@ -221,9 +235,15 @@ fun Home(
                                             .padding(3.dp)
                                             .clip(CircleShape)
                                     )
-                                    Image(modifier = modifier.border(
-                                        BorderStroke(2.dp,Color.White), shape = CircleShape
-                                    ).size(20.dp), painter = painterResource(R.drawable.round_add_circle_24), contentDescription = null)
+                                    Image(
+                                        modifier = modifier
+                                            .border(
+                                                BorderStroke(2.dp, Color.White), shape = CircleShape
+                                            )
+                                            .size(20.dp),
+                                        painter = painterResource(R.drawable.round_add_circle_24),
+                                        contentDescription = null
+                                    )
                                 }
                                 Spacer(modifier = modifier.height(5.dp))
                                 Text(
@@ -233,12 +253,26 @@ fun Home(
                             }
                         }
 
-                        Log.d("ResultApi","List Display : $list")
+                        Log.d("ResultApi", "List Display : $list")
 
                         items(list.size) {
                             Spacer(modifier = modifier.width(15.dp))
                             Column(
-                                modifier.wrapContentSize(),
+                                modifier
+                                    .wrapContentSize()
+                                    .clickable {
+                                        storyClicked(list[it])
+                                        navController.navigate(
+                                            Screen.Story(
+                                                list[it].userId,
+                                                list[it].profileImageUrl,
+                                                list[it].username,
+                                                list[it].fullName
+                                            )
+                                        ) {
+                                            launchSingleTop = true
+                                        }
+                                    },
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 RoundImage(
@@ -263,10 +297,15 @@ fun Home(
         }
 
 
-        when(postsListState) {
+        when (postsListState) {
             is MainViewModel.ApiResponse.Failure -> {
-                Toast.makeText(context,"Failed to fetch the feed : ${(postsListState as MainViewModel.ApiResponse.Failure).error}",Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Failed to fetch the feed : ${(postsListState as MainViewModel.ApiResponse.Failure).error}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+
             MainViewModel.ApiResponse.Idle -> {}
             MainViewModel.ApiResponse.Loading -> {
                 item {
@@ -285,8 +324,10 @@ fun Home(
                     }
                 }
             }
+
             is MainViewModel.ApiResponse.Success<*> -> {
-               val postsList = (postsListState as MainViewModel.ApiResponse.Success).data ?: emptyList()
+                val postsList =
+                    (postsListState as MainViewModel.ApiResponse.Success).data ?: emptyList()
                 items(postsList.size) {
                     Row(
                         modifier = modifier
@@ -380,8 +421,7 @@ fun Home(
                                 modifier = modifier
                                     .fillMaxHeight()
                                     .scale(0.9f)
-                                    .offset(y = 1.dp)
-                                ,
+                                    .offset(y = 1.dp),
                                 painter = painterResource(id = R.drawable.share),
                                 tint = Color.Unspecified,
                                 contentDescription = null,

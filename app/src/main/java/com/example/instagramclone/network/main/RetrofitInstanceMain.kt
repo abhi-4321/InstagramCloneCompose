@@ -1,6 +1,5 @@
 package com.example.instagramclone.network.main
 
-import android.content.Context
 import com.example.instagramclone.network.util.CustomAuthInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

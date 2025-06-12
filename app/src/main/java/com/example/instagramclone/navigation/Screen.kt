@@ -66,4 +66,7 @@ sealed interface Screen {
 
     @Serializable
     data class EditPost(val uri: String) : Screen
+
+    @Serializable
+    data class Story(val userId: Int, val profileImageUrl: String, val username: String, val fullName: String) : Screen
 }

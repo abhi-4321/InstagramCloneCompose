@@ -9,6 +9,7 @@ import com.example.instagramclone.model.ChatDisplayUser
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.StoryDisplayUser
+import com.example.instagramclone.model.StoryItem
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,37 +41,19 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
     }
 
     // Dashboard
-
-    private val _flowStory = MutableStateFlow<ApiResponse<List<StoryDisplayUser>>>(ApiResponse.Idle)
-    val liveDataStory: StateFlow<ApiResponse<List<StoryDisplayUser>>> get() = _flowStory
-
     private val _flowFeed = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Idle)
     val liveDataFeed: StateFlow<ApiResponse<List<PostDisplay>>> get() = _flowFeed
 
     fun fetchFeed() {
         viewModelScope.launch {
-            _flowStory.value = ApiResponse.Loading
             _flowFeed.value = ApiResponse.Loading
-            val responseStory = async {
-                retrofitInterfaceMain.fetchDisplayUsers()
-            }
-            val responseFeed = async {
-                retrofitInterfaceMain.fetchFeed()
-            }
 
-            val storyRes = responseStory.await()
-            val feedRes = responseFeed.await()
+            val responseFeed = retrofitInterfaceMain.fetchFeed()
 
-            if (storyRes.isSuccessful && storyRes.body() != null) {
-                _flowStory.value = ApiResponse.Success(storyRes.body()!!)
+            if (responseFeed.isSuccessful && responseFeed.body() != null) {
+                _flowFeed.value = ApiResponse.Success(responseFeed.body()!!)
             } else {
-                _flowStory.value = ApiResponse.Failure(storyRes.errorBody()?.string() ?: storyRes.code().toString())
-            }
-
-            if (storyRes.isSuccessful && storyRes.body() != null) {
-                _flowFeed.value = ApiResponse.Success(feedRes.body()!!)
-            } else {
-                _flowFeed.value = ApiResponse.Failure(feedRes.errorBody()?.string() ?: feedRes.code().toString())
+                _flowFeed.value = ApiResponse.Failure(responseFeed.errorBody()?.string() ?: responseFeed.code().toString())
             }
         }
     }
@@ -107,6 +90,25 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
                 _allChatUsersFlow.value = ApiResponse.Success(response.body()!!)
             } else {
                 _allChatUsersFlow.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
+            }
+        }
+    }
+
+    // Story List
+
+    private val _storiesFlow = MutableStateFlow<ApiResponse<List<StoryItem>>>(ApiResponse.Idle)
+    val storiesFlow: StateFlow<ApiResponse<List<StoryItem>>> get() = _storiesFlow
+
+    fun fetchStories(userId: Int) {
+        viewModelScope.launch {
+            _storiesFlow.value = ApiResponse.Loading
+
+            val response = retrofitInterfaceMain.getStories(userId)
+
+            if (response.isSuccessful && response.body() != null) {
+                _storiesFlow.value = ApiResponse.Success(response.body()!!)
+            } else {
+                _storiesFlow.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
             }
         }
     }
