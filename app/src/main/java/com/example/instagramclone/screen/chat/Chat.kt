@@ -295,8 +295,10 @@ fun Chat(
 
                         Log.d("Chats", list.toString())
 
-                        coroutineScope.launch {
-                            listState.animateScrollToItem(list.size - 1)
+                        if (list.isNotEmpty()) {
+                            coroutineScope.launch {
+                                listState.animateScrollToItem(list.size - 1)
+                            }
                         }
 
                         groupedMessages.forEachIndexed { groupIndex: Int, messageGroup: MessageGroup ->
@@ -470,8 +472,10 @@ fun Chat(
                                 if (previousChats is MainViewModel.ApiResponse.Success) {
                                     val list =
                                         (previousChats as MainViewModel.ApiResponse.Success).data!!
-                                    coroutineScope.launch {
-                                        listState.animateScrollToItem(list.size - 1)
+                                    if (list.isNotEmpty()) {
+                                        coroutineScope.launch {
+                                            listState.animateScrollToItem(list.size - 1)
+                                        }
                                     }
                                 }
                             },

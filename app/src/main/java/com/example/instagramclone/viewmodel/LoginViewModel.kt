@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.instagramclone.model.LoginRequest
 import com.example.instagramclone.model.OtpRequest
-import com.example.instagramclone.model.OtpResponse
 import com.example.instagramclone.model.RegistrationRequest
 import com.example.instagramclone.network.login.RetrofitInterfaceLogin
 import kotlinx.coroutines.delay
@@ -27,7 +26,7 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
                 } else {
                     _uiState.value = LoginState.Error("Invalid credentials")
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 _uiState.value = LoginState.Error("Network error")
             }
         }

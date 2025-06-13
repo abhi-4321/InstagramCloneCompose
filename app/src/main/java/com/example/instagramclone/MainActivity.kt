@@ -361,9 +361,6 @@ class MainActivity : ComponentActivity() {
                                 ) {
                                     launchSingleTop = true
                                 }
-                            } else {
-                                currentDuIndex = -1
-                                navController.navigateUp()
                             }
                         }
                     )

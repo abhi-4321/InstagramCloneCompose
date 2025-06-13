@@ -25,7 +25,7 @@ class ChatViewModel(userId: Int, private val retrofitInterfaceMain: RetrofitInte
 
     val client = OkHttpClient()
     val request = Request.Builder()
-        .url("ws://192.168.1.38:3000?userId=$userId")  // replace with your actual URL
+        .url("ws://192.168.1.39:3000?userId=$userId")  // replace with your actual URL
         .build()
 
     val listener = object : WebSocketListener() {

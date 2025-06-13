@@ -82,6 +82,10 @@ fun Story(
 
     val storyListState = viewModel.storiesFlow.collectAsState()
 
+    var storyListGP by remember {
+        mutableStateOf(emptyList<StoryItem>())
+    }
+
     var currentStoryIndex by remember { mutableIntStateOf(0) }
     var progress by remember { mutableFloatStateOf(0f) }
     var isPaused by remember { mutableStateOf(false) }
@@ -92,17 +96,11 @@ fun Story(
     val updateInterval = 50L // Update every 50ms for smooth animation
     val progressIncrement = updateInterval.toFloat() / storyDuration
 
-    val storyList = listOf<StoryItem>(
-        StoryItem(0, 3, "", listOf<Int>(), ""),
-        StoryItem(0, 3, "", listOf<Int>(), ""),
-        StoryItem(0, 3, "", listOf<Int>(), ""),
-        StoryItem(0, 3, "", listOf<Int>(), ""),
-        StoryItem(0, 3, "", listOf<Int>(), ""),
-    )
-
     LaunchedEffect(currentStoryIndex, isPaused, storyListState.value) {
         if (storyListState.value is MainViewModel.ApiResponse.Success<*> && !isPaused) {
             val storyList = (storyListState.value as MainViewModel.ApiResponse.Success<List<StoryItem>>).data!!
+
+            storyListGP = storyList
 
             if (currentStoryIndex < storyList.size) {
                 while (progress < 1f && !isPaused && currentStoryIndex < storyList.size) {
@@ -125,7 +123,7 @@ fun Story(
     }
 
     fun goToNextStory() {
-        if (currentStoryIndex < storyList.size - 1) {
+        if (currentStoryIndex < storyListGP.size - 1) {
             currentStoryIndex++
             progress = 0f
         } else {
@@ -527,7 +525,7 @@ fun Story(
                             .fillMaxWidth()
                             .fillMaxHeight(0.88f),
                         model = storyList[currentStoryIndex].storyUrl, // Use current story
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Inside,
                         contentDescription = null
                     )
                 }
