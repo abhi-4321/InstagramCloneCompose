@@ -1,6 +1,5 @@
 package com.example.instagramclone.screen.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -58,12 +57,13 @@ import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.StoryItem
 import com.example.instagramclone.network.main.RetrofitInstanceMain
-import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.LightGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
+import java.time.Duration
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
-//@Preview(showSystemUi = true)
 @Composable
 fun Story(
     modifier: Modifier = Modifier,
@@ -413,23 +413,6 @@ fun Story(
                                 }
 
                                 Spacer(modifier.width(7.dp))
-
-                                Text(
-                                    text = "21h",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.LightGray,
-                                    style = TextStyle.Default.copy(
-                                        shadow = Shadow(
-                                            color = Color.Black,
-                                            offset = Offset(0f, 1f),
-                                            blurRadius = 2f
-                                        )
-                                    ),
-                                    modifier = modifier
-                                        .padding(top = 5.dp)
-                                        .align(Alignment.Top)
-                                )
                             }
 
                         }
@@ -657,7 +640,7 @@ fun Story(
                                 Spacer(modifier.width(7.dp))
 
                                 Text(
-                                    text = "21h",
+                                    text = getTimeAgoInIST(storyList[currentStoryIndex].createdAt),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.LightGray,
@@ -749,4 +732,39 @@ fun Story(
             }
         }
     }
+}
+
+fun getTimeAgoInIST(utcString: String): String {
+    // Parse the incoming UTC time string
+    val utcZonedDateTime = ZonedDateTime.parse(utcString)
+
+    // Convert to IST time zone
+    val istZonedDateTime = utcZonedDateTime.withZoneSameInstant(ZoneId.of("Asia/Kolkata"))
+
+    // Get current IST time
+    val nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"))
+
+    // Calculate the duration between now and the created time
+    val duration = Duration.between(istZonedDateTime, nowIST)
+
+    return when {
+        duration.toMinutes() < 1 -> "Just now"
+        duration.toMinutes() < 60 -> "${duration.toMinutes()}m"
+        duration.toHours() < 24 -> "${duration.toHours()}h"
+        else -> "24h"
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun StoryPreview() {
+    Story(
+        userId = 1,
+        username = "zufu.kid",
+        profileImageUrl = "",
+        fullName = "Mahika Nandal",
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
+        onNavigateToPreviousUser = {},
+        onNavigateToNextUser = {}
+    )
 }

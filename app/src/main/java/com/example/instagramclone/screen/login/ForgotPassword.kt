@@ -46,11 +46,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.ui.theme.Blue
@@ -238,4 +240,10 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             )
         }
     }
+}
+
+@Composable
+@Preview(showSystemUi = true)
+fun ForgotPasswordPreview() {
+    ForgotPassword(navController = rememberNavController())
 }

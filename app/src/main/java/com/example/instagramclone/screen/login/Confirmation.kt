@@ -43,14 +43,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
-import com.example.instagramclone.model.OtpRequest
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.viewmodel.LoginViewModel
@@ -58,7 +60,11 @@ import com.example.instagramclone.viewmodel.LoginViewModel
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
 @Composable
-fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController, viewModel: LoginViewModel) {
+fun Confirmation(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    viewModel: LoginViewModel
+) {
     var textMobState by remember {
         mutableStateOf("")
     }
@@ -69,11 +75,14 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
 
     when (otpRequestState) {
         LoginViewModel.OtpRequestState.Error -> {
-            Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT)
+                .show()
         }
+
         LoginViewModel.OtpRequestState.Sent -> {
             Toast.makeText(context, "Otp sent to email successfully", Toast.LENGTH_SHORT).show()
         }
+
         else -> {}
     }
 
@@ -85,12 +94,16 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
                 navController.navigate(Screen.EnterPassword)
             }
         }
+
         LoginViewModel.OtpVerifyState.Error -> {
-            Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Unknown error occurred. Please retry", Toast.LENGTH_SHORT)
+                .show()
         }
+
         LoginViewModel.OtpVerifyState.Incorrect -> {
             Toast.makeText(context, "Otp is invalid or expired", Toast.LENGTH_SHORT).show()
         }
+
         else -> {}
     }
 
@@ -231,4 +244,14 @@ fun Confirmation(modifier: Modifier = Modifier, navController: NavHostController
             )
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun ConfirmationPreview() {
+    Confirmation(
+        navController = rememberNavController(), viewModel = LoginViewModel(
+            RetrofitInstanceLogin.instance
+        )
+    )
 }

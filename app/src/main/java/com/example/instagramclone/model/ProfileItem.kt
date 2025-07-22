@@ -13,5 +13,65 @@ data class ProfileItem(
     val posts: List<Post>,
     val private: Boolean
 ) {
-    constructor() : this(1,"","","","","","","", emptyList(), emptyList(),false)
+    constructor() : this(
+        1,
+        "_d_evil_02",
+        "",
+        "345",
+        "654",
+        "45",
+        "Abhinav Mahalwal",
+        "We forge the chains we wear in life",
+        listOf(
+            HighlightItem(
+                id = 1,
+                userId = 1,
+                highlightUrl = "",
+                title = "Mountains"
+            ),
+            HighlightItem(
+                id = 2,
+                userId = 1,
+                highlightUrl = "",
+                title = "Beaches"
+            ),
+            HighlightItem(
+                id = 3,
+                userId = 1,
+                highlightUrl = "",
+                title = "Oceans"
+            ),
+        ),
+        listOf(
+            Post(
+                id = 1,
+                userId = 1,
+                postUrl = "",
+                caption = "",
+                likesCount = "12",
+                likedBy = emptyList(),
+                commentsCount = "",
+                comments = emptyList()
+            ), Post(
+                id = 1,
+                userId = 1,
+                postUrl = "",
+                caption = "",
+                likesCount = "12",
+                likedBy = emptyList(),
+                commentsCount = "",
+                comments = emptyList()
+            ), Post(
+                id = 1,
+                userId = 1,
+                postUrl = "",
+                caption = "",
+                likesCount = "12",
+                likedBy = emptyList(),
+                commentsCount = "",
+                comments = emptyList()
+            )
+        ),
+        false
+    )
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -53,14 +52,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.model.LoginRequest
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
@@ -125,6 +127,7 @@ fun Login(
                     Toast.LENGTH_SHORT
                 ).show()
             }
+
             is LoginViewModel.LoginState.Success -> {
                 val token = (loginState as LoginViewModel.LoginState.Success).token
                 val saved = SessionManager.saveToken(context.applicationContext, token = token)
@@ -134,6 +137,7 @@ fun Login(
                     Toast.makeText(context, "Error saving token", Toast.LENGTH_SHORT).show()
                 }
             }
+
             else -> {}
         }
     }
@@ -379,4 +383,15 @@ fun Login(
             }
         }
     }
+}
+
+
+@Preview(showSystemUi = true)
+@Composable
+fun LoginPreview() {
+    Login(
+        Modifier,
+        rememberNavController(),
+        LoginViewModel(RetrofitInstanceLogin.instance)
+    ) {}
 }

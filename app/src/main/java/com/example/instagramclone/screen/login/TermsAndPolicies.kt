@@ -28,13 +28,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.viewmodel.LoginViewModel
@@ -145,4 +148,14 @@ fun TermsAndPolicies(
             )
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun TermsAndPoliciesPreview() {
+    TermsAndPolicies(
+        navController = rememberNavController(), viewModel = LoginViewModel(
+            RetrofitInstanceLogin.instance
+        )
+    )
 }

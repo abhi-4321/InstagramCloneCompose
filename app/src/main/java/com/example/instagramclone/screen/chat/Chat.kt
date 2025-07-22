@@ -60,17 +60,18 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.rememberSwipeableState
-import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.model.MessageGroup
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
 import com.example.instagramclone.ui.theme.PinkDark
 import com.example.instagramclone.ui.theme.Purple
@@ -151,7 +152,9 @@ fun Chat(
                 Spacer(modifier = Modifier.width(15.dp))
 
                 AsyncImage(
-                    model = if (profileImageUrl.isEmpty()) { R.drawable.user } else profileImageUrl,
+                    model = if (profileImageUrl.isEmpty()) {
+                        R.drawable.user
+                    } else profileImageUrl,
                     contentDescription = "menu",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -248,7 +251,9 @@ fun Chat(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 AsyncImage(
-                                    model = if (profileImageUrl.isEmpty()) { R.drawable.user } else profileImageUrl,
+                                    model = if (profileImageUrl.isEmpty()) {
+                                        R.drawable.user
+                                    } else profileImageUrl,
                                     contentDescription = "menu",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -357,9 +362,11 @@ fun Chat(
 
         // 3. Input area - Always at bottom
 
-        Column(modifier
-            .fillMaxWidth()
-            .imePadding()) {
+        Column(
+            modifier
+                .fillMaxWidth()
+                .imePadding()
+        ) {
             Box(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
@@ -798,7 +805,9 @@ fun ChatBubble(
         ) {
             if (showProfileImage) {
                 AsyncImage(
-                    model = if (profileImageUrl.isEmpty()) { R.drawable.user } else profileImageUrl,
+                    model = if (profileImageUrl.isEmpty()) {
+                        R.drawable.user
+                    } else profileImageUrl,
                     contentDescription = "menu",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -832,4 +841,18 @@ fun ChatBubble(
             }
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun ChatPreview() {
+    Chat(
+        retrofitInterfaceMain = RetrofitInstanceMain.getApiService(""),
+        mainViewModel =  MainViewModel(RetrofitInstanceMain.getApiService("")),
+        receiverId =  1,
+        profileImageUrl =  "",
+        username =  "Abhi",
+        fullName =  "Abhinav",
+        senderId =  2
+    )
 }

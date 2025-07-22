@@ -21,28 +21,32 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
-import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.network.util.SessionManager
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.viewmodel.MainViewModel
 
 @Composable
-//@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", )
-fun Settings(modifier: Modifier = Modifier, navController: NavController, viewModel: MainViewModel, launchActivity: () -> Unit) {
+fun Settings(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: MainViewModel,
+    launchActivity: () -> Unit
+) {
 
     val context = LocalContext.current
 
-    Box(contentAlignment = Alignment.BottomCenter, modifier = modifier
-        .fillMaxSize()
-        .padding(20.dp)) {
+    Box(
+        contentAlignment = Alignment.BottomCenter, modifier = modifier
+            .fillMaxSize()
+            .padding(20.dp)
+    ) {
         Button(
             onClick = {
 //                viewModel.saveToken(null)
-                val saved = SessionManager.saveToken(context.applicationContext,null)
+                val saved = SessionManager.saveToken(context.applicationContext, null)
                 if (saved) {
                     launchActivity()
                 } else {
@@ -65,5 +69,13 @@ fun Settings(modifier: Modifier = Modifier, navController: NavController, viewMo
             )
         }
     }
+}
 
+@Preview(showSystemUi = true)
+@Composable
+fun SettingsPreview() {
+    Settings(
+        navController = rememberNavController(),
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""))
+    ) {}
 }

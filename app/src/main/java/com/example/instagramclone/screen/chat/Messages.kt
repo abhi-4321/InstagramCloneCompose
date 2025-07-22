@@ -44,14 +44,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.ReceiverInfo
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.WhiteVar
 import com.example.instagramclone.viewmodel.MainViewModel
 import java.time.Duration
@@ -325,4 +328,10 @@ fun Messages(
             }
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun MessagesPreview() {
+    Messages(navController = rememberNavController(), viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")))
 }

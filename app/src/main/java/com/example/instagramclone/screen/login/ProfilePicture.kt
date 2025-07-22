@@ -28,11 +28,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.LoginActivity
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
@@ -127,6 +129,10 @@ fun ProfilePicture(modifier: Modifier = Modifier, navController: NavHostControll
     }
 }
 
-fun uploadImage() {
+fun uploadImage() {}
 
+@Preview(showSystemUi = true)
+@Composable
+fun ProfilePicturePreview() {
+    ProfilePicture(navController = rememberNavController()) {}
 }

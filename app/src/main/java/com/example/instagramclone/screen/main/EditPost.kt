@@ -34,17 +34,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import androidx.work.WorkManager
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.viewmodel.MainViewModel
+import com.example.instagramclone.viewmodel.StoryViewModel
 
 @Composable
 fun EditPost(
@@ -143,5 +147,16 @@ fun EditPost(
             ) {
             Text("Share", fontSize = 15.sp, modifier = modifier.padding(vertical = 10.dp, horizontal = 5.dp), color = Color.White, fontWeight = FontWeight.Medium)
         }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun EditPostPreview() {
+    EditPost(
+        navController = rememberNavController(),
+        uri = ""
+    ) {
+        s1, s2 ->
     }
 }

@@ -40,7 +40,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.traceEventEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -57,8 +56,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
-import com.example.instagramclone.model.OtpRequest
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.viewmodel.LoginViewModel
@@ -180,7 +179,9 @@ fun Register(
         Spacer(modifier.height(15.dp))
         Button(
             onClick = {
-                if (textMobState.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(textMobState).matches().not()) {
+                if (textMobState.isEmpty() || Patterns.EMAIL_ADDRESS.matcher(textMobState).matches()
+                        .not()
+                ) {
                     Toast.makeText(context, "Enter a valid email", Toast.LENGTH_SHORT).show()
                     return@Button
                 }
@@ -248,4 +249,14 @@ fun Register(
             )
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun RegisterPreview() {
+    Register(
+        navController = rememberNavController(), viewModel = LoginViewModel(
+            RetrofitInstanceLogin.instance
+        )
+    )
 }

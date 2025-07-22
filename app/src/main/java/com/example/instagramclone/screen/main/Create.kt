@@ -3,8 +3,6 @@ package com.example.instagramclone.screen.main
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import androidx.activity.SystemBarStyle
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,14 +22,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -52,10 +47,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.instagramclone.R
@@ -66,8 +62,8 @@ import com.example.instagramclone.ui.theme.WhiteVar2
 @Composable
 fun Create(
     modifier: Modifier = Modifier,
-    navController: NavController = rememberNavController(),
-    onCreate: suspend (offset: Int) -> List<Pair<Uri,Bitmap?>>
+    navController: NavHostController,
+    onCreate: suspend (offset: Int) -> List<Pair<Uri, Bitmap?>>
 ) {
 
     // State for pagination
@@ -369,5 +365,16 @@ fun Create(
                 }
             }
         }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun CreatePreview() {
+    Create(
+        navController = rememberNavController()
+    ) {
+        offset ->
+        emptyList()
     }
 }

@@ -15,13 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Blue
+import com.example.instagramclone.viewmodel.MainViewModel
+import com.example.instagramclone.viewmodel.StoryViewModel
 
 @Composable
 fun Reels(modifier: Modifier = Modifier, navController: NavController) {
@@ -52,4 +57,10 @@ fun Reels(modifier: Modifier = Modifier, navController: NavController) {
             }
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun ReelsPreview() {
+    Reels(navController = rememberNavController())
 }

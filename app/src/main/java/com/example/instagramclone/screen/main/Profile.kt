@@ -2,7 +2,6 @@ package com.example.instagramclone.screen.main
 
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,6 +28,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,10 +38,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,9 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
-import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.HighlightItem
@@ -70,14 +68,20 @@ import com.example.instagramclone.model.Post
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.TabItem
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Blue
+import com.example.instagramclone.ui.theme.LightGray
 import com.example.instagramclone.ui.theme.TransGray
 import com.example.instagramclone.viewmodel.MainViewModel
-import kotlinx.coroutines.flow.flow
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp")
-fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel, navController: NavController, launchActivity: () -> Unit) {
+fun Profile(
+    modifier: Modifier = Modifier,
+    viewModel: MainViewModel,
+    navController: NavController,
+    launchActivity: () -> Unit
+) {
 
     val context = LocalContext.current
     val flowState by viewModel.liveData.collectAsState()
@@ -86,9 +90,13 @@ fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel, navControll
         mutableIntStateOf(0)
     }
 
-    when(flowState) {
+    when (flowState) {
         is MainViewModel.ApiResponse.Failure -> {
-            Toast.makeText(context,"Failed to fetch the feed : ${(flowState as MainViewModel.ApiResponse.Failure).error}",Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                "Failed to fetch the feed : ${(flowState as MainViewModel.ApiResponse.Failure).error}",
+                Toast.LENGTH_SHORT
+            ).show()
             Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(modifier.wrapContentSize(), verticalArrangement = Arrangement.Center) {
 
@@ -143,6 +151,7 @@ fun Profile(modifier: Modifier = Modifier, viewModel: MainViewModel, navControll
                 CircularProgressIndicator(modifier.size(40.dp))
             }
         }
+
         is MainViewModel.ApiResponse.Success<*> -> {
             val flow = (flowState as MainViewModel.ApiResponse.Success).data!!
 
@@ -203,6 +212,30 @@ fun Highlights(highlightsList: List<HighlightItem>, modifier: Modifier = Modifie
                 )
             }
         }
+
+        item {
+            Spacer(modifier = modifier.width(15.dp))
+            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    modifier = Modifier
+                        .size(70.dp)
+                        .border(width = 1.dp, color = Color.LightGray, shape = CircleShape)
+                        .clip(CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(35.dp)
+                    )
+                }
+                Spacer(modifier = modifier.height(5.dp))
+                Text(
+                    text = "New",
+                    fontSize = 13.sp
+                )
+            }
+        }
     }
 }
 
@@ -248,13 +281,13 @@ fun PostSection(
     posts: List<Post>,
     modifier: Modifier
 ) {
-    LazyVerticalGrid(columns = GridCells.Fixed(3),Modifier.scale(1.01f)) {
+    LazyVerticalGrid(columns = GridCells.Fixed(3), Modifier.scale(1.01f)) {
         items(posts.size) {
             AsyncImage(
                 modifier = modifier
                     .padding((0.75).dp)
                     .aspectRatio(1f),
-                model = if (posts[it].postUrl.isEmpty()) { R.drawable.baseline_more_horiz_24 } else posts[it].postUrl,
+                model = posts[it].postUrl.ifEmpty { R.drawable.ig },
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
             )
@@ -300,8 +333,7 @@ fun TopAppBar(username: String, modifier: Modifier = Modifier, navController: Na
                 .clickable {
                     Log.d("TAG", "TopAppBar: navigated")
                     navController.navigate(Screen.Settings)
-                }
-            ,
+                },
             tint = Color.Black
         )
     }
@@ -311,70 +343,94 @@ fun TopAppBar(username: String, modifier: Modifier = Modifier, navController: Na
 fun UserInfo(flow: ProfileItem, modifier: Modifier = Modifier) {
     Row(
         modifier
-            .wrapContentHeight()
+            .height(90.dp)
             .padding(horizontal = 15.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
 
         RoundImage(
             image = flow.profileImageUrl,
             modifier = Modifier
-                .weight(1f)
+                .fillMaxHeight(0.95f)
                 .aspectRatio(1.05f)
         )
 
-        Row(
+        Column(
             modifier
-                .weight(3f)
-                .wrapContentHeight()
-                .padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceAround
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 5.dp),
+            verticalArrangement = Arrangement.SpaceAround
         ) {
-            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = flow.postsCount,
-                    color = Color.Black,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Posts",
-                    color = Color.Gray,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
 
-            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = flow.followersCount,
-                    color = Color.Black,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Followers",
-                    color = Color.Gray,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Text(
+                text = flow.fullName,
+                color = Color.Black,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
 
-            Column(modifier.wrapContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = flow.followingCount,
-                    color = Color.Black,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Following",
-                    color = Color.Gray,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            Row(
+                modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(), horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    modifier.wrapContentSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = flow.postsCount,
+                        color = Color.Black,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "posts",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Column(
+                    modifier.wrapContentSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = flow.followersCount,
+                        color = Color.Black,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "followers",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Column(
+                    modifier.wrapContentSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = flow.followingCount,
+                        color = Color.Black,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "following",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
+
     }
 }
 
@@ -407,7 +463,7 @@ fun Options(modifier: Modifier = Modifier) {
         val (editProfile, shareProfile, addPerson) = createRefs()
 
         // Create a height reference that will be shared
-        val heightRef = createGuidelineFromTop(0.5f)
+        createGuidelineFromTop(0.5f)
 
         // Edit Profile Button
         Row(
@@ -417,9 +473,9 @@ fun Options(modifier: Modifier = Modifier) {
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
                     height = Dimension.wrapContent  // This height will be used as reference
-                    width = Dimension.percent(0.4f)  // Using percent instead of weight
+                    width = Dimension.percent(0.44f)  // Using percent instead of weight
                 }
-                .border(1.dp, TransGray, RoundedCornerShape(4.dp)),
+                .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -427,7 +483,7 @@ fun Options(modifier: Modifier = Modifier) {
                 fontSize = 14.sp,
                 fontWeight = FontWeight(500),
                 modifier = Modifier
-                    .padding(vertical = 5.dp)
+                    .padding(vertical = 7.dp)
             )
         }
 
@@ -439,9 +495,9 @@ fun Options(modifier: Modifier = Modifier) {
                     top.linkTo(editProfile.top)
                     bottom.linkTo(editProfile.bottom)
                     height = Dimension.fillToConstraints  // Match edit profile height
-                    width = Dimension.percent(0.4f)
+                    width = Dimension.percent(0.44f)
                 }
-                .border(1.dp, TransGray, RoundedCornerShape(4.dp)),
+                .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
@@ -449,7 +505,7 @@ fun Options(modifier: Modifier = Modifier) {
                 fontSize = 14.sp,
                 fontWeight = FontWeight(500),
                 modifier = Modifier
-                    .padding(vertical = 5.dp)
+                    .padding(vertical = 7.dp)
             )
         }
 
@@ -461,9 +517,9 @@ fun Options(modifier: Modifier = Modifier) {
                     top.linkTo(editProfile.top)
                     bottom.linkTo(editProfile.bottom)
                     height = Dimension.fillToConstraints  // Match edit profile height
-                    width = Dimension.percent(0.15f)
+                    width = Dimension.percent(0.08f)
                 }
-                .border(1.dp, TransGray, RoundedCornerShape(4.dp)),
+                .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -490,7 +546,7 @@ fun Line() {
 @Composable
 fun RoundImage(image: String, modifier: Modifier) {
     AsyncImage(
-        model = if (image.isEmpty()) R.drawable.user else image,
+        model = image.ifEmpty { R.drawable.user },
         contentDescription = "menu",
         contentScale = ContentScale.Crop,
         modifier = modifier
@@ -504,4 +560,13 @@ fun RoundImage(image: String, modifier: Modifier) {
             .clip(CircleShape)
 
     )
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun ProfilePreview() {
+    Profile(
+        navController = rememberNavController(),
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
+    ) { }
 }

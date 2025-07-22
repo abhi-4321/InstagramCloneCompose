@@ -5,19 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
-import com.example.instagramclone.network.util.ChatWebSocketListener
 import com.example.instagramclone.viewmodel.MainViewModel.ApiResponse
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import okhttp3.internal.notify
 import okio.ByteString
 
 class ChatViewModel(userId: Int, private val retrofitInterfaceMain: RetrofitInterfaceMain, mainViewModel: MainViewModel) :
@@ -25,7 +22,7 @@ class ChatViewModel(userId: Int, private val retrofitInterfaceMain: RetrofitInte
 
     val client = OkHttpClient()
     val request = Request.Builder()
-        .url("ws://192.168.1.39:3000?userId=$userId")  // replace with your actual URL
+        .url("ws://instagram-clone-3rjr.onrender.com?userId=$userId")  // replace with your actual URL
         .build()
 
     val listener = object : WebSocketListener() {

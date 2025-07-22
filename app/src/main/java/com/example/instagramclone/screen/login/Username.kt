@@ -57,6 +57,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.Green
 import com.example.instagramclone.ui.theme.MoreLightGray
@@ -256,4 +257,14 @@ fun Username(
             )
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun UsernamePreview() {
+    Username(
+        navController = rememberNavController(), viewModel = LoginViewModel(
+            RetrofitInstanceLogin.instance
+        )
+    )
 }

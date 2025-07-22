@@ -25,8 +25,12 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -47,14 +51,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Pink
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.StoryViewModel
@@ -328,7 +335,7 @@ fun Home(
             is MainViewModel.ApiResponse.Success<*> -> {
                 val postsList =
                     (postsListState as MainViewModel.ApiResponse.Success).data ?: emptyList()
-                items(postsList.size) {
+                items(postsList) { post ->
                     Row(
                         modifier = modifier
                             .fillMaxWidth()
@@ -339,8 +346,7 @@ fun Home(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-//                        painter = painterResource(id = R.drawable.p),
-                                painter = rememberImagePainter(data = postsList[it].profileImageUrl) {
+                                painter = rememberImagePainter(data = post.profileImageUrl) {
                                     error(
                                         R.drawable.p
                                     )
@@ -356,22 +362,34 @@ fun Home(
                                     .clip(CircleShape)
                             )
                             Text(
-                                text = postsList[it].username,
+                                text = post.username,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = modifier.padding(horizontal = 10.dp)
                             )
                         }
-                        Icon(
-                            modifier = modifier.size(25.dp),
-                            painter = painterResource(id = R.drawable.baseline_more_horiz_24),
-                            contentDescription = null
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Follow",
+                                modifier = Modifier
+                                    .wrapContentSize()
+                                    .background(
+                                        color = Color(0xFFEAEAEA),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 14.dp, vertical = 6.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Icon(
+                                modifier = modifier.size(25.dp),
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = null
+                            )
+                        }
                     }
 
                     Image(
-//                painter = painterResource(id = R.drawable.p),
-                        painter = rememberImagePainter(data = postsList[it].postUrl),
+                        painter = rememberImagePainter(data = post.postUrl),
                         contentDescription = "menu",
                         contentScale = ContentScale.Crop,
                         modifier = modifier
@@ -387,17 +405,23 @@ fun Home(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            val uId = (userDetailsState as MainViewModel.ApiResponse.Success).data?.id!!
                             Icon(
                                 modifier = modifier
                                     .fillMaxHeight()
-                                    .scale(0.9f),
-                                painter = painterResource(id = R.drawable.notliked),
+                                    .scale(1f),
+                                painter = painterResource(
+                                    id = if (post.likedBy.contains(uId))
+                                            R.drawable.liked
+                                        else
+                                            R.drawable.notliked
+                                ),
                                 tint = Color.Unspecified,
                                 contentDescription = null
                             )
-                            Spacer(modifier.width(3.dp))
+                            Spacer(modifier.width(4.dp))
                             Text(
-                                postsList[it].likesCount,
+                                post.likesCount,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -405,14 +429,16 @@ fun Home(
                             Icon(
                                 modifier = modifier
                                     .fillMaxHeight()
-                                    .offset(y = (-0.5).dp),
+                                    .offset(y = (-0.5).dp)
+                                    .clickable {
+                                    },
                                 painter = painterResource(id = R.drawable.comment),
                                 tint = Color.Unspecified,
                                 contentDescription = null
                             )
-                            Spacer(modifier.width(3.dp))
+                            Spacer(modifier.width(4.dp))
                             Text(
-                                postsList[it].commentsCount,
+                                post.commentsCount,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -437,14 +463,14 @@ fun Home(
                     }
                     Spacer(modifier.height(5.dp))
                     Text(
-                        "Liked by zufu.kid and ${postsList[it].likesCount} others",
+                        "Liked by zufu.kid and ${post.likesCount} others",
                         modifier = modifier.padding(horizontal = 15.dp),
                         fontSize = 14.sp
                     )
 
                     Spacer(modifier.height(5.dp))
                     Text(
-                        "${postsList[it].username} ${postsList[it].caption}",
+                        "${post.username} ${post.caption}",
                         modifier = modifier.padding(horizontal = 15.dp),
                         fontSize = 14.sp,
                         maxLines = 2,
@@ -453,7 +479,7 @@ fun Home(
 
                     Spacer(modifier.height(5.dp))
                     Text(
-                        "View all ${postsList[it].commentsCount} comments",
+                        "View all ${post.commentsCount} comments",
                         color = Color(0xFF6F7680),
                         modifier = modifier.padding(horizontal = 15.dp),
                         fontSize = 14.sp,
@@ -472,4 +498,14 @@ fun Home(
             }
         }
     }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun HomePreview() {
+    Home(
+        navController = rememberNavController(),
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
+        storyViewModel = StoryViewModel(RetrofitInstanceMain.getApiService(""))
+    ) { }
 }

@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -52,10 +51,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.instagramclone.R
 import com.example.instagramclone.navigation.Screen
+import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.MoreLightGray
 import com.example.instagramclone.viewmodel.LoginViewModel
-import kotlin.coroutines.coroutineContext
 
 @Composable
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
@@ -170,12 +169,14 @@ fun Name(
             )
         }
         Spacer(modifier.weight(1f, true))
-        Row(modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp)
-            .clickable {
-                navController.popBackStack(Screen.Login, false)
-            }, horizontalArrangement = Arrangement.Center) {
+        Row(
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp)
+                .clickable {
+                    navController.popBackStack(Screen.Login, false)
+                }, horizontalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = "I already have an account",
                 fontSize = 15.sp,
@@ -184,4 +185,13 @@ fun Name(
             )
         }
     }
+}
+
+@Composable
+@Preview(showSystemUi = true)
+fun NamePreview() {
+    Name(
+        navController = rememberNavController(),
+        viewModel = LoginViewModel(RetrofitInstanceLogin.instance)
+    )
 }

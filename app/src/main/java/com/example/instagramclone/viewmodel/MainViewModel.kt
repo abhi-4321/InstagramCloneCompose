@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.util.recursiveFetchLongSparseArray
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.model.ChatDisplayUser
+import com.example.instagramclone.model.Comment
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.StoryDisplayUser
@@ -25,7 +26,9 @@ import java.io.File
 class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : ViewModel() {
 
     // Profile
-    private val _flow = MutableStateFlow<ApiResponse<ProfileItem>>(ApiResponse.Idle)
+    private val _flow = MutableStateFlow<ApiResponse<ProfileItem>>(ApiResponse.Success(
+        ProfileItem()
+    ))
     val liveData: StateFlow<ApiResponse<ProfileItem>> get() = _flow
 
     fun fetchUser() {
