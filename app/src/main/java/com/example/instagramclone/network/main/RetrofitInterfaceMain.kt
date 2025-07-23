@@ -2,6 +2,7 @@ package com.example.instagramclone.network.main
 
 import com.example.instagramclone.model.Chat
 import com.example.instagramclone.model.ChatDisplayUser
+import com.example.instagramclone.model.LikeResponse
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.StoryDisplayUser
@@ -17,7 +18,6 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
-import java.io.File
 
 interface RetrofitInterfaceMain {
 
@@ -47,8 +47,14 @@ interface RetrofitInterfaceMain {
 
     @Multipart
     @POST("/post")
-    suspend fun createPost(@Part("caption") caption: RequestBody, @Part image: MultipartBody.Part): Response<Void>
+    suspend fun createPost(
+        @Part("caption") caption: RequestBody,
+        @Part image: MultipartBody.Part
+    ): Response<Void>
 
     @GET("/story/{userId}")
-    suspend fun getStories(@Path("userId") userId: Int) : Response<List<StoryItem>>
+    suspend fun getStories(@Path("userId") userId: Int): Response<List<StoryItem>>
+
+    @POST("/post/like/{postId}")
+    suspend fun like(@Path("postId") postId: Int): Response<LikeResponse>
 }

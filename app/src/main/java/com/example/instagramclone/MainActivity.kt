@@ -58,7 +58,7 @@ import com.example.instagramclone.screen.chat.NewMessage
 import com.example.instagramclone.screen.main.Create
 import com.example.instagramclone.screen.main.EditPost
 import com.example.instagramclone.screen.main.Home
-import com.example.instagramclone.screen.main.Profile
+import com.example.instagramclone.screen.main.MyProfile
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
 import com.example.instagramclone.screen.main.Story
@@ -194,7 +194,7 @@ class MainActivity : ComponentActivity() {
                     exitTransition = { null },
                     popEnterTransition = { null }
                 ) {
-                    Profile(viewModel = viewModel, navController = navController) {
+                    MyProfile(viewModel = viewModel, navController = navController) {
                         startActivity(Intent(this@MainActivity, LoginActivity::class.java))
                         finish()
                     }

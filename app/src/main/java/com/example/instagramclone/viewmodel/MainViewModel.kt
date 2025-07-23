@@ -3,32 +3,23 @@ package com.example.instagramclone.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.util.recursiveFetchLongSparseArray
-import com.example.instagramclone.model.Chat
 import com.example.instagramclone.model.ChatDisplayUser
-import com.example.instagramclone.model.Comment
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
-import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.model.StoryItem
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.internal.EMPTY_REQUEST
-import java.io.File
 
 class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : ViewModel() {
 
     // Profile
-    private val _flow = MutableStateFlow<ApiResponse<ProfileItem>>(ApiResponse.Success(
-        ProfileItem()
-    ))
+    private val _flow = MutableStateFlow<ApiResponse<ProfileItem>>(
+        ApiResponse.Success(
+            ProfileItem()
+        )
+    )
     val liveData: StateFlow<ApiResponse<ProfileItem>> get() = _flow
 
     fun fetchUser() {
@@ -39,7 +30,9 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
             if (response.isSuccessful && response.body() != null)
                 _flow.value = ApiResponse.Success(response.body()!!)
             else
-                _flow.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
+                _flow.value = ApiResponse.Failure(
+                    response.errorBody()?.string() ?: response.code().toString()
+                )
         }
     }
 
@@ -56,14 +49,17 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
             if (responseFeed.isSuccessful && responseFeed.body() != null) {
                 _flowFeed.value = ApiResponse.Success(responseFeed.body()!!)
             } else {
-                _flowFeed.value = ApiResponse.Failure(responseFeed.errorBody()?.string() ?: responseFeed.code().toString())
+                _flowFeed.value = ApiResponse.Failure(
+                    responseFeed.errorBody()?.string() ?: responseFeed.code().toString()
+                )
             }
         }
     }
 
     // Chat users
 
-    private val _chatUsersFlow = MutableStateFlow<ApiResponse<List<ChatDisplayUser>>>(ApiResponse.Idle)
+    private val _chatUsersFlow =
+        MutableStateFlow<ApiResponse<List<ChatDisplayUser>>>(ApiResponse.Idle)
     val chatUsersFlow: StateFlow<ApiResponse<List<ChatDisplayUser>>> get() = _chatUsersFlow
 
     fun fetchChatUsers() {
@@ -75,12 +71,15 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
             if (response.isSuccessful && response.body() != null) {
                 _chatUsersFlow.value = ApiResponse.Success(response.body()!!)
             } else {
-                _chatUsersFlow.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
+                _chatUsersFlow.value = ApiResponse.Failure(
+                    response.errorBody()?.string() ?: response.code().toString()
+                )
             }
         }
     }
 
-    private val _allChatUsersFlow = MutableStateFlow<ApiResponse<List<ChatDisplayUser>>>(ApiResponse.Idle)
+    private val _allChatUsersFlow =
+        MutableStateFlow<ApiResponse<List<ChatDisplayUser>>>(ApiResponse.Idle)
     val allChatUsersFlow: StateFlow<ApiResponse<List<ChatDisplayUser>>> get() = _allChatUsersFlow
 
     fun fetchAllChatUsers() {
@@ -92,7 +91,9 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
             if (response.isSuccessful && response.body() != null) {
                 _allChatUsersFlow.value = ApiResponse.Success(response.body()!!)
             } else {
-                _allChatUsersFlow.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
+                _allChatUsersFlow.value = ApiResponse.Failure(
+                    response.errorBody()?.string() ?: response.code().toString()
+                )
             }
         }
     }
@@ -111,15 +112,59 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
             if (response.isSuccessful && response.body() != null) {
                 _storiesFlow.value = ApiResponse.Success(response.body()!!)
             } else {
-                _storiesFlow.value = ApiResponse.Failure(response.errorBody()?.string() ?: response.code().toString())
+                _storiesFlow.value = ApiResponse.Failure(
+                    response.errorBody()?.string() ?: response.code().toString()
+                )
             }
+        }
+    }
+
+    // Like
+
+    fun toggleLikePost(postId: Int, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = retrofitInterfaceMain.like(postId) // Your toggle API call
+                if (response.isSuccessful) {
+                    // Optionally refresh specific post data or entire feed
+                    // fetchFeed()
+                    callback(true)
+                } else {
+                    callback(false)
+                }
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "Error toggling like: ${e.message}")
+                callback(false)
+            }
+        }
+    }
+
+    // User Profile
+    private val _upFlow = MutableStateFlow<ApiResponse<ProfileItem>>(
+        ApiResponse.Success(
+            ProfileItem()
+        )
+    )
+    val upLiveData: StateFlow<ApiResponse<ProfileItem>> get() = _upFlow
+
+    fun fetchUserProfile() {
+        viewModelScope.launch {
+            _upFlow.value = ApiResponse.Loading
+            val response = retrofitInterfaceMain.getUser()
+            Log.d("UserResponse", "${response.isSuccessful} ${response.code()}")
+            if (response.isSuccessful && response.body() != null)
+                _upFlow.value = ApiResponse.Success(response.body()!!)
+            else
+                _upFlow.value = ApiResponse.Failure(
+                    response.errorBody()?.string() ?: response.code().toString()
+                )
         }
     }
 
     sealed class ApiResponse<out T> {
         data class Success<T>(val data: T?) : ApiResponse<T>()
-        data class Failure(val error: String?): ApiResponse<Nothing>()
-        data object Loading: ApiResponse<Nothing>()
-        data object Idle: ApiResponse<Nothing>()
+        data class Failure(val error: String?) : ApiResponse<Nothing>()
+        data object Loading : ApiResponse<Nothing>()
+        data object Idle : ApiResponse<Nothing>()
     }
 }

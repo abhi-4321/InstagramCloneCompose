@@ -72,6 +72,6 @@ data class ProfileItem(
                 comments = emptyList()
             )
         ),
-        false
+        true
     )
 }

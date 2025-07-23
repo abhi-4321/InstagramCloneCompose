@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -35,11 +36,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,8 +67,13 @@ import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Pink
+import com.example.instagramclone.ui.theme.TransGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.StoryViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp")
 @Composable
@@ -89,6 +98,19 @@ fun Home(
     }
 
     var imageUrl by remember { mutableStateOf("") }
+
+    var localLikedPosts by remember { mutableStateOf(setOf<Int>()) }
+    var localLikeCounts by remember { mutableStateOf(mapOf<Int, Int>()) }
+    val pendingApiCalls = remember { mutableStateMapOf<Int, Job>() }
+    val coroutineScope = rememberCoroutineScope()
+
+    DisposableEffect(Unit)
+    {
+        onDispose {
+            pendingApiCalls.values.forEach { it.cancel() }
+            pendingApiCalls.clear()
+        }
+    }
 
     // When userDetailsState updates, update imageUrl
     LaunchedEffect(userDetailsState) {
@@ -300,7 +322,12 @@ fun Home(
             }
 
             Spacer(modifier.height(15.dp))
-            Line()
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .border(1.dp, TransGray, CutCornerShape(1.dp))
+            ) {}
         }
 
 
@@ -409,9 +436,60 @@ fun Home(
                             Icon(
                                 modifier = modifier
                                     .fillMaxHeight()
-                                    .scale(1f),
+                                    .scale(1f)
+                                    .clickable {
+                                        val postId = post.id // Assuming your post has an id field
+                                        val isCurrentlyLiked = post.likedBy.contains(uId) || localLikedPosts.contains(postId)
+
+                                        // Immediately update UI state
+                                        localLikedPosts = if (isCurrentlyLiked) {
+                                            localLikedPosts - postId
+                                        } else {
+                                            localLikedPosts + postId
+                                        }
+
+                                        // Update local like count
+                                        val currentCount = localLikeCounts[postId] ?: post.likesCount.toIntOrNull() ?: 0
+                                        localLikeCounts = localLikeCounts + (postId to if (isCurrentlyLiked) currentCount - 1 else currentCount + 1)
+
+                                        // Cancel any existing pending API call for this post
+                                        pendingApiCalls[postId]?.cancel()
+
+                                        // Start new 2-second timer for API call
+                                        val apiJob = coroutineScope.launch {
+                                            delay(2000) // 2 second delay
+
+                                            // Make API call after delay
+                                            viewModel.toggleLikePost(postId) { success ->
+                                                if (!success) {
+                                                    // Revert UI state on API failure
+                                                    localLikedPosts = if (isCurrentlyLiked) {
+                                                        localLikedPosts + postId
+                                                    } else {
+                                                        localLikedPosts - postId
+                                                    }
+
+                                                    // Revert like count
+                                                    val revertCount = localLikeCounts[postId] ?: currentCount
+                                                    localLikeCounts = localLikeCounts + (postId to if (isCurrentlyLiked) revertCount + 1 else revertCount - 1)
+
+                                                    Toast.makeText(context, "Failed to update like", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    // Success - optionally refresh feed to get latest server state
+                                                    // viewModel.fetchFeed()
+                                                }
+                                            }
+
+                                            // Remove from pending calls
+                                            pendingApiCalls.remove(postId)
+                                        }
+
+                                        // Store the job so it can be cancelled if needed
+                                        pendingApiCalls[postId] = apiJob
+                                    }
+                                ,
                                 painter = painterResource(
-                                    id = if (post.likedBy.contains(uId))
+                                    id = if (post.likedBy.contains(uId) || localLikedPosts.contains(post.id))
                                             R.drawable.liked
                                         else
                                             R.drawable.notliked
@@ -421,7 +499,7 @@ fun Home(
                             )
                             Spacer(modifier.width(4.dp))
                             Text(
-                                post.likesCount,
+                                (localLikeCounts[post.id] ?: post.likesCount.toIntOrNull() ?: 0).toString(),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -463,7 +541,7 @@ fun Home(
                     }
                     Spacer(modifier.height(5.dp))
                     Text(
-                        "Liked by zufu.kid and ${post.likesCount} others",
+                        "Liked by zufu.kid and ${(localLikeCounts[post.id] ?: post.likesCount.toIntOrNull() ?: 0)} others",
                         modifier = modifier.padding(horizontal = 15.dp),
                         fontSize = 14.sp
                     )
