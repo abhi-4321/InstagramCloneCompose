@@ -68,6 +68,7 @@ import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Pink
 import com.example.instagramclone.ui.theme.TransGray
+import com.example.instagramclone.ui.theme.WhiteGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.StoryViewModel
 import kotlinx.coroutines.Job
@@ -401,7 +402,7 @@ fun Home(
                                 modifier = Modifier
                                     .wrapContentSize()
                                     .background(
-                                        color = Color(0xFFEAEAEA),
+                                        color = WhiteGray,
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .padding(horizontal = 14.dp, vertical = 6.dp)

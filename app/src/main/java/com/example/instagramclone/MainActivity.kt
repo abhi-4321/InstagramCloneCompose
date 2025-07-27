@@ -55,8 +55,10 @@ import com.example.instagramclone.network.main.RetrofitInterfaceMain
 import com.example.instagramclone.screen.chat.Chat
 import com.example.instagramclone.screen.chat.Messages
 import com.example.instagramclone.screen.chat.NewMessage
+import com.example.instagramclone.screen.main.AddHighlight
 import com.example.instagramclone.screen.main.Create
 import com.example.instagramclone.screen.main.EditPost
+import com.example.instagramclone.screen.main.HighlightTitle
 import com.example.instagramclone.screen.main.Home
 import com.example.instagramclone.screen.main.MyProfile
 import com.example.instagramclone.screen.main.Reels
@@ -364,6 +366,15 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     )
+                }
+
+                composable<Screen.AddHighLight> {
+                    AddHighlight()
+                }
+
+                composable<Screen.HighlightTitle> {
+                    val args = it.toRoute<Screen.HighlightTitle>()
+                    HighlightTitle(args.url)
                 }
             }
         }

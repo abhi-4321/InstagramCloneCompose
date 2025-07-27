@@ -71,6 +71,7 @@ import com.example.instagramclone.model.TabItem
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.TransGray
+import com.example.instagramclone.ui.theme.WhiteGray
 import com.example.instagramclone.viewmodel.MainViewModel
 
 @Composable
@@ -333,7 +334,7 @@ fun UserProfile(
                         Box(
                             Modifier
                                 .size(60.dp)
-                                .background(color = Color(0xFFEAEAEA), shape = CircleShape),
+                                .background(color = WhiteGray, shape = CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -387,7 +388,7 @@ fun UserProfile(
                                     width =
                                         Dimension.percent(0.44f)  // Using percent instead of weight
                                 }
-                                .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
+                                .background(WhiteGray, RoundedCornerShape(4.dp)),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -417,7 +418,7 @@ fun UserProfile(
                                         Dimension.fillToConstraints  // Match edit profile height
                                     width = Dimension.percent(0.44f)
                                 }
-                                .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
+                                .background(WhiteGray, RoundedCornerShape(4.dp)),
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text(
@@ -440,7 +441,7 @@ fun UserProfile(
                                         Dimension.fillToConstraints  // Match edit profile height
                                     width = Dimension.percent(0.08f)
                                 }
-                                .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
+                                .background(WhiteGray, RoundedCornerShape(4.dp)),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

@@ -69,4 +69,10 @@ sealed interface Screen {
 
     @Serializable
     data class Story(val userId: Int, val profileImageUrl: String, val username: String, val fullName: String) : Screen
+
+    @Serializable
+    data object AddHighLight : Screen
+
+    @Serializable
+    data class HighlightTitle(val url: String) : Screen
 }

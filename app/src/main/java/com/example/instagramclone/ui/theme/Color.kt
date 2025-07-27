@@ -27,3 +27,5 @@ val Pink = Color(0xF5F55C5C)
 val PinkDark = Color(0xFFE516EC)
 
 val Green = Color(0xFF378737)
+
+val WhiteGray = Color(0xFFEAEAEA)

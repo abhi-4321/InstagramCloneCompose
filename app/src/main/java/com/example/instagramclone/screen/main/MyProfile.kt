@@ -71,6 +71,7 @@ import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.TransGray
+import com.example.instagramclone.ui.theme.WhiteGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import kotlin.text.ifEmpty
 
@@ -331,7 +332,7 @@ fun MyProfile(
                                     Dimension.wrapContent  // This height will be used as reference
                                 width = Dimension.percent(0.44f)  // Using percent instead of weight
                             }
-                            .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
+                            .background(WhiteGray, RoundedCornerShape(4.dp)),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
@@ -353,7 +354,7 @@ fun MyProfile(
                                 height = Dimension.fillToConstraints  // Match edit profile height
                                 width = Dimension.percent(0.44f)
                             }
-                            .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
+                            .background(WhiteGray, RoundedCornerShape(4.dp)),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
@@ -375,7 +376,7 @@ fun MyProfile(
                                 height = Dimension.fillToConstraints  // Match edit profile height
                                 width = Dimension.percent(0.08f)
                             }
-                            .background(Color(0xFFEAEAEA), RoundedCornerShape(4.dp)),
+                            .background(WhiteGray, RoundedCornerShape(4.dp)),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -492,7 +493,7 @@ fun MyProfile(
                                         .size(180.dp),
                                     model = flow.posts[it].postUrl.ifEmpty { R.drawable.ig },
                                     contentDescription = null,
-                                    contentScale = ContentScale.Crop,
+                                contentScale = ContentScale.Crop,
                                 )
                             }
                         }
