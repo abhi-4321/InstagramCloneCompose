@@ -64,6 +64,7 @@ import com.example.instagramclone.screen.main.MyProfile
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
 import com.example.instagramclone.screen.main.Story
+import com.example.instagramclone.screen.main.ViewPost
 import com.example.instagramclone.screen.util.Settings
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.MainViewModel
@@ -221,7 +222,7 @@ class MainActivity : ComponentActivity() {
                     exitTransition = { null },
                     popEnterTransition = { null }
                 ) {
-                    Search(navController = navController)
+                    Search(navController = navController, viewModel = viewModel)
                 }
                 composable<Screen.Reels>(
                     enterTransition = { null },
@@ -375,6 +376,11 @@ class MainActivity : ComponentActivity() {
                 composable<Screen.HighlightTitle> {
                     val args = it.toRoute<Screen.HighlightTitle>()
                     HighlightTitle(args.url)
+                }
+
+                composable<Screen.ViewPost> {
+                    val args = it.toRoute<Screen.ViewPost>()
+                    ViewPost(args.postId,viewModel,navController,args.from)
                 }
             }
         }

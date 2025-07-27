@@ -1,6 +1,5 @@
 package com.example.instagramclone.screen.main
 
-import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,18 +21,22 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +56,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.WhiteGray
@@ -70,6 +74,8 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
         mutableStateOf(false)
     }
 
+    val postsListState by viewModel.liveDataFeed.collectAsState()
+
     Column(
         modifier
             .fillMaxSize()
@@ -82,7 +88,9 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
                 Icon(
                     Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.padding(start = 10.dp).size(22.dp)
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .size(22.dp)
                 )
             }
 
@@ -150,16 +158,48 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
                 }
             }
         } else {
-            LazyVerticalGrid(columns = GridCells.Fixed(3)) {
-                items(10) {
-                    Image(
-                        modifier = modifier
-                            .padding((0.75).dp)
-                            .aspectRatio(1f),
-                        painter = painterResource(R.drawable.p),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                    )
+            when (postsListState) {
+                is MainViewModel.ApiResponse.Failure -> {
+                    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                                .clickable {
+                                    viewModel.fetchFeed()
+                                }
+                        )
+                    }
+                }
+
+                MainViewModel.ApiResponse.Idle -> {}
+
+                MainViewModel.ApiResponse.Loading -> {
+                    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(modifier.size(40.dp))
+                    }
+                }
+
+                is MainViewModel.ApiResponse.Success<*> -> {
+                    val list =
+                        (postsListState as MainViewModel.ApiResponse.Success).data ?: emptyList()
+
+                    LazyVerticalGrid(columns = GridCells.Fixed(3)) {
+                        items(list) { post ->
+                            AsyncImage(
+                                modifier = modifier
+                                    .padding((0.75).dp)
+                                    .aspectRatio(1f)
+                                    .clickable {
+                                        navController.navigate(Screen.ViewPost(post.id,"Explore"))
+                                    }
+                                ,
+                                model = post.postUrl,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -228,7 +268,9 @@ fun SearchBar(
                                 Icons.Default.Close,
                                 contentDescription = null,
                                 tint = Gray,
-                                modifier = Modifier.size((17.5).dp).align(Alignment.CenterEnd)
+                                modifier = Modifier
+                                    .size((17.5).dp)
+                                    .align(Alignment.CenterEnd)
                             )
                         }
                     }

@@ -68,6 +68,7 @@ import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.TabItem
+import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.TransGray
@@ -535,7 +536,11 @@ fun UserProfile(
                                     AsyncImage(
                                         modifier = modifier
                                             .padding((0.75).dp)
-                                            .size(180.dp),
+                                            .size(180.dp)
+                                            .clickable {
+                                                navController.navigate(Screen.ViewPost(flow.posts[it].id,"Posts"))
+                                            }
+                                        ,
                                         model = flow.posts[it].postUrl.ifEmpty { R.drawable.ig },
                                         contentDescription = null,
                                         contentScale = ContentScale.Crop,
@@ -555,7 +560,11 @@ fun UserProfile(
                                     AsyncImage(
                                         modifier = modifier
                                             .padding((0.75).dp)
-                                            .size(180.dp),
+                                            .size(180.dp)
+                                            .clickable {
+                                                navController.navigate(Screen.ViewPost(flow.posts[it].id,"Posts"))
+                                            }
+                                        ,
                                         model = flow.posts[it].postUrl.ifEmpty { R.drawable.ig },
                                         contentDescription = null,
                                         contentScale = ContentScale.Crop,

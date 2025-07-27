@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.instagramclone.model.ChatDisplayUser
+import com.example.instagramclone.model.Comment
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.StoryItem
@@ -37,7 +38,39 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
     }
 
     // Dashboard
-    private val _flowFeed = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Idle)
+    private val _flowFeed = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Success(
+        listOf(
+            PostDisplay(
+                id = 1,
+                userId = 2,
+                postUrl = "https://example.com/post/1.jpg",
+                caption = "Enjoying the sunshine! ☀️",
+                likesCount = "150",
+                likedBy = listOf(101, 102, 103),
+                commentsCount = "2",
+                comments = listOf(
+                    Comment(
+                        id = 1,
+                        userId = 201,
+                        postId = 1,
+                        comment = "Nice picture!",
+                        likesCount = "10",
+                        likedBy = listOf(202, 203)
+                    ),
+                    Comment(
+                        id = 2,
+                        userId = 202,
+                        postId = 1,
+                        comment = "Love this spot 😍",
+                        likesCount = "8",
+                        likedBy = listOf(201, 204)
+                    )
+                ),
+                username = "sunny_user",
+                profileImageUrl = "https://example.com/profile/100.jpg"
+            )
+        )
+    ))
     val liveDataFeed: StateFlow<ApiResponse<List<PostDisplay>>> get() = _flowFeed
 
     fun fetchFeed() {

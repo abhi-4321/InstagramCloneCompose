@@ -75,4 +75,7 @@ sealed interface Screen {
 
     @Serializable
     data class HighlightTitle(val url: String) : Screen
+
+    @Serializable
+    data class ViewPost(val postId: Int, val from: String) : Screen
 }
