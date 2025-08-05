@@ -1,6 +1,5 @@
 package com.example.instagramclone.screen.main
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -60,7 +59,6 @@ import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.PostDisplay
-import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Pink
 import com.example.instagramclone.ui.theme.WhiteGray
@@ -163,6 +161,22 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
                     fontWeight = FontWeight.Bold
                 )
             }
+
+            if (from == "Posts") {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Follow",
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .wrapContentSize()
+                            .background(
+                                color = WhiteGray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    )
+                }
+            }
         }
 
         Row(
@@ -194,16 +208,18 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Follow",
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .background(
-                            color = WhiteGray,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
-                )
+                if (from == "Explore") {
+                    Text(
+                        text = "Follow",
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .background(
+                                color = WhiteGray,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    )
+                }
                 Spacer(Modifier.width(4.dp))
                 Icon(
                     modifier = Modifier.size(25.dp),
@@ -213,8 +229,8 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
             }
         }
 
-        Image(
-            painter = rememberImagePainter(data = post.postUrl),
+        AsyncImage(
+            model = post.postUrl,
             contentDescription = "menu",
             contentScale = ContentScale.Crop,
             modifier = Modifier

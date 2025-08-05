@@ -1,6 +1,5 @@
 package com.example.instagramclone.screen.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,17 +35,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,8 +61,12 @@ import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.ui.theme.Gray
 import com.example.instagramclone.ui.theme.WhiteGray
 import com.example.instagramclone.viewmodel.MainViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun Search(modifier: Modifier = Modifier, navController: NavController, viewModel: MainViewModel) {
 
@@ -74,7 +78,24 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
         mutableStateOf(false)
     }
 
-    val postsListState by viewModel.liveDataFeed.collectAsState()
+    val debouncePeriod = 500L // milliseconds
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchExplore()
+    }
+
+    LaunchedEffect(query) {
+        snapshotFlow { query }
+            .debounce(debouncePeriod)
+            .filter { it.length >= 2 } // avoid short queries
+            .distinctUntilChanged()
+            .collect {
+                viewModel.searchUsers(it)
+            }
+    }
+
+    val searchResponse by viewModel.searchResults.collectAsState()
+    val exploreState by viewModel.flowExplore.collectAsState()
 
     Column(
         modifier
@@ -104,67 +125,95 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
         }
 
         if (isActive) {
-            LazyColumn {
-                items(4) {
-                    Spacer(Modifier.height(10.dp))
-                    Row(
-                        modifier
-                            .padding(horizontal = 10.dp)
-                            .wrapContentHeight()
-                            .fillMaxWidth()
-                            .clickable {},
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            modifier.wrapContentSize(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            AsyncImage(
-                                model = if (true) {
-                                    R.drawable.user
-                                } else "",
-                                contentDescription = "menu",
-                                contentScale = ContentScale.Crop,
-                                modifier = modifier
-                                    .size(45.dp)
-                                    .aspectRatio(1f, matchHeightConstraintsFirst = true)
-                                    .padding(3.dp)
-                                    .clip(CircleShape)
-                            )
 
-                            Spacer(modifier.width(15.dp))
+            when (searchResponse) {
+                is MainViewModel.ApiResponse.Failure -> {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                        Text(
+                            text = "An error occurred"
+                        )
+                    }
+                }
 
-                            Column {
-                                Text(
-                                    text = "Abhinav Mahalwal",
-//                                    text = list[it].fullName,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = Color.Black
-                                )
-                                Spacer(modifier.height(3.dp))
+                is MainViewModel.ApiResponse.Idle -> {}
+                is MainViewModel.ApiResponse.Loading -> {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = Color.Black,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                }
 
-                                Text(
-                                    text = "_d_evil_02",
-//                                    text = list[it].username,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = Color.Gray
-                                )
+                is MainViewModel.ApiResponse.Success<*> -> {
+                    val list = (searchResponse as MainViewModel.ApiResponse.Success).data?.users
+                        ?: emptyList()
+
+                    LazyColumn {
+                        items(4) {
+                            Spacer(Modifier.height(10.dp))
+                            Row(
+                                modifier
+                                    .padding(horizontal = 10.dp)
+                                    .wrapContentHeight()
+                                    .fillMaxWidth()
+                                    .clickable {},
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    modifier.wrapContentSize(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AsyncImage(
+                                        model = list[it].profileImageUrl.ifEmpty {
+                                            R.drawable.user
+                                        },
+                                        contentDescription = "menu",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = modifier
+                                            .size(45.dp)
+                                            .aspectRatio(1f, matchHeightConstraintsFirst = true)
+                                            .padding(3.dp)
+                                            .clip(CircleShape)
+                                    )
+
+                                    Spacer(modifier.width(15.dp))
+
+                                    Column {
+                                        Text(
+//                                    text = "Abhinav Mahalwal",
+                                            text = list[it].fullName,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Spacer(modifier.height(3.dp))
+
+                                        Text(
+//                                    text = "_d_evil_02",
+                                            text = list[it].username,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         } else {
-            when (postsListState) {
+            when (exploreState) {
                 is MainViewModel.ApiResponse.Failure -> {
                     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = null,
-                            modifier = Modifier.size(30.dp)
+                            modifier = Modifier
+                                .size(30.dp)
                                 .clickable {
                                     viewModel.fetchFeed()
                                 }
@@ -182,7 +231,7 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
 
                 is MainViewModel.ApiResponse.Success<*> -> {
                     val list =
-                        (postsListState as MainViewModel.ApiResponse.Success).data ?: emptyList()
+                        (exploreState as MainViewModel.ApiResponse.Success).data ?: emptyList()
 
                     LazyVerticalGrid(columns = GridCells.Fixed(3)) {
                         items(list) { post ->
@@ -191,9 +240,8 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
                                     .padding((0.75).dp)
                                     .aspectRatio(1f)
                                     .clickable {
-                                        navController.navigate(Screen.ViewPost(post.id,"Explore"))
-                                    }
-                                ,
+                                        navController.navigate(Screen.ViewPost(post.id, "Explore"))
+                                    },
                                 model = post.postUrl,
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,

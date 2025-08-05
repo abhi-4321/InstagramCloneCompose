@@ -42,6 +42,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -80,11 +81,14 @@ fun UserProfile(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     navController: NavController,
-    launchActivity: () -> Unit
+    userId: Int
 ) {
 
-    val context = LocalContext.current
-    val flowState by viewModel.upLiveData.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserProfile(userId)
+    }
+
+    val flowState by viewModel.flowUserProfile.collectAsState()
 
     var selectedIndex by remember {
         mutableIntStateOf(0)
@@ -96,56 +100,10 @@ fun UserProfile(
 
     when (flowState) {
         is MainViewModel.ApiResponse.Failure -> {
-            Toast.makeText(
-                context,
-                "Failed to fetch the feed : ${(flowState as MainViewModel.ApiResponse.Failure).error}",
-                Toast.LENGTH_SHORT
-            ).show()
             Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(modifier.wrapContentSize(), verticalArrangement = Arrangement.Center) {
-
-                    Button(
-                        onClick = {
-                            viewModel.fetchUser()
-                        },
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Blue),
-                        shape = RoundedCornerShape(28.dp)
-                    ) {
-                        Text(
-                            modifier = modifier.padding(vertical = 4.dp),
-                            text = "Retry",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.White,
-                            letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
-                        )
-                    }
-
-                    Spacer(modifier.height(20.dp))
-
-                    Button(
-                        onClick = {
-                            launchActivity()
-                        },
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Blue),
-                        shape = RoundedCornerShape(28.dp)
-                    ) {
-                        Text(
-                            modifier = modifier.padding(vertical = 4.dp),
-                            text = "Log out",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.White,
-                            letterSpacing = TextUnit(0.5f, TextUnitType.Sp)
-                        )
-                    }
-                }
+                Text("Failed to load. Retry", Modifier.clickable{
+                    viewModel.fetchUserProfile(userId)
+                }, color = Blue)
             }
         }
 
@@ -585,5 +543,6 @@ fun UserProfilePreview() {
     UserProfile(
         navController = rememberNavController(),
         viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
-    ) { }
+        userId = 0
+    )
 }

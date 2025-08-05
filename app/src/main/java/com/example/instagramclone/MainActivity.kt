@@ -17,7 +17,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -50,7 +49,6 @@ import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.navigation.BottomBarDestinations
 import com.example.instagramclone.navigation.BottomNavigationBar
 import com.example.instagramclone.navigation.Screen
-import com.example.instagramclone.network.main.RetrofitInstanceMain
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
 import com.example.instagramclone.screen.chat.Chat
 import com.example.instagramclone.screen.chat.Messages
@@ -64,22 +62,25 @@ import com.example.instagramclone.screen.main.MyProfile
 import com.example.instagramclone.screen.main.Reels
 import com.example.instagramclone.screen.main.Search
 import com.example.instagramclone.screen.main.Story
+import com.example.instagramclone.screen.main.UserProfile
 import com.example.instagramclone.screen.main.ViewPost
 import com.example.instagramclone.screen.util.Settings
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.MainViewModel
-import com.example.instagramclone.viewmodel.MainViewModelFactory
 import com.example.instagramclone.viewmodel.StoryViewModel
-import com.example.instagramclone.viewmodel.StoryViewModelFactory
 import com.example.instagramclone.worker.PostWorker
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.getKoin
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import java.util.UUID
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
 
-    var isPermitted = false
+    private var isPermitted = false
+    private lateinit var retrofitInterfaceMain: RetrofitInterfaceMain
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,17 +97,10 @@ class MainActivity : ComponentActivity() {
 
         checkAndRequestPermission()
 
-        val retrofitInterfaceMain = RetrofitInstanceMain.getApiService(token)
-        val mainViewModelFactory = MainViewModelFactory(retrofitInterfaceMain)
-        val storyViewModelFactory = StoryViewModelFactory(retrofitInterfaceMain)
+        retrofitInterfaceMain = getKoin().get(parameters = { parametersOf(token) })
 
-        val viewModel by viewModels<MainViewModel> {
-            mainViewModelFactory
-        }
-
-        val storyViewModel by viewModels<StoryViewModel> {
-            storyViewModelFactory
-        }
+        val viewModel: MainViewModel by viewModel { parametersOf(token) }
+        val storyViewModel: StoryViewModel by viewModel()
 
         viewModel.fetchUser()
         storyViewModel.fetchDisplayUsers()
@@ -381,6 +375,11 @@ class MainActivity : ComponentActivity() {
                 composable<Screen.ViewPost> {
                     val args = it.toRoute<Screen.ViewPost>()
                     ViewPost(args.postId,viewModel,navController,args.from)
+                }
+
+                composable<Screen.UserProfile> {
+                    val args = it.toRoute<Screen.UserProfile>()
+                    UserProfile(viewModel= viewModel, userId = args.userId, navController =  navController)
                 }
             }
         }

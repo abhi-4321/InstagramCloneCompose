@@ -7,6 +7,7 @@ import com.example.instagramclone.model.ChatDisplayUser
 import com.example.instagramclone.model.Comment
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
+import com.example.instagramclone.model.SearchResponse
 import com.example.instagramclone.model.StoryItem
 import com.example.instagramclone.network.main.RetrofitInterfaceMain
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : ViewModel() {
 
-    // Profile
+    // My Profile
     private val _flow = MutableStateFlow<ApiResponse<ProfileItem>>(
         ApiResponse.Success(
             ProfileItem()
@@ -37,40 +38,31 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
         }
     }
 
-    // Dashboard
-    private val _flowFeed = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Success(
-        listOf(
-            PostDisplay(
-                id = 1,
-                userId = 2,
-                postUrl = "https://example.com/post/1.jpg",
-                caption = "Enjoying the sunshine! ☀️",
-                likesCount = "150",
-                likedBy = listOf(101, 102, 103),
-                commentsCount = "2",
-                comments = listOf(
-                    Comment(
-                        id = 1,
-                        userId = 201,
-                        postId = 1,
-                        comment = "Nice picture!",
-                        likesCount = "10",
-                        likedBy = listOf(202, 203)
-                    ),
-                    Comment(
-                        id = 2,
-                        userId = 202,
-                        postId = 1,
-                        comment = "Love this spot 😍",
-                        likesCount = "8",
-                        likedBy = listOf(201, 204)
-                    )
-                ),
-                username = "sunny_user",
-                profileImageUrl = "https://example.com/profile/100.jpg"
-            )
+    // User Profile by ID
+    private val _flowUserProfile = MutableStateFlow<ApiResponse<ProfileItem>>(
+        ApiResponse.Success(
+            ProfileItem()
         )
-    ))
+    )
+    val flowUserProfile: StateFlow<ApiResponse<ProfileItem>> get() = _flow
+
+    fun fetchUserProfile(id: Int) {
+        viewModelScope.launch {
+            _flowUserProfile.value = ApiResponse.Loading
+
+            val response = retrofitInterfaceMain.getUserById(id)
+            Log.d("UserResponse", "${response.isSuccessful} ${response.code()}")
+            if (response.isSuccessful && response.body() != null)
+                _flowUserProfile.value = ApiResponse.Success(response.body()!!)
+            else
+                _flowUserProfile.value = ApiResponse.Failure(
+                    response.errorBody()?.string() ?: response.code().toString()
+                )
+        }
+    }
+
+    // Dashboard
+    private val _flowFeed = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Idle)
     val liveDataFeed: StateFlow<ApiResponse<List<PostDisplay>>> get() = _flowFeed
 
     fun fetchFeed() {
@@ -83,6 +75,27 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
                 _flowFeed.value = ApiResponse.Success(responseFeed.body()!!)
             } else {
                 _flowFeed.value = ApiResponse.Failure(
+                    responseFeed.errorBody()?.string() ?: responseFeed.code().toString()
+                )
+            }
+        }
+    }
+
+    // Explore
+
+    private val _flowExplore = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Idle)
+    val flowExplore: StateFlow<ApiResponse<List<PostDisplay>>> get() = _flowExplore
+
+    fun fetchExplore() {
+        viewModelScope.launch {
+            _flowExplore.value = ApiResponse.Loading
+
+            val responseFeed = retrofitInterfaceMain.explorePosts()
+
+            if (responseFeed.isSuccessful && responseFeed.body() != null) {
+                _flowExplore.value = ApiResponse.Success(responseFeed.body()!!)
+            } else {
+                _flowExplore.value = ApiResponse.Failure(
                     responseFeed.errorBody()?.string() ?: responseFeed.code().toString()
                 )
             }
@@ -172,25 +185,19 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
         }
     }
 
-    // User Profile
-    private val _upFlow = MutableStateFlow<ApiResponse<ProfileItem>>(
-        ApiResponse.Success(
-            ProfileItem()
-        )
-    )
-    val upLiveData: StateFlow<ApiResponse<ProfileItem>> get() = _upFlow
+    // Search
+    private val _searchResults = MutableStateFlow<ApiResponse<SearchResponse>>(ApiResponse.Idle)
+    val searchResults: StateFlow<ApiResponse<SearchResponse>> get() = _searchResults
 
-    fun fetchUserProfile() {
+    fun searchUsers(query: String) {
         viewModelScope.launch {
-            _upFlow.value = ApiResponse.Loading
-            val response = retrofitInterfaceMain.getUser()
-            Log.d("UserResponse", "${response.isSuccessful} ${response.code()}")
-            if (response.isSuccessful && response.body() != null)
-                _upFlow.value = ApiResponse.Success(response.body()!!)
-            else
-                _upFlow.value = ApiResponse.Failure(
-                    response.errorBody()?.string() ?: response.code().toString()
-                )
+            _searchResults.emit(ApiResponse.Loading)
+            try {
+                val result = retrofitInterfaceMain.searchUsers(query) // suspend call
+                _searchResults.emit(ApiResponse.Success(result))
+            } catch (e: Exception) {
+                _searchResults.emit(ApiResponse.Failure(e.message ?: "Error"))
+            }
         }
     }
 

@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +55,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.example.instagramclone.R
 import com.example.instagramclone.model.StoryItem
 import com.example.instagramclone.network.main.RetrofitInstanceMain
@@ -91,6 +94,10 @@ fun Story(
     var isPaused by remember { mutableStateOf(false) }
     var textMessageState by remember { mutableStateOf("") }
 
+    var isImageLoaded by remember {
+        mutableStateOf(false)
+    }
+
     // Story duration in milliseconds (5 seconds per story)
     val storyDuration = 5000L
     val updateInterval = 50L // Update every 50ms for smooth animation
@@ -103,6 +110,10 @@ fun Story(
             storyListGP = storyList
 
             if (currentStoryIndex < storyList.size) {
+                while (!isImageLoaded) {
+                    delay(500)
+                }
+
                 while (progress < 1f && !isPaused && currentStoryIndex < storyList.size) {
                     delay(updateInterval)
                     progress += progressIncrement
@@ -507,7 +518,20 @@ fun Story(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(0.88f),
-                        model = storyList[currentStoryIndex].storyUrl, // Use current story
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(storyList[currentStoryIndex].storyUrl)
+                            .crossfade(true)
+                            .listener(
+                                onSuccess = { request, result ->
+                                    // Image has successfully loaded
+                                    isImageLoaded = true
+                                },
+                                onError = { request, throwable ->
+                                    // Handle error if needed
+                                    isImageLoaded = true
+                                }
+                            )
+                            .build(), // Use current story
                         contentScale = ContentScale.Inside,
                         contentDescription = null
                     )

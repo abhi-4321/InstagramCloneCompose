@@ -1,19 +1,15 @@
 package com.example.instagramclone
 
-import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -25,9 +21,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.instagramclone.navigation.Screen
-import com.example.instagramclone.network.login.RetrofitInstanceLogin
 import com.example.instagramclone.network.util.SessionManager
-import com.example.instagramclone.screen.chat.Chat
 import com.example.instagramclone.screen.login.Birthday
 import com.example.instagramclone.screen.login.Confirmation
 import com.example.instagramclone.screen.login.EnterPassword
@@ -41,8 +35,7 @@ import com.example.instagramclone.screen.login.TermsAndPolicies
 import com.example.instagramclone.screen.login.Username
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.LoginViewModel
-import com.example.instagramclone.viewmodel.LoginViewModelFactory
-import kotlin.math.log
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,10 +51,7 @@ class LoginActivity : ComponentActivity() {
 
         checkAndRequestPermission()
 
-        val retrofitInterfaceLogin = RetrofitInstanceLogin.instance
-        val loginViewModel: LoginViewModel by viewModels {
-            LoginViewModelFactory(retrofitInterfaceLogin)
-        }
+        val loginViewModel: LoginViewModel by viewModel()
 
         var keepSplashScreen = true
 

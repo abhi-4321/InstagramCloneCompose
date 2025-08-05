@@ -416,8 +416,8 @@ fun Home(
                         }
                     }
 
-                    Image(
-                        painter = rememberImagePainter(data = post.postUrl),
+                    AsyncImage(
+                        model = post.postUrl,
                         contentDescription = "menu",
                         contentScale = ContentScale.Crop,
                         modifier = modifier

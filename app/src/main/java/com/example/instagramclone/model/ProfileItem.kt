@@ -27,19 +27,22 @@ data class ProfileItem(
                 id = 1,
                 userId = 1,
                 highlightUrl = "",
-                title = "Mountains"
+                title = "Mountains",
+                highlighted = true
             ),
             HighlightItem(
                 id = 2,
                 userId = 1,
                 highlightUrl = "",
-                title = "Beaches"
+                title = "Beaches",
+                highlighted = true
             ),
             HighlightItem(
                 id = 3,
                 userId = 1,
                 highlightUrl = "",
-                title = "Oceans"
+                title = "Oceans",
+                highlighted = true
             ),
         ),
         listOf(
@@ -51,7 +54,8 @@ data class ProfileItem(
                 likesCount = "12",
                 likedBy = emptyList(),
                 commentsCount = "",
-                comments = emptyList()
+                comments = emptyList(),
+                createdAt = "2025-04-01T18:37:01.811Z"
             ), Post(
                 id = 1,
                 userId = 1,
@@ -60,7 +64,8 @@ data class ProfileItem(
                 likesCount = "12",
                 likedBy = emptyList(),
                 commentsCount = "",
-                comments = emptyList()
+                comments = emptyList(),
+                createdAt = "2025-04-01T18:37:01.811Z"
             ), Post(
                 id = 1,
                 userId = 1,
@@ -69,7 +74,8 @@ data class ProfileItem(
                 likesCount = "12",
                 likedBy = emptyList(),
                 commentsCount = "",
-                comments = emptyList()
+                comments = emptyList(),
+                createdAt = "2025-04-01T18:37:01.811Z"
             )
         ),
         false

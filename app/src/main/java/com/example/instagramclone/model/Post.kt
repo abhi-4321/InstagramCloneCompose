@@ -8,5 +8,6 @@ data class Post(
     val likesCount: String,
     val likedBy: List<Int>,
     val commentsCount: String,
-    val comments: List<Comment>
+    val comments: List<Comment>,
+    val createdAt: String
 )

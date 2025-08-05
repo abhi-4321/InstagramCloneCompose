@@ -64,7 +64,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.rememberSwipeableState
 import coil3.compose.AsyncImage
@@ -77,9 +76,12 @@ import com.example.instagramclone.ui.theme.PinkDark
 import com.example.instagramclone.ui.theme.Purple
 import com.example.instagramclone.ui.theme.WhiteVar2
 import com.example.instagramclone.viewmodel.ChatViewModel
-import com.example.instagramclone.viewmodel.ChatViewModelFactory
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import com.example.instagramclone.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.viewModel
+import org.koin.core.parameter.parametersOf
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -103,9 +105,9 @@ fun Chat(
     senderId: Int
 ) {
 
-    val chatViewModel: ChatViewModel = viewModel(
-        factory = ChatViewModelFactory(senderId, retrofitInterfaceMain, mainViewModel)
-    )
+    val chatViewModel: ChatViewModel = getViewModel {
+        parametersOf(senderId)
+    }
 
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }

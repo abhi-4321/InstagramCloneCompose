@@ -78,4 +78,7 @@ sealed interface Screen {
 
     @Serializable
     data class ViewPost(val postId: Int, val from: String) : Screen
+
+    @Serializable
+    data class UserProfile(val userId: Int): Screen
 }

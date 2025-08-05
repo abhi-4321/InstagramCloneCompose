@@ -63,9 +63,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
-import com.example.instagramclone.model.HighlightItem
-import com.example.instagramclone.model.Post
-import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.TabItem
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
@@ -73,7 +70,6 @@ import com.example.instagramclone.ui.theme.Blue
 import com.example.instagramclone.ui.theme.TransGray
 import com.example.instagramclone.ui.theme.WhiteGray
 import com.example.instagramclone.viewmodel.MainViewModel
-import kotlin.text.ifEmpty
 
 @Composable
 fun MyProfile(
