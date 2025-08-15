@@ -218,7 +218,7 @@ fun MyProfile(
                     Column(
                         modifier
                             .fillMaxSize()
-                            .padding(horizontal = 20.dp, vertical = 5.dp),
+                            .padding(horizontal = 30.dp, vertical = 5.dp),
                         verticalArrangement = Arrangement.SpaceAround
                     ) {
 

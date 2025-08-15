@@ -68,6 +68,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
+import com.example.instagramclone.model.FollowUserItem
 import com.example.instagramclone.model.TabItem
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
@@ -94,8 +95,22 @@ fun UserProfile(
         mutableIntStateOf(0)
     }
 
+    val followingListState by viewModel.flowFollowingList.collectAsState()
+
     var isFollowing by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
+    }
+
+    if (followingListState is MainViewModel.ApiResponse.Success<FollowUserItem>) {
+        val list =
+            (followingListState as MainViewModel.ApiResponse.Success<FollowUserItem>).data?.list
+                ?: emptyList()
+
+        if (list.contains(userId)) {
+            isFollowing = true
+        } else {
+            isFollowing = false
+        }
     }
 
     when (flowState) {
@@ -268,7 +283,7 @@ fun UserProfile(
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp)
+                            .padding(horizontal = 14.dp)
                             .background(color = Blue, shape = RoundedCornerShape(8.dp)),
                         horizontalArrangement = Arrangement.Center
                     ) {

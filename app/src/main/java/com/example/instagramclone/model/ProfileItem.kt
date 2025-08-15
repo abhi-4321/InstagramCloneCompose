@@ -10,7 +10,7 @@ data class ProfileItem(
     val fullName: String,
     val bio: String,
     val highlights: List<HighlightItem>,
-    val posts: List<Post>,
+    val posts: List<PostDisplay>,
     val private: Boolean
 ) {
     constructor() : this(
@@ -46,7 +46,7 @@ data class ProfileItem(
             ),
         ),
         listOf(
-            Post(
+            PostDisplay(
                 id = 1,
                 userId = 1,
                 postUrl = "",
@@ -55,8 +55,10 @@ data class ProfileItem(
                 likedBy = emptyList(),
                 commentsCount = "",
                 comments = emptyList(),
-                createdAt = "2025-04-01T18:37:01.811Z"
-            ), Post(
+                createdAt = "2025-04-01T18:37:01.811Z",
+                username = "HT",
+                profileImageUrl = ""
+            ), PostDisplay(
                 id = 1,
                 userId = 1,
                 postUrl = "",
@@ -65,8 +67,10 @@ data class ProfileItem(
                 likedBy = emptyList(),
                 commentsCount = "",
                 comments = emptyList(),
-                createdAt = "2025-04-01T18:37:01.811Z"
-            ), Post(
+                createdAt = "2025-04-01T18:37:01.811Z",
+                username = "VC",
+                profileImageUrl = ""
+            ), PostDisplay(
                 id = 1,
                 userId = 1,
                 postUrl = "",
@@ -75,7 +79,9 @@ data class ProfileItem(
                 likedBy = emptyList(),
                 commentsCount = "",
                 comments = emptyList(),
-                createdAt = "2025-04-01T18:37:01.811Z"
+                createdAt = "2025-04-01T18:37:01.811Z",
+                username = "AB",
+                profileImageUrl = ""
             )
         ),
         false

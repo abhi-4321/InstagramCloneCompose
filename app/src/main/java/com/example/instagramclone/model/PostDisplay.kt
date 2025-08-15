@@ -10,5 +10,6 @@ data class PostDisplay(
     val commentsCount: String,
     val comments: List<Comment>,
     val username: String,
-    val profileImageUrl: String
+    val profileImageUrl: String,
+    val createdAt: String
 )

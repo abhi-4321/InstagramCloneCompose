@@ -100,9 +100,10 @@ class MainActivity : ComponentActivity() {
         retrofitInterfaceMain = getKoin().get(parameters = { parametersOf(token) })
 
         val viewModel: MainViewModel by viewModel { parametersOf(token) }
-        val storyViewModel: StoryViewModel by viewModel()
+        val storyViewModel: StoryViewModel by viewModel() { parametersOf(token) }
 
         viewModel.fetchUser()
+        viewModel.fetchFollowing()
         storyViewModel.fetchDisplayUsers()
 
         setContent {
@@ -254,7 +255,8 @@ class MainActivity : ComponentActivity() {
                         username = args.username,
                         senderId = args.senderId,
                         retrofitInterfaceMain = retrofitInterfaceMain,
-                        mainViewModel = viewModel
+                        mainViewModel = viewModel,
+                        token = token
                     )
                 }
                 composable<Screen.NewMessage> {

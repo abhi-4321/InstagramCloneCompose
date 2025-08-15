@@ -40,6 +40,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +64,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
+import com.example.instagramclone.model.FollowUserItem
 import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
@@ -72,9 +74,11 @@ import com.example.instagramclone.ui.theme.WhiteGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.StoryViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 //@Preview(showSystemUi = true, device = "spec:width=411dp,height=891dp")
 @Composable
@@ -91,6 +95,7 @@ fun Home(
     val postsListState by viewModel.liveDataFeed.collectAsState()
 
     val userDetailsState by viewModel.liveData.collectAsState()
+    val followingListState by viewModel.flowFollowingList.collectAsState()
 
     LaunchedEffect(Unit) {
         if (postsListState !is MainViewModel.ApiResponse.Success<*>) {
@@ -99,6 +104,7 @@ fun Home(
     }
 
     var imageUrl by remember { mutableStateOf("") }
+    var uId by remember { mutableIntStateOf(0) }
 
     var localLikedPosts by remember { mutableStateOf(setOf<Int>()) }
     var localLikeCounts by remember { mutableStateOf(mapOf<Int, Int>()) }
@@ -118,6 +124,7 @@ fun Home(
         if (userDetailsState is MainViewModel.ApiResponse.Success) {
             imageUrl =
                 (userDetailsState as MainViewModel.ApiResponse.Success).data!!.profileImageUrl
+            uId = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.id
         }
     }
 
@@ -372,7 +379,11 @@ fun Home(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable {
+                                navController.navigate(Screen.UserProfile(post.userId))
+                            }) {
                             Image(
                                 painter = rememberImagePainter(data = post.profileImageUrl) {
                                     error(
@@ -397,16 +408,28 @@ fun Home(
                             )
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "Follow",
-                                modifier = Modifier
-                                    .wrapContentSize()
-                                    .background(
-                                        color = WhiteGray,
-                                        shape = RoundedCornerShape(8.dp)
+                            if (followingListState is MainViewModel.ApiResponse.Success<FollowUserItem>) {
+                                val list =
+                                    (followingListState as MainViewModel.ApiResponse.Success<FollowUserItem>).data?.list
+                                        ?: emptyList()
+
+                                if (list.contains(post.userId)) {
+                                    Text(
+                                        text = "Follow",
+                                        modifier = Modifier
+                                            .wrapContentSize()
+                                            .background(
+                                                color = WhiteGray,
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                                            .clickable {
+                                                viewModel.followUser()
+                                            }
                                     )
-                                    .padding(horizontal = 14.dp, vertical = 6.dp)
-                            )
+                                }
+                            }
+
                             Spacer(Modifier.width(4.dp))
                             Icon(
                                 modifier = modifier.size(25.dp),
@@ -433,14 +456,16 @@ fun Home(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            val uId = (userDetailsState as MainViewModel.ApiResponse.Success).data?.id!!
                             Icon(
                                 modifier = modifier
                                     .fillMaxHeight()
                                     .scale(1f)
                                     .clickable {
                                         val postId = post.id // Assuming your post has an id field
-                                        val isCurrentlyLiked = post.likedBy.contains(uId) || localLikedPosts.contains(postId)
+                                        val isCurrentlyLiked =
+                                            post.likedBy.contains(uId) || localLikedPosts.contains(
+                                                postId
+                                            )
 
                                         // Immediately update UI state
                                         localLikedPosts = if (isCurrentlyLiked) {
@@ -450,8 +475,11 @@ fun Home(
                                         }
 
                                         // Update local like count
-                                        val currentCount = localLikeCounts[postId] ?: post.likesCount.toIntOrNull() ?: 0
-                                        localLikeCounts = localLikeCounts + (postId to if (isCurrentlyLiked) currentCount - 1 else currentCount + 1)
+                                        val currentCount =
+                                            localLikeCounts[postId] ?: post.likesCount.toIntOrNull()
+                                            ?: 0
+                                        localLikeCounts =
+                                            localLikeCounts + (postId to if (isCurrentlyLiked) currentCount - 1 else currentCount + 1)
 
                                         // Cancel any existing pending API call for this post
                                         pendingApiCalls[postId]?.cancel()
@@ -471,10 +499,16 @@ fun Home(
                                                     }
 
                                                     // Revert like count
-                                                    val revertCount = localLikeCounts[postId] ?: currentCount
-                                                    localLikeCounts = localLikeCounts + (postId to if (isCurrentlyLiked) revertCount + 1 else revertCount - 1)
+                                                    val revertCount =
+                                                        localLikeCounts[postId] ?: currentCount
+                                                    localLikeCounts =
+                                                        localLikeCounts + (postId to if (isCurrentlyLiked) revertCount + 1 else revertCount - 1)
 
-                                                    Toast.makeText(context, "Failed to update like", Toast.LENGTH_SHORT).show()
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Failed to update like",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
                                                 } else {
                                                     // Success - optionally refresh feed to get latest server state
                                                     // viewModel.fetchFeed()
@@ -487,24 +521,31 @@ fun Home(
 
                                         // Store the job so it can be cancelled if needed
                                         pendingApiCalls[postId] = apiJob
-                                    }
-                                ,
+                                    },
                                 painter = painterResource(
-                                    id = if (post.likedBy.contains(uId) || localLikedPosts.contains(post.id))
-                                            R.drawable.liked
-                                        else
-                                            R.drawable.notliked
+                                    id = if (post.likedBy.contains(uId) || localLikedPosts.contains(
+                                            post.id
+                                        )
+                                    )
+                                        R.drawable.liked
+                                    else
+                                        R.drawable.notliked
                                 ),
                                 tint = Color.Unspecified,
                                 contentDescription = null
                             )
                             Spacer(modifier.width(4.dp))
-                            Text(
-                                (localLikeCounts[post.id] ?: post.likesCount.toIntOrNull() ?: 0).toString(),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+
+                            if (localLikeCounts[post.id] != 0) {
+                                Text(
+                                    (localLikeCounts[post.id] ?: post.likesCount.toIntOrNull()
+                                    ?: 0).toString(),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                             Spacer(modifier.width(10.dp))
+
                             Icon(
                                 modifier = modifier
                                     .fillMaxHeight()
@@ -516,11 +557,15 @@ fun Home(
                                 contentDescription = null
                             )
                             Spacer(modifier.width(4.dp))
-                            Text(
-                                post.commentsCount,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+
+                            if (post.commentsCount != "0") {
+                                Text(
+                                    post.commentsCount,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+
                             Spacer(modifier.width(10.dp))
                             Icon(
                                 modifier = modifier
@@ -566,7 +611,7 @@ fun Home(
 
                     Spacer(modifier.height(5.dp))
                     Text(
-                        "14 hours ago",
+                        getTimeInIST(post.createdAt),
                         color = Color(0xFF6F7680),
                         modifier = modifier.padding(horizontal = 15.dp),
                         fontSize = 13.sp,
@@ -575,6 +620,36 @@ fun Home(
                     Spacer(modifier.height(5.dp))
                 }
             }
+        }
+    }
+}
+
+fun getTimeInIST(utcString: String): String {
+    // Parse the incoming UTC time string
+    val utcZonedDateTime = ZonedDateTime.parse(utcString)
+
+    // Convert to IST time zone
+    val istZonedDateTime = utcZonedDateTime.withZoneSameInstant(ZoneId.of("Asia/Kolkata"))
+
+    // Get current IST time
+    val nowIST = ZonedDateTime.now(ZoneId.of("Asia/Kolkata"))
+
+    // Calculate the duration between now and the created time
+    val duration = Duration.between(istZonedDateTime, nowIST)
+
+    return when {
+        duration.toMinutes() < 1 -> "Just now"
+        duration.toMinutes().toInt() == 1 -> "1 minute ago"
+        duration.toMinutes() < 60 -> "${duration.toMinutes()} minutes ago"
+        duration.toMinutes().toInt() == 60 -> "1 hour ago"
+        duration.toHours() < 24 -> "${duration.toHours()} hours ago"
+        duration.toHours().toInt() == 24 -> "1 day ago"
+        duration.toDays() < 30 -> "${duration.toDays()} days ago"
+        duration.toDays().toInt() == 30 -> "1 month ago"
+//        duration.toDays() in 31..365 -> "${duration.toDays()} months ago"
+        else -> {
+            val month: Int = (duration.toDays().toInt() / 30)
+            "$month months ago"
         }
     }
 }

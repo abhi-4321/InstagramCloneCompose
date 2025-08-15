@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.instagramclone.model.ChatDisplayUser
-import com.example.instagramclone.model.Comment
+import com.example.instagramclone.model.FollowUserItem
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.SearchResponse
@@ -16,47 +16,71 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : ViewModel() {
 
+    // Following List
+    private val _flowFollowingList = MutableStateFlow<ApiResponse<FollowUserItem>>(
+        ApiResponse.Idle
+    )
+    val flowFollowingList: StateFlow<ApiResponse<FollowUserItem>> get() = _flowFollowingList
+
+    fun fetchFollowing() {
+        viewModelScope.launch {
+            _flowFollowingList.emit(ApiResponse.Loading)
+
+            val response = retrofitInterfaceMain.getFollowing()
+
+            if (response.isSuccessful && response.body() != null)
+                _flowFollowingList.emit(ApiResponse.Success(response.body()!!))
+            else
+                _flowFollowingList.emit(
+                    ApiResponse.Failure(
+                        response.errorBody()?.string() ?: response.code().toString()
+                    )
+                )
+        }
+    }
+
+
     // My Profile
     private val _flow = MutableStateFlow<ApiResponse<ProfileItem>>(
-        ApiResponse.Success(
-            ProfileItem()
-        )
+        ApiResponse.Idle
     )
     val liveData: StateFlow<ApiResponse<ProfileItem>> get() = _flow
 
     fun fetchUser() {
         viewModelScope.launch {
-            _flow.value = ApiResponse.Loading
+            _flow.emit(ApiResponse.Loading)
             val response = retrofitInterfaceMain.getUser()
             Log.d("UserResponse", "${response.isSuccessful} ${response.code()}")
             if (response.isSuccessful && response.body() != null)
-                _flow.value = ApiResponse.Success(response.body()!!)
+                _flow.emit(ApiResponse.Success(response.body()!!))
             else
-                _flow.value = ApiResponse.Failure(
-                    response.errorBody()?.string() ?: response.code().toString()
+                _flow.emit(
+                    ApiResponse.Failure(
+                        response.errorBody()?.string() ?: response.code().toString()
+                    )
                 )
         }
     }
 
     // User Profile by ID
     private val _flowUserProfile = MutableStateFlow<ApiResponse<ProfileItem>>(
-        ApiResponse.Success(
-            ProfileItem()
-        )
+        ApiResponse.Idle
     )
-    val flowUserProfile: StateFlow<ApiResponse<ProfileItem>> get() = _flow
+    val flowUserProfile: StateFlow<ApiResponse<ProfileItem>> get() = _flowUserProfile
 
     fun fetchUserProfile(id: Int) {
         viewModelScope.launch {
-            _flowUserProfile.value = ApiResponse.Loading
+            _flowUserProfile.emit(ApiResponse.Loading)
 
             val response = retrofitInterfaceMain.getUserById(id)
             Log.d("UserResponse", "${response.isSuccessful} ${response.code()}")
             if (response.isSuccessful && response.body() != null)
-                _flowUserProfile.value = ApiResponse.Success(response.body()!!)
+                _flowUserProfile.emit(ApiResponse.Success(response.body()!!))
             else
-                _flowUserProfile.value = ApiResponse.Failure(
-                    response.errorBody()?.string() ?: response.code().toString()
+                _flowUserProfile.emit(
+                    ApiResponse.Failure(
+                        response.errorBody()?.string() ?: response.code().toString()
+                    )
                 )
         }
     }
@@ -67,15 +91,17 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
 
     fun fetchFeed() {
         viewModelScope.launch {
-            _flowFeed.value = ApiResponse.Loading
+            _flowFeed.emit(ApiResponse.Loading)
 
             val responseFeed = retrofitInterfaceMain.fetchFeed()
 
             if (responseFeed.isSuccessful && responseFeed.body() != null) {
-                _flowFeed.value = ApiResponse.Success(responseFeed.body()!!)
+                _flowFeed.emit(ApiResponse.Success(responseFeed.body()!!))
             } else {
-                _flowFeed.value = ApiResponse.Failure(
-                    responseFeed.errorBody()?.string() ?: responseFeed.code().toString()
+                _flowFeed.emit(
+                    ApiResponse.Failure(
+                        responseFeed.errorBody()?.string() ?: responseFeed.code().toString()
+                    )
                 )
             }
         }
@@ -88,15 +114,17 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
 
     fun fetchExplore() {
         viewModelScope.launch {
-            _flowExplore.value = ApiResponse.Loading
+            _flowExplore.emit(ApiResponse.Loading)
 
             val responseFeed = retrofitInterfaceMain.explorePosts()
 
             if (responseFeed.isSuccessful && responseFeed.body() != null) {
-                _flowExplore.value = ApiResponse.Success(responseFeed.body()!!)
+                _flowExplore.emit(ApiResponse.Success(responseFeed.body()!!))
             } else {
-                _flowExplore.value = ApiResponse.Failure(
-                    responseFeed.errorBody()?.string() ?: responseFeed.code().toString()
+                _flowExplore.emit(
+                    ApiResponse.Failure(
+                        responseFeed.errorBody()?.string() ?: responseFeed.code().toString()
+                    )
                 )
             }
         }
@@ -110,15 +138,17 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
 
     fun fetchChatUsers() {
         viewModelScope.launch {
-            _chatUsersFlow.value = ApiResponse.Loading
+            _chatUsersFlow.emit(ApiResponse.Loading)
 
             val response = retrofitInterfaceMain.fetchChatUsers()
 
             if (response.isSuccessful && response.body() != null) {
-                _chatUsersFlow.value = ApiResponse.Success(response.body()!!)
+                _chatUsersFlow.emit(ApiResponse.Success(response.body()!!))
             } else {
-                _chatUsersFlow.value = ApiResponse.Failure(
-                    response.errorBody()?.string() ?: response.code().toString()
+                _chatUsersFlow.emit(
+                    ApiResponse.Failure(
+                        response.errorBody()?.string() ?: response.code().toString()
+                    )
                 )
             }
         }
@@ -130,15 +160,17 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
 
     fun fetchAllChatUsers() {
         viewModelScope.launch {
-            _allChatUsersFlow.value = ApiResponse.Loading
+            _allChatUsersFlow.emit(ApiResponse.Loading)
 
             val response = retrofitInterfaceMain.fetchAllChatUsers()
 
             if (response.isSuccessful && response.body() != null) {
-                _allChatUsersFlow.value = ApiResponse.Success(response.body()!!)
+                _allChatUsersFlow.emit(ApiResponse.Success(response.body()!!))
             } else {
-                _allChatUsersFlow.value = ApiResponse.Failure(
-                    response.errorBody()?.string() ?: response.code().toString()
+                _allChatUsersFlow.emit(
+                    ApiResponse.Failure(
+                        response.errorBody()?.string() ?: response.code().toString()
+                    )
                 )
             }
         }
@@ -151,15 +183,17 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
 
     fun fetchStories(userId: Int) {
         viewModelScope.launch {
-            _storiesFlow.value = ApiResponse.Loading
+            _storiesFlow.emit(ApiResponse.Loading)
 
             val response = retrofitInterfaceMain.getStories(userId)
 
             if (response.isSuccessful && response.body() != null) {
-                _storiesFlow.value = ApiResponse.Success(response.body()!!)
+                _storiesFlow.emit(ApiResponse.Success(response.body()!!))
             } else {
-                _storiesFlow.value = ApiResponse.Failure(
-                    response.errorBody()?.string() ?: response.code().toString()
+                _storiesFlow.emit(
+                    ApiResponse.Failure(
+                        response.errorBody()?.string() ?: response.code().toString()
+                    )
                 )
             }
         }
@@ -199,6 +233,10 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
                 _searchResults.emit(ApiResponse.Failure(e.message ?: "Error"))
             }
         }
+    }
+
+    // Follow User
+    fun followUser() {
     }
 
     sealed class ApiResponse<out T> {

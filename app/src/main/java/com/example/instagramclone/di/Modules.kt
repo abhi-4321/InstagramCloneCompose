@@ -56,7 +56,7 @@ val viewmodelModule = module {
 
     viewModel { (userId: Int, token: String) ->
         ChatViewModel(
-            userId, get<RetrofitInterfaceMain> { parametersOf(token) }, get()
+            userId, get<RetrofitInterfaceMain> { parametersOf(token) }, get<MainViewModel> { parametersOf(token) }
         )
     }
 

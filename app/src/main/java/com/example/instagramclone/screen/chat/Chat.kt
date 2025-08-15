@@ -102,11 +102,12 @@ fun Chat(
     profileImageUrl: String,
     username: String,
     fullName: String,
-    senderId: Int
+    senderId: Int,
+    token: String
 ) {
 
     val chatViewModel: ChatViewModel = getViewModel {
-        parametersOf(senderId)
+        parametersOf(senderId,token)
     }
 
     val focusManager = LocalFocusManager.current
@@ -855,6 +856,7 @@ fun ChatPreview() {
         profileImageUrl =  "",
         username =  "Abhi",
         fullName =  "Abhinav",
-        senderId =  2
+        senderId =  2,
+        token = ""
     )
 }
