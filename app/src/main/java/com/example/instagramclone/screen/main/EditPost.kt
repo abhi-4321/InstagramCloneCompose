@@ -83,7 +83,10 @@ fun EditPost(
                     contentDescription = null,
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable {
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
                             navController.navigateUp()
                         },
                     tint = Color.Black
@@ -138,7 +141,10 @@ fun EditPost(
                 .padding(horizontal = 10.dp, vertical = 15.dp)
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .clickable {
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) {
                     startWorker(textCaptionState, uri)
                     navController.popBackStack(Screen.Create,true)
                 }

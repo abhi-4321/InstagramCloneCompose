@@ -93,7 +93,10 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() }
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) { navController.navigateUp() }
             ,
             tint = Color.Black,
         )
@@ -170,7 +173,10 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
             )
         }
         Spacer(modifier.height(15.dp))
-        Row(modifier.fillMaxWidth().clickable { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }, horizontalArrangement = Arrangement.Center) {
+        Row(modifier.fillMaxWidth().clickable(
+            indication = null,
+            interactionSource = null
+        ) { Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show() }, horizontalArrangement = Arrangement.Center) {
             Text(
                 "Search by mobile number instead",
                 fontSize = 15.sp,
@@ -227,7 +233,10 @@ fun ForgotPassword(modifier: Modifier = Modifier, navController: NavController) 
         Row(
             modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp).clickable {
+                .padding(vertical = 20.dp).clickable(
+                    indication = null,
+                    interactionSource = null
+                ) {
                     navController.popBackStack(Screen.Login, false)
                 },
             horizontalArrangement = Arrangement.Center

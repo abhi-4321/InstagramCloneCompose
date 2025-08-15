@@ -115,7 +115,10 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
                             .padding(10.dp)
                             .size(25.dp)
                             .align(Alignment.TopStart)
-                            .clickable {
+                            .clickable(
+                                indication = null,
+                                interactionSource = null
+                            ) {
                                 navController.navigateUp()
                             }
                     )
@@ -124,7 +127,7 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
                         Text("Failed to load post")
                         Button(onClick = {
                             when (from) {
-                                "Explore", "Profile" -> viewModel.fetchFeed()
+                                "Explore", "Profile" -> viewModel.fetchExplore()
                             }
                         }) {
                             Text("Retry")
@@ -149,7 +152,10 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
                     modifier = Modifier
-                        .clickable {
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
                             navController.navigateUp()
                         },
                     tint = Color.Black
@@ -251,63 +257,11 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
                     modifier = Modifier
                         .fillMaxHeight()
                         .scale(1f)
-                        .clickable {
-                            val postId = post.id // Assuming your post has an id field
-                            val isCurrentlyLiked =
-                                post.likedBy.contains(uId) || localLikedPosts.contains(postId)
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
 
-                            // Immediately update UI state
-                            localLikedPosts = if (isCurrentlyLiked) {
-                                localLikedPosts - postId
-                            } else {
-                                localLikedPosts + postId
-                            }
-
-                            // Update local like count
-                            val currentCount =
-                                localLikeCounts[postId] ?: post.likesCount.toIntOrNull() ?: 0
-                            localLikeCounts =
-                                localLikeCounts + (postId to if (isCurrentlyLiked) currentCount - 1 else currentCount + 1)
-
-                            // Cancel any existing pending API call for this post
-                            pendingApiCalls[postId]?.cancel()
-
-                            // Start new 2-second timer for API call
-                            val apiJob = coroutineScope.launch {
-                                delay(2000) // 2 second delay
-
-                                // Make API call after delay
-                                viewModel.toggleLikePost(postId) { success ->
-                                    if (!success) {
-                                        // Revert UI state on API failure
-                                        localLikedPosts = if (isCurrentlyLiked) {
-                                            localLikedPosts + postId
-                                        } else {
-                                            localLikedPosts - postId
-                                        }
-
-                                        // Revert like count
-                                        val revertCount = localLikeCounts[postId] ?: currentCount
-                                        localLikeCounts =
-                                            localLikeCounts + (postId to if (isCurrentlyLiked) revertCount + 1 else revertCount - 1)
-
-                                        Toast.makeText(
-                                            context,
-                                            "Failed to update like",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        // Success - optionally refresh feed to get latest server state
-                                        // viewModel.fetchFeed()
-                                    }
-                                }
-
-                                // Remove from pending calls
-                                pendingApiCalls.remove(postId)
-                            }
-
-                            // Store the job so it can be cancelled if needed
-                            pendingApiCalls[postId] = apiJob
                         },
                     painter = painterResource(
                         id = if (post.likedBy.contains(uId) || localLikedPosts.contains(post.id))
@@ -329,7 +283,10 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
                     modifier = Modifier
                         .fillMaxHeight()
                         .offset(y = (-0.5).dp)
-                        .clickable {
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
                         },
                     painter = painterResource(id = R.drawable.comment),
                     tint = Color.Unspecified,

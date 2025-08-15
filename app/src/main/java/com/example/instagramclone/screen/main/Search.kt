@@ -158,7 +158,10 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
                                     .padding(horizontal = 10.dp)
                                     .wrapContentHeight()
                                     .fillMaxWidth()
-                                    .clickable {},
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = null
+                                    ) {},
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -214,8 +217,11 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
                             contentDescription = null,
                             modifier = Modifier
                                 .size(30.dp)
-                                .clickable {
-                                    viewModel.fetchFeed()
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = null
+                                ) {
+                                    viewModel.fetchExplore()
                                 }
                         )
                     }
@@ -239,7 +245,10 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
                                 modifier = modifier
                                     .padding((0.75).dp)
                                     .aspectRatio(1f)
-                                    .clickable {
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = null
+                                    ) {
                                         navController.navigate(Screen.ViewPost(post.id, "Explore"))
                                     },
                                 model = post.postUrl,
@@ -274,7 +283,10 @@ fun SearchBar(
         modifier
             .background(shape = RoundedCornerShape(24.dp), color = WhiteGray)
             .padding(horizontal = 5.dp)
-            .clickable {
+            .clickable(
+                indication = null,
+                interactionSource = null
+            ) {
                 onClickFocus
             }
     ) {

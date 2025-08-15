@@ -88,7 +88,10 @@ fun NewMessage(
             Icon(
                 painter = painterResource(id = R.drawable.baseline_keyboard_backspace_24),
                 contentDescription = null,
-                modifier = Modifier.size(30.dp).clickable { 
+                modifier = Modifier.size(30.dp).clickable(
+                    indication = null,
+                    interactionSource = null
+                ) {
                     navController.navigateUp()
                 },
                 tint = Color.Black
@@ -182,7 +185,10 @@ fun NewMessage(
                                 .padding(horizontal = 10.dp)
                                 .wrapContentHeight()
                                 .fillMaxWidth()
-                                .clickable {
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = null
+                                ) {
                                     navController.navigate(
                                         Screen.Chat(
                                             list[it].receiverId,list[it].profileImageUrl,list[it].username,list[it].fullName,

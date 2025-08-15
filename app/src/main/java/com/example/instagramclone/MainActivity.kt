@@ -20,8 +20,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -108,7 +110,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             InstagramCloneTheme {
-                Main(viewModel, retrofitInterfaceMain, token, storyViewModel)
+
+                    Main(viewModel, retrofitInterfaceMain, token, storyViewModel)
+
             }
         }
     }

@@ -133,7 +133,10 @@ fun Messages(
                 contentDescription = null,
                 modifier = modifier
                     .size(28.dp)
-                    .clickable {
+                    .clickable(
+                        indication = null,
+                        interactionSource = null
+                    ) {
                         navController.navigate(Screen.NewMessage)
                     },
                 tint = Color.Black
@@ -239,7 +242,10 @@ fun Messages(
                                 .padding(horizontal = 10.dp)
                                 .wrapContentHeight()
                                 .fillMaxWidth()
-                                .clickable {
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = null
+                                ) {
                                     navController.navigate(Screen.Chat(list[it].receiverId,list[it].profileImageUrl,list[it].username,list[it].fullName,senderId))
                                 },
                             horizontalArrangement = Arrangement.SpaceBetween,

@@ -82,7 +82,10 @@ fun TermsAndPolicies(
             contentDescription = null,
             modifier = modifier
                 .size(18.dp)
-                .clickable { navController.navigateUp() }
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) { navController.navigateUp() }
                 .offset(x = (-2).dp),
             tint = Color.Black,
         )
@@ -135,7 +138,10 @@ fun TermsAndPolicies(
             modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp)
-                .clickable {
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) {
                     navController.popBackStack(Screen.Login, false)
                 },
             horizontalArrangement = Arrangement.Center

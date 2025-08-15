@@ -261,7 +261,10 @@ fun Login(
                     contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
                     modifier = Modifier
                         .size(24.dp)
-                        .clickable {
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
                             isPasswordVisible = !isPasswordVisible
                         }
                 )
@@ -328,7 +331,10 @@ fun Login(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .clickable { navController.navigate(Screen.ForgotPassword) },
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) { navController.navigate(Screen.ForgotPassword) },
             horizontalArrangement = Arrangement.Center
         ) {
             Text(

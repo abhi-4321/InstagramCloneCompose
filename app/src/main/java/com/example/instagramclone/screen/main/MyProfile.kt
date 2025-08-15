@@ -192,7 +192,10 @@ fun MyProfile(
                         contentDescription = null,
                         modifier = modifier
                             .scale(0.8f)
-                            .clickable {
+                            .clickable(
+                                indication = null,
+                                interactionSource = null
+                            ) {
                                 Log.d("TAG", "TopAppBar: navigated")
                                 navController.navigate(Screen.Settings)
                             },

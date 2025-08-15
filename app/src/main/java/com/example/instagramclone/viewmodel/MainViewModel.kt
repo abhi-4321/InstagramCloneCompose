@@ -1,10 +1,12 @@
 package com.example.instagramclone.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.instagramclone.model.ChatDisplayUser
 import com.example.instagramclone.model.FollowUserItem
+import com.example.instagramclone.model.LikeInfo
 import com.example.instagramclone.model.PostDisplay
 import com.example.instagramclone.model.ProfileItem
 import com.example.instagramclone.model.SearchResponse
@@ -89,13 +91,14 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
     private val _flowFeed = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Idle)
     val liveDataFeed: StateFlow<ApiResponse<List<PostDisplay>>> get() = _flowFeed
 
-    fun fetchFeed() {
+    fun fetchFeed(uId: Int) {
         viewModelScope.launch {
             _flowFeed.emit(ApiResponse.Loading)
 
             val responseFeed = retrofitInterfaceMain.fetchFeed()
 
             if (responseFeed.isSuccessful && responseFeed.body() != null) {
+                setPosts(responseFeed.body()!!,uId)
                 _flowFeed.emit(ApiResponse.Success(responseFeed.body()!!))
             } else {
                 _flowFeed.emit(
@@ -200,21 +203,23 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
     }
 
     // Like
+    val likesStateMap = mutableStateMapOf<Int, LikeInfo>()
 
-    fun toggleLikePost(postId: Int, callback: (Boolean) -> Unit) {
+    fun setPosts(posts: List<PostDisplay>, uId: Int) {
+        likesStateMap.clear()
+        for (post in posts) {
+            likesStateMap[post.id] = LikeInfo(post.likedBy.contains(uId), post.likesCount.toInt())
+        }
+    }
+
+    fun toggleLikePost(postId: Int) {
+        val old = likesStateMap[postId] ?: LikeInfo(false, 0)
+        likesStateMap[postId] = old.copy(liked = !old.liked, count = old.count + if (old.liked) -1 else 1)
+
         viewModelScope.launch {
-            try {
-                val response = retrofitInterfaceMain.like(postId) // Your toggle API call
-                if (response.isSuccessful) {
-                    // Optionally refresh specific post data or entire feed
-                    // fetchFeed()
-                    callback(true)
-                } else {
-                    callback(false)
-                }
-            } catch (e: Exception) {
-                Log.e("MainViewModel", "Error toggling like: ${e.message}")
-                callback(false)
+            val result = runCatching { retrofitInterfaceMain.like(postId) }.getOrNull()
+            if (result == null || !result.isSuccessful) {
+                likesStateMap[postId] = old // rollback
             }
         }
     }

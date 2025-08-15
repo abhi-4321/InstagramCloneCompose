@@ -103,7 +103,10 @@ fun EnterPassword(
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() },
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) { navController.navigateUp() },
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -157,7 +160,10 @@ fun EnterPassword(
                     contentDescription = if (isVisible) "Hide password" else "Show password",
                     modifier = Modifier
                         .size(24.dp)
-                        .clickable {
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
                             isVisible = !isVisible
                         }
                 )
@@ -226,7 +232,10 @@ fun EnterPassword(
             modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp)
-                .clickable {
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) {
                     navController.popBackStack(Screen.Login, false)
                 }, horizontalArrangement = Arrangement.Center
         ) {

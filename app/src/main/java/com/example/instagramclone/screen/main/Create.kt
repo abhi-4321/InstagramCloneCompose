@@ -155,7 +155,10 @@ fun Create(
                     contentDescription = null,
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable {
+                        .clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
                             navController.navigateUp()
                         },
                     tint = Color.Black
@@ -171,7 +174,10 @@ fun Create(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = modifier
-                    .clickable {
+                    .clickable(
+                        indication = null,
+                        interactionSource = null
+                    ) {
                         if (selectedUri.isNotEmpty()) {
                             navController.navigate(Screen.EditPost(selectedUri))
                         }
@@ -307,7 +313,10 @@ fun Create(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(0.75.dp)
-                                .clickable {
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = null
+                                ) {
                                     selectedUri = pair.first.toString()
                                 }
                                 .aspectRatio(1f)
@@ -327,15 +336,6 @@ fun Create(
                                         .background(Color(0x33D7D7D7))
                                 )
                             }
-                            /*
-                            // Make each grid image clickable
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clickable {
-
-                                    }
-                            )*/
                         }
                     }
 

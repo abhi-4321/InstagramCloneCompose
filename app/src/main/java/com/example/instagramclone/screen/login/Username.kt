@@ -110,7 +110,10 @@ fun Username(
             modifier = modifier
                 .size(18.dp)
                 .offset(x = (-2).dp)
-                .clickable { navController.navigateUp() },
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) { navController.navigateUp() },
             tint = Color.Black,
         )
         Spacer(modifier.height(15.dp))
@@ -245,7 +248,10 @@ fun Username(
             modifier
                 .fillMaxWidth()
                 .padding(vertical = 20.dp)
-                .clickable {
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) {
                     navController.popBackStack(Screen.Login, false)
                 }, horizontalArrangement = Arrangement.Center
         ) {

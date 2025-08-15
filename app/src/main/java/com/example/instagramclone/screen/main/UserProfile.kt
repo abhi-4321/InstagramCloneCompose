@@ -165,7 +165,10 @@ fun UserProfile(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = null,
                         modifier = modifier
-                            .clickable {
+                            .clickable(
+                                indication = null,
+                                interactionSource = null
+                            ) {
                                 Log.d("TAG", "TopAppBar: navigated")
                             },
                         tint = Color.Black
@@ -510,7 +513,10 @@ fun UserProfile(
                                         modifier = modifier
                                             .padding((0.75).dp)
                                             .size(180.dp)
-                                            .clickable {
+                                            .clickable(
+                                                indication = null,
+                                                interactionSource = null
+                                            ) {
                                                 navController.navigate(Screen.ViewPost(flow.posts[it].id,"Posts"))
                                             }
                                         ,
@@ -534,7 +540,10 @@ fun UserProfile(
                                         modifier = modifier
                                             .padding((0.75).dp)
                                             .size(180.dp)
-                                            .clickable {
+                                            .clickable(
+                                                indication = null,
+                                                interactionSource = null
+                                            ) {
                                                 navController.navigate(Screen.ViewPost(flow.posts[it].id,"Posts"))
                                             }
                                         ,

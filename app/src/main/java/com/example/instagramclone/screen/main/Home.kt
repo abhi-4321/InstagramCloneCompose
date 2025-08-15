@@ -36,15 +36,12 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +62,7 @@ import coil.compose.rememberImagePainter
 import coil3.compose.AsyncImage
 import com.example.instagramclone.R
 import com.example.instagramclone.model.FollowUserItem
+import com.example.instagramclone.model.LikeInfo
 import com.example.instagramclone.model.StoryDisplayUser
 import com.example.instagramclone.navigation.Screen
 import com.example.instagramclone.network.main.RetrofitInstanceMain
@@ -73,9 +71,6 @@ import com.example.instagramclone.ui.theme.TransGray
 import com.example.instagramclone.ui.theme.WhiteGray
 import com.example.instagramclone.viewmodel.MainViewModel
 import com.example.instagramclone.viewmodel.StoryViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -97,34 +92,21 @@ fun Home(
     val userDetailsState by viewModel.liveData.collectAsState()
     val followingListState by viewModel.flowFollowingList.collectAsState()
 
-    LaunchedEffect(Unit) {
-        if (postsListState !is MainViewModel.ApiResponse.Success<*>) {
-            viewModel.fetchFeed()
-        }
-    }
-
     var imageUrl by remember { mutableStateOf("") }
     var uId by remember { mutableIntStateOf(0) }
+    val likesStateMap = viewModel.likesStateMap
 
-    var localLikedPosts by remember { mutableStateOf(setOf<Int>()) }
-    var localLikeCounts by remember { mutableStateOf(mapOf<Int, Int>()) }
-    val pendingApiCalls = remember { mutableStateMapOf<Int, Job>() }
-    val coroutineScope = rememberCoroutineScope()
-
-    DisposableEffect(Unit)
-    {
-        onDispose {
-            pendingApiCalls.values.forEach { it.cancel() }
-            pendingApiCalls.clear()
-        }
-    }
-
-    // When userDetailsState updates, update imageUrl
     LaunchedEffect(userDetailsState) {
         if (userDetailsState is MainViewModel.ApiResponse.Success) {
             imageUrl =
                 (userDetailsState as MainViewModel.ApiResponse.Success).data!!.profileImageUrl
             uId = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.id
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (postsListState !is MainViewModel.ApiResponse.Success<*>) {
+            viewModel.fetchFeed(uId)
         }
     }
 
@@ -159,7 +141,10 @@ fun Home(
                         modifier = modifier
                             .size(21.dp)
                             .padding(top = 3.dp)
-                            .clickable {
+                            .clickable(
+                                indication = null,
+                                interactionSource = null
+                            ) {
                                 navController.navigate(Screen.Messages)
                             },
                         painter = painterResource(id = R.drawable.share),
@@ -297,7 +282,10 @@ fun Home(
                             Column(
                                 modifier
                                     .wrapContentSize()
-                                    .clickable {
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = null
+                                    ) {
                                         storyClicked(list[it])
                                         navController.navigate(
                                             Screen.Story(
@@ -370,7 +358,9 @@ fun Home(
             is MainViewModel.ApiResponse.Success<*> -> {
                 val postsList =
                     (postsListState as MainViewModel.ApiResponse.Success).data ?: emptyList()
+
                 items(postsList) { post ->
+                    val info = likesStateMap[post.id] ?: LikeInfo(false, 0)
                     Row(
                         modifier = modifier
                             .fillMaxWidth()
@@ -381,7 +371,10 @@ fun Home(
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable {
+                            modifier = Modifier.clickable(
+                                indication = null,
+                                interactionSource = null
+                            ) {
                                 navController.navigate(Screen.UserProfile(post.userId))
                             }) {
                             Image(
@@ -423,7 +416,10 @@ fun Home(
                                                 shape = RoundedCornerShape(8.dp)
                                             )
                                             .padding(horizontal = 14.dp, vertical = 6.dp)
-                                            .clickable {
+                                            .clickable(
+                                                indication = null,
+                                                interactionSource = null
+                                            ) {
                                                 viewModel.followUser()
                                             }
                                     )
@@ -460,73 +456,11 @@ fun Home(
                                 modifier = modifier
                                     .fillMaxHeight()
                                     .scale(1f)
-                                    .clickable {
-                                        val postId = post.id // Assuming your post has an id field
-                                        val isCurrentlyLiked =
-                                            post.likedBy.contains(uId) || localLikedPosts.contains(
-                                                postId
-                                            )
-
-                                        // Immediately update UI state
-                                        localLikedPosts = if (isCurrentlyLiked) {
-                                            localLikedPosts - postId
-                                        } else {
-                                            localLikedPosts + postId
-                                        }
-
-                                        // Update local like count
-                                        val currentCount =
-                                            localLikeCounts[postId] ?: post.likesCount.toIntOrNull()
-                                            ?: 0
-                                        localLikeCounts =
-                                            localLikeCounts + (postId to if (isCurrentlyLiked) currentCount - 1 else currentCount + 1)
-
-                                        // Cancel any existing pending API call for this post
-                                        pendingApiCalls[postId]?.cancel()
-
-                                        // Start new 2-second timer for API call
-                                        val apiJob = coroutineScope.launch {
-                                            delay(2000) // 2 second delay
-
-                                            // Make API call after delay
-                                            viewModel.toggleLikePost(postId) { success ->
-                                                if (!success) {
-                                                    // Revert UI state on API failure
-                                                    localLikedPosts = if (isCurrentlyLiked) {
-                                                        localLikedPosts + postId
-                                                    } else {
-                                                        localLikedPosts - postId
-                                                    }
-
-                                                    // Revert like count
-                                                    val revertCount =
-                                                        localLikeCounts[postId] ?: currentCount
-                                                    localLikeCounts =
-                                                        localLikeCounts + (postId to if (isCurrentlyLiked) revertCount + 1 else revertCount - 1)
-
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Failed to update like",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                } else {
-                                                    // Success - optionally refresh feed to get latest server state
-                                                    // viewModel.fetchFeed()
-                                                }
-                                            }
-
-                                            // Remove from pending calls
-                                            pendingApiCalls.remove(postId)
-                                        }
-
-                                        // Store the job so it can be cancelled if needed
-                                        pendingApiCalls[postId] = apiJob
+                                    .clickable(interactionSource = null, indication = null) {
+                                        viewModel.toggleLikePost(post.id)
                                     },
                                 painter = painterResource(
-                                    id = if (post.likedBy.contains(uId) || localLikedPosts.contains(
-                                            post.id
-                                        )
-                                    )
+                                    id = if (info.liked)
                                         R.drawable.liked
                                     else
                                         R.drawable.notliked
@@ -536,21 +470,23 @@ fun Home(
                             )
                             Spacer(modifier.width(4.dp))
 
-                            if (localLikeCounts[post.id] != 0) {
+                            if (likesStateMap[post.id]!!.count > 0) {
                                 Text(
-                                    (localLikeCounts[post.id] ?: post.likesCount.toIntOrNull()
-                                    ?: 0).toString(),
+                                    text = info.count.toString(),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
-                            Spacer(modifier.width(10.dp))
 
+                            Spacer(modifier.width(10.dp))
                             Icon(
                                 modifier = modifier
                                     .fillMaxHeight()
                                     .offset(y = (-0.5).dp)
-                                    .clickable {
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = null
+                                    ) {
                                     },
                                 painter = painterResource(id = R.drawable.comment),
                                 tint = Color.Unspecified,
@@ -587,7 +523,7 @@ fun Home(
                     }
                     Spacer(modifier.height(5.dp))
                     Text(
-                        "Liked by zufu.kid and ${(localLikeCounts[post.id] ?: post.likesCount.toIntOrNull() ?: 0)} others",
+                        "Liked by zufu.kid and ${post.likesCount} others",
                         modifier = modifier.padding(horizontal = 15.dp),
                         fontSize = 14.sp
                     )

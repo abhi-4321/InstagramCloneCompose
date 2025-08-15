@@ -462,7 +462,10 @@ fun Chat(
                             .height(32.dp)
                             .width(45.dp)
                             .background(color = Purple, shape = RoundedCornerShape(14.dp))
-                            .clickable {
+                            .clickable(
+                                indication = null,
+                                interactionSource = null
+                            ) {
                                 val list = listOf(senderId, receiverId).sorted()
                                 val id = list.joinToString("_")
                                 chatViewModel.sendMessage(

@@ -54,7 +54,10 @@ fun SaveInfo(modifier: Modifier = Modifier, navController: NavHostController) {
             contentDescription = null,
             modifier = modifier
                 .size(18.dp)
-                .clickable { navController.navigateUp() }
+                .clickable(
+                    indication = null,
+                    interactionSource = null
+                ) { navController.navigateUp() }
                 .offset(x = (-2).dp),
             tint = Color.Black,
         )
@@ -115,7 +118,10 @@ fun SaveInfo(modifier: Modifier = Modifier, navController: NavHostController) {
         Row(
             modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp).clickable {
+                .padding(vertical = 20.dp).clickable(
+                    indication = null,
+                    interactionSource = null
+                ) {
                     navController.popBackStack(Screen.Login, false)
                 },
             horizontalArrangement = Arrangement.Center
