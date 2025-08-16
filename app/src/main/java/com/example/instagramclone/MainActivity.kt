@@ -20,10 +20,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -96,12 +94,13 @@ class MainActivity : ComponentActivity() {
         }
 
         val token = intent.getStringExtra("token") ?: ""
+        val uId = intent.getIntExtra("uId",0)
 
         checkAndRequestPermission()
 
         retrofitInterfaceMain = getKoin().get(parameters = { parametersOf(token) })
 
-        val viewModel: MainViewModel by viewModel { parametersOf(token) }
+        val viewModel: MainViewModel by viewModel { parametersOf(token,uId) }
         val storyViewModel: StoryViewModel by viewModel() { parametersOf(token) }
 
         viewModel.fetchUser()
@@ -110,9 +109,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             InstagramCloneTheme {
-
-                    Main(viewModel, retrofitInterfaceMain, token, storyViewModel)
-
+                Main(viewModel, retrofitInterfaceMain, token, storyViewModel, uId)
             }
         }
     }
@@ -124,7 +121,8 @@ class MainActivity : ComponentActivity() {
         viewModel: MainViewModel,
         retrofitInterfaceMain: RetrofitInterfaceMain,
         token: String,
-        storyViewModel: StoryViewModel
+        storyViewModel: StoryViewModel,
+        uId: Int
     ) {
         val navController = rememberNavController()
         val storyListState = storyViewModel.liveDataStory.collectAsState()
@@ -210,7 +208,7 @@ class MainActivity : ComponentActivity() {
                     Home(
                         navController = navController,
                         viewModel = viewModel,
-                        storyViewModel = storyViewModel
+                        storyViewModel = storyViewModel,
                     ) { displayUser ->
                         currentDuIndex = list.indexOfFirst { it.userId == displayUser.userId }
                     }
@@ -380,12 +378,16 @@ class MainActivity : ComponentActivity() {
 
                 composable<Screen.ViewPost> {
                     val args = it.toRoute<Screen.ViewPost>()
-                    ViewPost(args.postId,viewModel,navController,args.from)
+                    ViewPost(args.postId, viewModel, navController, args.from)
                 }
 
                 composable<Screen.UserProfile> {
                     val args = it.toRoute<Screen.UserProfile>()
-                    UserProfile(viewModel= viewModel, userId = args.userId, navController =  navController)
+                    UserProfile(
+                        viewModel = viewModel,
+                        userId = args.userId,
+                        navController = navController
+                    )
                 }
             }
         }

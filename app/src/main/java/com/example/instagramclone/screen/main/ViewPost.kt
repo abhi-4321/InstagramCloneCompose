@@ -357,7 +357,7 @@ fun ViewPost(postId: Int, viewModel: MainViewModel, navController: NavController
 fun ViewPostPreview() {
     ViewPost(
         1,
-        MainViewModel(RetrofitInstanceMain.getApiService("")),
+        MainViewModel(RetrofitInstanceMain.getApiService(""),0),
         rememberNavController(),
         "Explore"
     )

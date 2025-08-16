@@ -16,6 +16,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -35,6 +36,9 @@ import com.example.instagramclone.screen.login.TermsAndPolicies
 import com.example.instagramclone.screen.login.Username
 import com.example.instagramclone.ui.theme.InstagramCloneTheme
 import com.example.instagramclone.viewmodel.LoginViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LoginActivity : ComponentActivity() {
@@ -59,18 +63,44 @@ class LoginActivity : ComponentActivity() {
             keepSplashScreen
         }
 
-        val token = SessionManager.fetchToken(applicationContext)
-        if (!token.isNullOrEmpty()) {
-            startActivity(Intent(this@LoginActivity, MainActivity::class.java).apply {
-                putExtra("token", token)
-            })
-            finish()
-        }
-        keepSplashScreen = false
+        lifecycleScope.launch {
+            val token = SessionManager.fetchToken(applicationContext)
+            var uId = 0
+            val isValid = if (!token.isNullOrEmpty()) {
+                val validateResult = withContext(Dispatchers.IO) {
+                    loginViewModel.validateToken(token)
+                }
 
-        setContent {
-            InstagramCloneTheme {
-                Login(loginViewModel)
+                val bool = validateResult.isSuccessful && validateResult.code() == 200
+                if (bool) {
+                    uId = validateResult.body()!!.userId
+                }
+                bool
+            } else {
+                false
+            }
+
+            if (isValid) {
+                startActivity(Intent(this@LoginActivity, MainActivity::class.java).apply {
+                    putExtra("token", token)
+                    putExtra("uId", uId)
+                })
+                finish()
+            } else {
+                if (!token.isNullOrEmpty()) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Invalid or expired token, please login again",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                keepSplashScreen = false
+                setContent {
+                    InstagramCloneTheme {
+                        Login(loginViewModel)
+                    }
+                }
             }
         }
     }
@@ -167,7 +197,11 @@ class LoginActivity : ComponentActivity() {
         }
 
     fun checkAndRequestPermission() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 requestPermissionLauncher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
             }

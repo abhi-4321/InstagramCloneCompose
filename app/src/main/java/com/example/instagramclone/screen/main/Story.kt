@@ -787,7 +787,7 @@ fun StoryPreview() {
         username = "zufu.kid",
         profileImageUrl = "",
         fullName = "Mahika Nandal",
-        viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""),0),
         onNavigateToPreviousUser = {},
         onNavigateToNextUser = {}
     )

@@ -5,6 +5,7 @@ import com.example.instagramclone.model.LoginResponse
 import com.example.instagramclone.model.OtpRequest
 import com.example.instagramclone.model.OtpResponse
 import com.example.instagramclone.model.RegistrationRequest
+import com.example.instagramclone.model.TokenValidationResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -27,4 +28,7 @@ interface RetrofitInterfaceLogin {
 
     @GET("auth/validate/{username}")
     suspend fun validateUsername(@Path("username") username: String) : Response<Void>
+
+    @GET("auth/validateToken/{token}")
+    suspend fun validateToken(@Path("token") token: String) : Response<TokenValidationResponse>
 }

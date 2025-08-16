@@ -566,7 +566,7 @@ fun UserProfile(
 fun UserProfilePreview() {
     UserProfile(
         navController = rememberNavController(),
-        viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""),0),
         userId = 0
     )
 }

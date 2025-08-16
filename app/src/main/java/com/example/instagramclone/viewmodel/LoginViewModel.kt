@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.instagramclone.model.LoginRequest
 import com.example.instagramclone.model.OtpRequest
 import com.example.instagramclone.model.RegistrationRequest
+import com.example.instagramclone.model.TokenValidationResponse
 import com.example.instagramclone.network.login.RetrofitInterfaceLogin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import okhttp3.internal.EMPTY_RESPONSE
+import retrofit2.Response
 
 class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin) : ViewModel() {
 
@@ -18,16 +21,16 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
 
     fun login(loginRequest: LoginRequest) {
         viewModelScope.launch {
-            _uiState.value = LoginState.Loading // Show loading UI
+            _uiState.emit(LoginState.Loading) // Show loading UI
             try {
                 val response = retrofitInterfaceLogin.login(loginRequest)
                 if (response.isSuccessful && response.body() != null) {
-                    _uiState.value = LoginState.Success(token = response.body()!!.token)
+                    _uiState.emit(LoginState.Success(token = response.body()!!.token))
                 } else {
-                    _uiState.value = LoginState.Error("Invalid credentials")
+                    _uiState.emit(LoginState.Error("Invalid credentials"))
                 }
             } catch (_: Exception) {
-                _uiState.value = LoginState.Error("Network error")
+                _uiState.emit(LoginState.Error("Network error"))
             }
         }
     }
@@ -44,17 +47,22 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
 
     fun register() {
         viewModelScope.launch {
-            _uiStateReg.value = LoginState.Loading // Show loading UI
+            _uiStateReg.emit(LoginState.Loading) // Show loading UI
             try {
-                val registrationRequest = RegistrationRequest(registrationDetails.email!!,registrationDetails.username!!,registrationDetails.password!!,registrationDetails.fullName!!)
+                val registrationRequest = RegistrationRequest(
+                    registrationDetails.email!!,
+                    registrationDetails.username!!,
+                    registrationDetails.password!!,
+                    registrationDetails.fullName!!
+                )
                 val response = retrofitInterfaceLogin.register(registrationRequest)
                 if (response.isSuccessful && response.body() != null) {
-                    _uiStateReg.value = LoginState.Success(token = response.body()!!.token)
+                    _uiStateReg.emit(LoginState.Success(token = response.body()!!.token))
                 } else {
-                    _uiStateReg.value = LoginState.Error("Invalid credentials")
+                    _uiStateReg.emit(LoginState.Error("Invalid credentials"))
                 }
             } catch (e: Exception) {
-                _uiStateReg.value = LoginState.Error("Network error")
+                _uiStateReg.emit(LoginState.Error("Network error"))
             }
         }
     }
@@ -72,7 +80,7 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
 
     fun validateUsername(username: String) {
         viewModelScope.launch {
-            _usernameState.value = UsernameState.Validating // Show loading UI
+            _usernameState.emit(UsernameState.Validating) // Show loading UI
             try {
                 val response = retrofitInterfaceLogin.validateUsername(username)
                 if (response.code() == 200) {
@@ -101,20 +109,20 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
 
     fun sendOtp(email: String = registrationDetails.email!!) {
         viewModelScope.launch {
-            _otpState.value = OtpRequestState.Loading // Show loading UI
+            _otpState.emit(OtpRequestState.Loading) // Show loading UI
             try {
-                val response = retrofitInterfaceLogin.sendOtp(OtpRequest(email,""))
+                val response = retrofitInterfaceLogin.sendOtp(OtpRequest(email, ""))
                 if (response.isSuccessful && response.body() != null && response.body()!!.success) {
-                    _otpState.value = OtpRequestState.Sent
+                    _otpState.emit(OtpRequestState.Sent)
                     delay(100)
-                    _otpState.value = OtpRequestState.Idle
+                    _otpState.emit(OtpRequestState.Idle)
                 } else if (response.code() == 401) {
-                    _otpState.value = OtpRequestState.Exists
+                    _otpState.emit(OtpRequestState.Exists)
                 } else {
-                    _otpState.value = OtpRequestState.Error
+                    _otpState.emit(OtpRequestState.Error)
                 }
             } catch (e: Exception) {
-                _otpState.value = OtpRequestState.Error
+                _otpState.emit(OtpRequestState.Error)
             }
         }
     }
@@ -132,19 +140,33 @@ class LoginViewModel(private val retrofitInterfaceLogin: RetrofitInterfaceLogin)
 
     fun verifyOtp(otp: String) {
         viewModelScope.launch {
-            _otpVerifyState.value = OtpVerifyState.Loading // Show loading UI
+            _otpVerifyState.emit(OtpVerifyState.Loading)// Show loading UI
             try {
-                val response = retrofitInterfaceLogin.verifyOtp(OtpRequest(email = registrationDetails.email!!, otp = otp))
+                val response = retrofitInterfaceLogin.verifyOtp(
+                    OtpRequest(
+                        email = registrationDetails.email!!,
+                        otp = otp
+                    )
+                )
                 if (response.isSuccessful && response.body() != null && response.body()!!.success) {
-                    _otpVerifyState.value = OtpVerifyState.Correct
+                    _otpVerifyState.emit(OtpVerifyState.Correct)
                 } else if (response.code() == 400) {
-                    _otpVerifyState.value = OtpVerifyState.Incorrect
+                    _otpVerifyState.emit(OtpVerifyState.Incorrect)
                 } else {
-                    _otpVerifyState.value = OtpVerifyState.Error
+                    _otpVerifyState.emit(OtpVerifyState.Error)
                 }
             } catch (e: Exception) {
-                _otpVerifyState.value = OtpVerifyState.Error
+                _otpVerifyState.emit(OtpVerifyState.Error)
             }
+        }
+    }
+
+    // Validate Token
+    suspend fun validateToken(token: String): Response<TokenValidationResponse> {
+        return try {
+            retrofitInterfaceLogin.validateToken(token)
+        } catch (e: Exception) {
+            Response.error(500,EMPTY_RESPONSE)
         }
     }
 

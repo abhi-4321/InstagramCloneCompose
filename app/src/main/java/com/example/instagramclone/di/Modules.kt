@@ -48,9 +48,9 @@ val networkModule = module {
 }
 
 val viewmodelModule = module {
-    viewModel { (token: String) ->
+    viewModel { (token: String, uId: Int) ->
         MainViewModel(
-            get<RetrofitInterfaceMain> { parametersOf(token) }
+            get<RetrofitInterfaceMain> { parametersOf(token) }, uId
         )
     }
 

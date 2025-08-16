@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : ViewModel() {
+class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain, private val uId: Int) : ViewModel() {
 
     // Following List
     private val _flowFollowingList = MutableStateFlow<ApiResponse<FollowUserItem>>(
@@ -91,14 +91,14 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
     private val _flowFeed = MutableStateFlow<ApiResponse<List<PostDisplay>>>(ApiResponse.Idle)
     val liveDataFeed: StateFlow<ApiResponse<List<PostDisplay>>> get() = _flowFeed
 
-    fun fetchFeed(uId: Int) {
+    fun fetchFeed() {
         viewModelScope.launch {
             _flowFeed.emit(ApiResponse.Loading)
 
             val responseFeed = retrofitInterfaceMain.fetchFeed()
 
             if (responseFeed.isSuccessful && responseFeed.body() != null) {
-                setPosts(responseFeed.body()!!,uId)
+                setPosts(responseFeed.body()!!)
                 _flowFeed.emit(ApiResponse.Success(responseFeed.body()!!))
             } else {
                 _flowFeed.emit(
@@ -205,7 +205,7 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
     // Like
     val likesStateMap = mutableStateMapOf<Int, LikeInfo>()
 
-    fun setPosts(posts: List<PostDisplay>, uId: Int) {
+    fun setPosts(posts: List<PostDisplay>) {
         likesStateMap.clear()
         for (post in posts) {
             likesStateMap[post.id] = LikeInfo(post.likedBy.contains(uId), post.likesCount.toInt())
@@ -220,6 +220,8 @@ class MainViewModel(private val retrofitInterfaceMain: RetrofitInterfaceMain) : 
             val result = runCatching { retrofitInterfaceMain.like(postId) }.getOrNull()
             if (result == null || !result.isSuccessful) {
                 likesStateMap[postId] = old // rollback
+            } else {
+
             }
         }
     }

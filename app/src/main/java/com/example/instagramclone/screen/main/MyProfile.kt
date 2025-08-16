@@ -541,6 +541,6 @@ fun RoundImage(image: String, modifier: Modifier) {
 fun MyProfilePreview() {
     MyProfile(
         navController = rememberNavController(),
-        viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""),0),
     ) { }
 }

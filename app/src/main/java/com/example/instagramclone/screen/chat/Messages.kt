@@ -339,5 +339,5 @@ fun Messages(
 @Preview(showSystemUi = true)
 @Composable
 fun MessagesPreview() {
-    Messages(navController = rememberNavController(), viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")))
+    Messages(navController = rememberNavController(), viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""),0))
 }

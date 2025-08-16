@@ -249,5 +249,5 @@ fun NewMessage(
 @Preview(showSystemUi = true)
 @Composable
 fun NewMessagePreview() {
-    NewMessage(navController = rememberNavController(), viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")))
+    NewMessage(navController = rememberNavController(), viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""),0))
 }

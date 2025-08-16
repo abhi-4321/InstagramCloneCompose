@@ -268,7 +268,7 @@ fun Search(modifier: Modifier = Modifier, navController: NavController, viewMode
 fun SearchPreview() {
     Search(
         navController = rememberNavController(),
-        viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""))
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""),0)
     )
 }
 

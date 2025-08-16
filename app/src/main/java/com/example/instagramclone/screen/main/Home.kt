@@ -93,20 +93,18 @@ fun Home(
     val followingListState by viewModel.flowFollowingList.collectAsState()
 
     var imageUrl by remember { mutableStateOf("") }
-    var uId by remember { mutableIntStateOf(0) }
     val likesStateMap = viewModel.likesStateMap
 
     LaunchedEffect(userDetailsState) {
         if (userDetailsState is MainViewModel.ApiResponse.Success) {
             imageUrl =
                 (userDetailsState as MainViewModel.ApiResponse.Success).data!!.profileImageUrl
-            uId = (userDetailsState as MainViewModel.ApiResponse.Success).data!!.id
         }
     }
 
     LaunchedEffect(Unit) {
         if (postsListState !is MainViewModel.ApiResponse.Success<*>) {
-            viewModel.fetchFeed(uId)
+            viewModel.fetchFeed()
         }
     }
 
@@ -168,7 +166,7 @@ fun Home(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 AsyncImage(
-                                    model = if (imageUrl.isEmpty()) R.drawable.user else imageUrl,
+                                    model = imageUrl.ifEmpty { R.drawable.user },
                                     contentDescription = "menu",
                                     contentScale = ContentScale.Crop,
                                     modifier = modifier
@@ -361,6 +359,7 @@ fun Home(
 
                 items(postsList) { post ->
                     val info = likesStateMap[post.id] ?: LikeInfo(false, 0)
+
                     Row(
                         modifier = modifier
                             .fillMaxWidth()
@@ -595,7 +594,7 @@ fun getTimeInIST(utcString: String): String {
 fun HomePreview() {
     Home(
         navController = rememberNavController(),
-        viewModel = MainViewModel(RetrofitInstanceMain.getApiService("")),
+        viewModel = MainViewModel(RetrofitInstanceMain.getApiService(""),0),
         storyViewModel = StoryViewModel(RetrofitInstanceMain.getApiService(""))
     ) { }
 }

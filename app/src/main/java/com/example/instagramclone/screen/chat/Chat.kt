@@ -854,7 +854,7 @@ fun ChatBubble(
 fun ChatPreview() {
     Chat(
         retrofitInterfaceMain = RetrofitInstanceMain.getApiService(""),
-        mainViewModel =  MainViewModel(RetrofitInstanceMain.getApiService("")),
+        mainViewModel =  MainViewModel(RetrofitInstanceMain.getApiService(""),0),
         receiverId =  1,
         profileImageUrl =  "",
         username =  "Abhi",
